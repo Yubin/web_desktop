@@ -55,7 +55,6 @@ setInterval( function() {
 		$('#pageLogin').addClass('initLog').delay(190).queue(function() { $(this).removeClass('initLog').addClass('initLogExit'); $(this).dequeue(); });;
 		$('#page, #head').delay(250).queue(function() { $(this).addClass('vis'); $(this).dequeue(); });
 		$('.window').delay(300).queue(function() { $(this).addClass('windows-vis'); $(this).dequeue(); });
-		event.preventDefault();
     // }
 //     else {
 // 		$('.tooltip-pass').hide();
