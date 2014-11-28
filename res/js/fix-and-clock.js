@@ -42,28 +42,6 @@ setInterval( function() {
 	$(".hours, .hour").html(( hours < 10 ? "0" : "" ) + hours);
     }, 1000);
 
-//-----------------------------------------------------------------------------------
-//	2.	Fix Classes after Validate Login
-//-----------------------------------------------------------------------------------
-
-// $('.submit').click(function() {
-// 	var ValPassword = $('#password').val() === 'admin';
-//     if (ValPassword === true) {
-		// $('input[type=password]').addClass('valid');
-		// $('.tooltip-pass').hide();
-		// $('.submit').removeClass('submit').addClass('charge');
-		// $('#pageLogin').addClass('initLog').delay(190).queue(function() { $(this).removeClass('initLog').addClass('initLogExit'); $(this).dequeue(); });;
-		// $('#page, #head').delay(250).queue(function() { $(this).addClass('vis'); $(this).dequeue(); });
-		// $('.window').delay(300).queue(function() { $(this).addClass('windows-vis'); $(this).dequeue(); });
-    // }
-//     else {
-// 		$('.tooltip-pass').hide();
-// 		$('input[type=password]').select();
-//     	$('.validate').addClass('error').delay(21).queue(function() { $(this).removeClass('error'); $(this).dequeue(); $('.tooltip-pass').show(); });
-// 			return false;
-//     	}
-// });
-
 $(this).addClass('vis');
 $(this).addClass('windows-vis');
 
@@ -176,9 +154,7 @@ for (j = 0; j < 12; j++) {
 		img.height('auto');
 //		node.attr('top', height * (i + 1) + "px");
 //		node.attr('left', width * (j + 1) + "px");
-console.log(node);
 		node.on('click', function () {
-			console.log('click');
 			openWindow(this);
 			addDock(this);
 			showCorner();
