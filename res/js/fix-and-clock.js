@@ -176,8 +176,9 @@ for (j = 0; j < 12; j++) {
 		img.height('auto');
 //		node.attr('top', height * (i + 1) + "px");
 //		node.attr('left', width * (j + 1) + "px");
-
+console.log(node);
 		node.on('click', function () {
+			console.log('click');
 			openWindow(this);
 			addDock(this);
 			showCorner();
