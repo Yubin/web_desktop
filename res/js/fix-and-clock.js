@@ -49,12 +49,12 @@ setInterval( function() {
 // $('.submit').click(function() {
 // 	var ValPassword = $('#password').val() === 'admin';
 //     if (ValPassword === true) {
-		$('input[type=password]').addClass('valid');
-		$('.tooltip-pass').hide();
-		$('.submit').removeClass('submit').addClass('charge');
-		$('#pageLogin').addClass('initLog').delay(190).queue(function() { $(this).removeClass('initLog').addClass('initLogExit'); $(this).dequeue(); });;
-		$('#page, #head').delay(250).queue(function() { $(this).addClass('vis'); $(this).dequeue(); });
-		$('.window').delay(300).queue(function() { $(this).addClass('windows-vis'); $(this).dequeue(); });
+		// $('input[type=password]').addClass('valid');
+		// $('.tooltip-pass').hide();
+		// $('.submit').removeClass('submit').addClass('charge');
+		// $('#pageLogin').addClass('initLog').delay(190).queue(function() { $(this).removeClass('initLog').addClass('initLogExit'); $(this).dequeue(); });;
+		// $('#page, #head').delay(250).queue(function() { $(this).addClass('vis'); $(this).dequeue(); });
+		// $('.window').delay(300).queue(function() { $(this).addClass('windows-vis'); $(this).dequeue(); });
     // }
 //     else {
 // 		$('.tooltip-pass').hide();
@@ -63,6 +63,9 @@ setInterval( function() {
 // 			return false;
 //     	}
 // });
+
+$(this).addClass('vis');
+$(this).addClass('windows-vis');
 
 //-----------------------------------------------------------------------------------
 //	3.	Draggable Windows
@@ -148,9 +151,6 @@ var offHeight = parseInt($( window ).height() * 0.05);
 var iconWidth = width * 0.618;
 var contentWidth = width * 0.9;
 
-console.log(height);
-console.log(width);
-
 for (j = 0; j < 12; j++) {
 
 	var rowIndex = Math.floor(j / 4);
@@ -166,9 +166,11 @@ for (j = 0; j < 12; j++) {
 
 		var y = j + 1 + rowIndex;
 
-		node.offset({ top: height * x + offHeight, left: width * y + offWidth });
+		node.offset({ top: height * x + offHeight, left: width * y });
 		node.height('auto');
 		node.width(contentWidth);
+		node.css('position', 'absolute');
+
 		var img = node.children("img");
 		img.width(iconWidth);
 		img.height('auto');
