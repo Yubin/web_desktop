@@ -192,12 +192,16 @@ var addDock = function (node) {
 	var img = ele.find("img").attr('src');
 	var name = ele.find("div.app-name").html();
 	var dockIcon = $('<li class="dock_icon">' +
-  	'<a href="#warning" data-rel="showOp">' +
-      	'<em><span>' + name + '</span></em>' +
-          '<img src="'+ img + '" alt="Launchpad">' +
-      '</a>' +
+    '<div>' +
+      '<em><span>' + name + '</span></em>' +
+        '<img src="'+ img + '" alt="Launchpad">' +
+    '</div>' +
   '</li>');
+	var img = dockIcon.find('img');
+	img.reflect({margin_top: 8, height: 48, width: 48, length: 0.95, opacity: 0.3});
+
 	$('div.dock ul').append(dockIcon);
+
 }
 var showCorner = function () {
 	$(sel_dock).removeClass('empty');

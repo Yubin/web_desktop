@@ -49,7 +49,6 @@
 .dock li {
 	display: inline-block;
 	position: relative;
-	-webkit-box-reflect: below -16px -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(91%, rgba(255, 255, 255, .1)), color-stop(91.01%, transparent), to(transparent));
 }
 .dock a {
 	display: block;
@@ -99,6 +98,40 @@
 	-webkit-transition:all 0.1s linear;
 	-moz-transition:all 0.1s linear;
 }
+
+.dock li .icon {
+	margin-top: 3px;
+	width: 48px;
+	height: 48px;
+	display: block;
+	color: transparent;
+	background-size: 48px 48px;
+	background-image: url("../img/appstore.png")
+}
+
+.dock li .icon:before {
+  content   : "";
+  position  : absolute;
+  top       : 100%;*/
+  width     : inherit;
+  height    : inherit;
+  opacity   : 0.45;
+
+  background-image: inherit;
+
+  -webkit-transform: rotateX(180deg);
+     -moz-transform: rotateX(180deg);
+      -ms-transform: rotateX(180deg);
+       -o-transform: rotateX(180deg);
+          transform: rotateX(180deg);
+
+  -webkit-box-shadow: inset 0 150px 50px -12px #fff;
+     -moz-box-shadow: inset 0 150px 50px -12px #fff;
+      -ms-box-shadow: inset 0 150px 50px -12px #fff;
+       -o-box-shadow: inset 0 150px 50px -12px #fff;
+          box-shadow: inset 0 150px 50px -12px #fff;
+}
+
 .dock li.ok:hover img {
 	-webkit-transition:all 0.15s linear;
 	-moz-transition:all 0.15s linear;
