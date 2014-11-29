@@ -4,6 +4,7 @@ $(document).ready(function() {
 
 var width_dock_icon = 52;
 var width_dock_corner = 25;
+var width_sync = 66;
 
 var total_dock = 0;
 
@@ -232,7 +233,7 @@ $('.head .after').addClass('empty');
 
 var adjustHeader = function () {
 	var offset = total_dock ? total_dock * width_dock_icon + 2 * width_dock_corner : 0;
-	var width = (width_window - offset) /2 ;
+	var width = (width_window - offset - width_sync) /2 ;
 	$(".head .left").width(width);
 	$(".head .right").width(width);
 

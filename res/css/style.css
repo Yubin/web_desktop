@@ -445,7 +445,7 @@ input[type=password]:focus ~ .tooltip-pass {
 
 .head .left, .head .right {
 	background: url(../img/bar_short_2.png) repeat-x ;
-	opacity: .7;
+	opacity: .8;
 	background-size: contain;
 	min-width:20%;
 	height:60px;
@@ -456,6 +456,16 @@ input[type=password]:focus ~ .tooltip-pass {
 	float: left;
 }
 
+.head .sync {
+	background: url(../img/bar_sync_2.png) repeat-x ;
+	opacity: .8;
+	background-size: 66px 60px;
+	height:60px;
+	z-index:1000;
+	float: left;
+	width: 66px;
+}
+
 /*.head.right {
 	position: absolute;
   right: 0px;
@@ -463,7 +473,6 @@ input[type=password]:focus ~ .tooltip-pass {
 
 
 .head nav#menu-dx{
-	position:absolute;
 	right:10px;
 	top:0;
 	line-height:40px;
@@ -473,7 +482,7 @@ input[type=password]:focus ~ .tooltip-pass {
 	padding:0;
 }
 .head nav#menu-dx ul li {
-	float:left;
+	float:right;
 	position:relative;
 	height:40px;
 }
