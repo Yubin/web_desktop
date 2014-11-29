@@ -1,9 +1,8 @@
 $(document).ready(function() {
 
 // global for now
-var sel_dock = "div.dock";
 
-var width_dock_icon = 48;
+var width_dock_icon = 52;
 var width_dock_corner = 25;
 
 var total_dock = 0;
@@ -222,17 +221,21 @@ var addDock = function (node) {
 
 }
 var showCorner = function () {
-	$(sel_dock).removeClass('empty');
+$('.head .before').removeClass('empty');
+$('.head .after').removeClass('empty');
 }
 
 var hideCorner = function () {
-	$(sel_dock).addClass('empty');
+$('.head .before').addClass('empty');
+$('.head .after').addClass('empty');
 }
 
 var adjustHeader = function () {
-	var offset = total_dock ? total_dock * width_dock_icon - 2 * width_dock_corner : 0;
+	var offset = total_dock ? total_dock * width_dock_icon + 2 * width_dock_corner : 0;
 	var width = (width_window - offset) /2 ;
-	$(".head").width(width);
+	$(".head .left").width(width);
+	$(".head .right").width(width);
+
 }
 
 adjustHeader();

@@ -98,6 +98,11 @@ html, body {
 	user-select:none;
 	font-family: "Lucida Grande", "Lucida Sans Unicode", sans-serif;
 }
+
+.head .font-bold {
+	font-weight: bold;
+}
+
 .headlogin nav#menu-dx-login {
 	position:absolute;
 	right:10px;
@@ -435,24 +440,26 @@ input[type=password]:focus ~ .tooltip-pass {
 	-webkit-animation:none;
 }
 .head {
+	width: 100%;
+}
+
+.head .left, .head .right {
 	background: url(../img/bar_short_2.png) repeat-x ;
+	opacity: .7;
 	background-size: contain;
 	min-width:20%;
 	height:60px;
-	position:fixed;
 	z-index:1000;
 	-webkit-user-select:none;
 	-moz-user-select:none;
 	user-select:none;
-}
-.head .left {
-
+	float: left;
 }
 
-.head.right {
+/*.head.right {
 	position: absolute;
   right: 0px;
-}
+}*/
 
 
 .head nav#menu-dx{
@@ -499,7 +506,6 @@ input[type=password]:focus ~ .tooltip-pass {
 	text-decoration:none;
 	text-shadow: 0 1px 1px #dbdbdb;
 	padding:0 5px;
-	font-weight:400;
 }
 
 .head nav#menu{
@@ -534,7 +540,6 @@ input[type=password]:focus ~ .tooltip-pass {
 	text-decoration:none;
 	text-shadow: 0 1px 1px #dbdbdb;
 	padding:0 10px;
-	font-weight:400;
 }
 .head nav#menu ul li.here a {
 	font-weight:bold;
