@@ -131,7 +131,9 @@ var appList =  [
 {name: "icon_14", imgName: "icon_14", screen: 0, i: 1, j: 3},
 {name: "icon_15", imgName: "icon_15", screen: 0, i: 2, j: 3},
 {name: "icon_16", imgName: "icon_16", screen: 0, i: 3, j: 3},
-{name: "icon_17", imgName: "icon_17", screen: 0, i: 0, j: 4}
+{name: "icon_17", imgName: "icon_17", screen: 0, i: 0, j: 4},
+{name: "icon_10", imgName: "icon_10", screen: 0, i: 1, j: 4}
+
 ];
 
 var height = parseInt($( window ).height() / 7);

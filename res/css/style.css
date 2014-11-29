@@ -832,7 +832,14 @@ a.button.blink:active, a.button.simple:active {
 	text-align: center;
 }
 
+.app-list .app-name {
+	margin-top: 8px;
+}
+
 .app-list li img {
+	-webkit-filter: drop-shadow(5px 5px 5px rgba(0,0,0,0.7));
+	-moz-filter: drop-shadow(5px 5px 5px rgba(0,0,0,0.7));
+	filter: drop-shadow(5px 5px 5px rgba(0,0,0,0.7));
 
 }
 

@@ -91,45 +91,16 @@
 	display: block;
 }
 .dock img {
-	padding-top: 3px;
-	width: 48px;
+	padding-top: 5px;
+	width: 45px;
 	height: auto;
 	border: none;
 	-webkit-transition:all 0.1s linear;
 	-moz-transition:all 0.1s linear;
 }
 
-.dock li .icon {
-	margin-top: 3px;
-	width: 48px;
-	height: 48px;
-	display: block;
-	color: transparent;
-	background-size: 48px 48px;
-	background-image: url("../img/appstore.png")
-}
-
-.dock li .icon:before {
-  content   : "";
-  position  : absolute;
-  top       : 100%;*/
-  width     : inherit;
-  height    : inherit;
-  opacity   : 0.45;
-
-  background-image: inherit;
-
-  -webkit-transform: rotateX(180deg);
-     -moz-transform: rotateX(180deg);
-      -ms-transform: rotateX(180deg);
-       -o-transform: rotateX(180deg);
-          transform: rotateX(180deg);
-
-  -webkit-box-shadow: inset 0 150px 50px -12px #fff;
-     -moz-box-shadow: inset 0 150px 50px -12px #fff;
-      -ms-box-shadow: inset 0 150px 50px -12px #fff;
-       -o-box-shadow: inset 0 150px 50px -12px #fff;
-          box-shadow: inset 0 150px 50px -12px #fff;
+.dock .dock_icon {
+	min-width: 52px;
 }
 
 .dock li.ok:hover img {
