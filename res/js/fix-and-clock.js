@@ -1,10 +1,10 @@
 $(document).ready(function() {
 
 // global for now
-var sel_dock = "div.dock";
 
-var width_dock_icon = 48;
+var width_dock_icon = 52;
 var width_dock_corner = 25;
+var width_sync = 66;
 
 var total_dock = 0;
 
@@ -42,27 +42,8 @@ setInterval( function() {
 	$(".hours, .hour").html(( hours < 10 ? "0" : "" ) + hours);
     }, 1000);
 
-//-----------------------------------------------------------------------------------
-//	2.	Fix Classes after Validate Login
-//-----------------------------------------------------------------------------------
-
-// $('.submit').click(function() {
-// 	var ValPassword = $('#password').val() === 'admin';
-//     if (ValPassword === true) {
-		$('input[type=password]').addClass('valid');
-		$('.tooltip-pass').hide();
-		$('.submit').removeClass('submit').addClass('charge');
-		$('#pageLogin').addClass('initLog').delay(190).queue(function() { $(this).removeClass('initLog').addClass('initLogExit'); $(this).dequeue(); });;
-		$('#page, #head').delay(250).queue(function() { $(this).addClass('vis'); $(this).dequeue(); });
-		$('.window').delay(300).queue(function() { $(this).addClass('windows-vis'); $(this).dequeue(); });
-    // }
-//     else {
-// 		$('.tooltip-pass').hide();
-// 		$('input[type=password]').select();
-//     	$('.validate').addClass('error').delay(21).queue(function() { $(this).removeClass('error'); $(this).dequeue(); $('.tooltip-pass').show(); });
-// 			return false;
-//     	}
-// });
+$(this).addClass('vis');
+$(this).addClass('windows-vis');
 
 //-----------------------------------------------------------------------------------
 //	3.	Draggable Windows
@@ -135,11 +116,57 @@ $("#trash a[data-rel=close]").click(function(e) {
 
 
 var appList =  [
-				{name: "App Store", imgName: "appstore"},
-				{name: "iChat", imgName: "ichat"},
-				{name: "skype", imgName: "skype"},
-				{name: "iChat", imgName: "ichat"},
-				{name: "addressBook", imgName: "address"}];
+{name: "icon_1", imgName: "icon_1", screen: 0, i: 0, j: 0},
+{name: "icon_2", imgName: "icon_2", screen: 0, i: 1, j: 0},
+{name: "icon_3", imgName: "icon_3", screen: 0, i: 2, j: 0},
+{name: "icon_4", imgName: "icon_4", screen: 0, i: 3, j: 0},
+{name: "icon_5", imgName: "icon_5", screen: 0, i: 0, j: 1},
+{name: "icon_6", imgName: "icon_6", screen: 0, i: 1, j: 1},
+{name: "icon_7", imgName: "icon_7", screen: 0, i: 2, j: 1},
+{name: "icon_8", imgName: "icon_8", screen: 0, i: 3, j: 1},
+{name: "icon_9", imgName: "icon_9", screen: 0, i: 0, j: 2},
+{name: "icon_11", imgName: "icon_11", screen: 0, i: 1, j: 2},
+{name: "icon_12", imgName: "icon_12", screen: 0, i: 2, j: 2},
+{name: "icon_13", imgName: "icon_13", screen: 0, i: 3, j: 2},
+{name: "icon_14", imgName: "icon_14", screen: 0, i: 1, j: 3},
+{name: "icon_15", imgName: "icon_15", screen: 0, i: 2, j: 3},
+{name: "icon_16", imgName: "icon_16", screen: 0, i: 3, j: 3},
+{name: "icon_10", imgName: "icon_10", screen: 0, i: 0, j: 3},
+{name: "icon_13", imgName: "icon_13", screen: 0, i: 3, j: 4},
+{name: "icon_14", imgName: "icon_14", screen: 0, i: 2, j: 4},
+{name: "icon_15", imgName: "icon_15", screen: 0, i: 1, j: 4},
+{name: "icon_16", imgName: "icon_16", screen: 0, i: 0, j: 4},
+
+
+{name: "icon_1", imgName: "icon_1", screen: 1, i: 1, j: 0},
+{name: "icon_2", imgName: "icon_2", screen: 1, i: 0, j: 0},
+{name: "icon_3", imgName: "icon_3", screen: 1, i: 3, j: 0},
+{name: "icon_4", imgName: "icon_4", screen: 1, i: 2, j: 0},
+{name: "icon_5", imgName: "icon_5", screen: 1, i: 0, j: 1},
+{name: "icon_7", imgName: "icon_7", screen: 1, i: 3, j: 1},
+{name: "icon_8", imgName: "icon_8", screen: 1, i: 2, j: 1},
+{name: "icon_9", imgName: "icon_9", screen: 1, i: 0, j: 2},
+{name: "icon_11", imgName: "icon_11", screen: 1, i: 2, j: 2},
+{name: "icon_12", imgName: "icon_12", screen: 1, i: 1, j: 2},
+{name: "icon_13", imgName: "icon_13", screen: 1, i: 3, j: 2},
+{name: "icon_14", imgName: "icon_14", screen: 1, i: 2, j: 3},
+{name: "icon_15", imgName: "icon_15", screen: 1, i: 1, j: 3},
+{name: "icon_16", imgName: "icon_16", screen: 1, i: 3, j: 3},
+
+{name: "icon_1", imgName: "icon_1", screen: 2, i: 0, j: 1},
+{name: "icon_2", imgName: "icon_2", screen: 2, i: 1, j: 1},
+{name: "icon_3", imgName: "icon_3", screen: 2, i: 2, j: 1},
+{name: "icon_4", imgName: "icon_4", screen: 2, i: 3, j: 1},
+{name: "icon_5", imgName: "icon_5", screen: 2, i: 0, j: 0},
+{name: "icon_6", imgName: "icon_6", screen: 2, i: 1, j: 0},
+{name: "icon_8", imgName: "icon_8", screen: 2, i: 3, j: 0},
+{name: "icon_9", imgName: "icon_9", screen: 2, i: 0, j: 2},
+{name: "icon_11", imgName: "icon_11", screen: 2, i: 1, j: 2},
+{name: "icon_12", imgName: "icon_12", screen: 2, i: 2, j: 2},
+{name: "icon_13", imgName: "icon_13", screen: 2, i: 3, j: 2},
+{name: "icon_17", imgName: "icon_17", screen: 2, i: 0, j: 3},
+
+];
 
 var height = parseInt($( window ).height() / 7);
 var width = parseInt($( window ).width() / 16);
@@ -148,33 +175,36 @@ var offHeight = parseInt($( window ).height() * 0.05);
 var iconWidth = width * 0.618;
 var contentWidth = width * 0.9;
 
-console.log(height);
-console.log(width);
-
-for (j = 0; j < 12; j++) {
-
-	var rowIndex = Math.floor(j / 4);
+var screenWidth = width * 4;
 
 	for (i in appList) {
 
 		var app = appList[i];
+
 		var node = $('<li id="addressBook">'+
-			'<img src="res/img/'+ app.imgName + '.png" alt="Address Book" />'+
+			'<div class="app-img"><img src="res/img/'+ app.imgName + '.png" alt="Address Book" /></div>'+
 			'<div class="app-name">'+ app.name + '</div>'+
 			'</li>');
-		var x = parseInt(i) + 1;
 
-		var y = j + 1 + rowIndex;
+		var screenIdx = app.screen;
+		var gap = screenIdx * (width + screenWidth);
+		var x = app.i + 1;
+		var y = app.j + 1;
 
-		node.offset({ top: height * x + offHeight, left: width * y + offWidth });
+		console.log(y);
+
+		console.log(height * y + offHeight);
+
+		node.offset({ top: height * y + offHeight, left: width * x + gap  });
 		node.height('auto');
 		node.width(contentWidth);
-		var img = node.children("img");
+		node.css('position', 'absolute');
+
+		var img = node.find(".app-img img");
 		img.width(iconWidth);
 		img.height('auto');
 //		node.attr('top', height * (i + 1) + "px");
 //		node.attr('left', width * (j + 1) + "px");
-
 		node.on('click', function () {
 			openWindow(this);
 			addDock(this);
@@ -183,10 +213,17 @@ for (j = 0; j < 12; j++) {
 			adjustHeader();
 		});
 
+		node.mousedown(function () {
+			$(this).addClass('click');
+		});
+
+		node.mouseup(function () {
+			$(this).removeClass('click');
+		});
+
 		$('.app-list').append(node);
 
 	}
-}
 
 var openWindow = function (node) {
 
@@ -213,25 +250,33 @@ var addDock = function (node) {
 	var img = ele.find("img").attr('src');
 	var name = ele.find("div.app-name").html();
 	var dockIcon = $('<li class="dock_icon">' +
-  	'<a href="#warning" data-rel="showOp">' +
-      	'<em><span>' + name + '</span></em>' +
-          '<img src="'+ img + '" alt="Launchpad">' +
-      '</a>' +
+    '<div>' +
+      '<em><span>' + name + '</span></em>' +
+        '<img src="'+ img + '" alt="Launchpad">' +
+    '</div>' +
   '</li>');
+	var img = dockIcon.find('img');
+	img.reflect({margin_top: 8, height: 48, width: 48, length: 0.95, opacity: 0.3});
+
 	$('div.dock ul').append(dockIcon);
+
 }
 var showCorner = function () {
-	$(sel_dock).removeClass('empty');
+$('.head .before').removeClass('empty');
+$('.head .after').removeClass('empty');
 }
 
 var hideCorner = function () {
-	$(sel_dock).addClass('empty');
+$('.head .before').addClass('empty');
+$('.head .after').addClass('empty');
 }
 
 var adjustHeader = function () {
-	var offset = total_dock ? total_dock * width_dock_icon - 2 * width_dock_corner : 0;
-	var width = (width_window - offset) /2 ;
-	$(".head").width(width);
+	var offset = total_dock ? total_dock * width_dock_icon + 2 * width_dock_corner : 0;
+	var width = (width_window - offset - width_sync) /2 ;
+	$(".head .left").width(width);
+	$(".head .right").width(width);
+
 }
 
 adjustHeader();

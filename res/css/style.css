@@ -98,6 +98,11 @@ html, body {
 	user-select:none;
 	font-family: "Lucida Grande", "Lucida Sans Unicode", sans-serif;
 }
+
+.head .font-bold {
+	font-weight: bold;
+}
+
 .headlogin nav#menu-dx-login {
 	position:absolute;
 	right:10px;
@@ -435,28 +440,39 @@ input[type=password]:focus ~ .tooltip-pass {
 	-webkit-animation:none;
 }
 .head {
+	width: 100%;
+}
+
+.head .left, .head .right {
 	background: url(../img/bar_short_2.png) repeat-x ;
+	opacity: .8;
 	background-size: contain;
 	min-width:20%;
 	height:60px;
-	position:fixed;
 	z-index:1000;
 	-webkit-user-select:none;
 	-moz-user-select:none;
 	user-select:none;
-}
-.head .left {
-
+	float: left;
 }
 
-.head.right {
+.head .sync {
+	background: url(../img/bar_sync_2.png) repeat-x ;
+	opacity: .8;
+	background-size: 66px 60px;
+	height:60px;
+	z-index:1000;
+	float: left;
+	width: 66px;
+}
+
+/*.head.right {
 	position: absolute;
   right: 0px;
-}
+}*/
 
 
 .head nav#menu-dx{
-	position:absolute;
 	right:10px;
 	top:0;
 	line-height:40px;
@@ -466,7 +482,7 @@ input[type=password]:focus ~ .tooltip-pass {
 	padding:0;
 }
 .head nav#menu-dx ul li {
-	float:left;
+	float:right;
 	position:relative;
 	height:40px;
 }
@@ -499,7 +515,6 @@ input[type=password]:focus ~ .tooltip-pass {
 	text-decoration:none;
 	text-shadow: 0 1px 1px #dbdbdb;
 	padding:0 5px;
-	font-weight:400;
 }
 
 .head nav#menu{
@@ -534,7 +549,6 @@ input[type=password]:focus ~ .tooltip-pass {
 	text-decoration:none;
 	text-shadow: 0 1px 1px #dbdbdb;
 	padding:0 10px;
-	font-weight:400;
 }
 .head nav#menu ul li.here a {
 	font-weight:bold;
@@ -832,8 +846,26 @@ a.button.blink:active, a.button.simple:active {
 	text-align: center;
 }
 
-.app-list li img {
+.app-list .app-name {
+	margin-top: 8px;
+}
 
+.app-list li.click .app-name {
+	margin-top: 7px;
+}
+
+.app-list li img {
+	-webkit-filter: drop-shadow(5px 5px 5px rgba(0,0,0,0.5));
+	filter: url(shadow.svg#drop-shadow);
+	-ms-filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=5, OffY=5, Color='#444')";
+	filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=5, OffY=5, Color='#444')";
+}
+
+.app-list li.click img {
+	margin: 1px 0 0 1px;
+	-webkit-filter: none;
+	filter: none;
+	-ms-filter: "";
 }
 
 .app-list li span.app-name {
