@@ -131,8 +131,40 @@ var appList =  [
 {name: "icon_14", imgName: "icon_14", screen: 0, i: 1, j: 3},
 {name: "icon_15", imgName: "icon_15", screen: 0, i: 2, j: 3},
 {name: "icon_16", imgName: "icon_16", screen: 0, i: 3, j: 3},
-{name: "icon_17", imgName: "icon_17", screen: 0, i: 0, j: 4},
-{name: "icon_10", imgName: "icon_10", screen: 0, i: 1, j: 4}
+{name: "icon_10", imgName: "icon_10", screen: 0, i: 0, j: 3},
+{name: "icon_13", imgName: "icon_13", screen: 0, i: 3, j: 4},
+{name: "icon_14", imgName: "icon_14", screen: 0, i: 2, j: 4},
+{name: "icon_15", imgName: "icon_15", screen: 0, i: 1, j: 4},
+{name: "icon_16", imgName: "icon_16", screen: 0, i: 0, j: 4},
+
+
+{name: "icon_1", imgName: "icon_1", screen: 1, i: 1, j: 0},
+{name: "icon_2", imgName: "icon_2", screen: 1, i: 0, j: 0},
+{name: "icon_3", imgName: "icon_3", screen: 1, i: 3, j: 0},
+{name: "icon_4", imgName: "icon_4", screen: 1, i: 2, j: 0},
+{name: "icon_5", imgName: "icon_5", screen: 1, i: 0, j: 1},
+{name: "icon_7", imgName: "icon_7", screen: 1, i: 3, j: 1},
+{name: "icon_8", imgName: "icon_8", screen: 1, i: 2, j: 1},
+{name: "icon_9", imgName: "icon_9", screen: 1, i: 0, j: 2},
+{name: "icon_11", imgName: "icon_11", screen: 1, i: 2, j: 2},
+{name: "icon_12", imgName: "icon_12", screen: 1, i: 1, j: 2},
+{name: "icon_13", imgName: "icon_13", screen: 1, i: 3, j: 2},
+{name: "icon_14", imgName: "icon_14", screen: 1, i: 2, j: 3},
+{name: "icon_15", imgName: "icon_15", screen: 1, i: 1, j: 3},
+{name: "icon_16", imgName: "icon_16", screen: 1, i: 3, j: 3},
+
+{name: "icon_1", imgName: "icon_1", screen: 2, i: 0, j: 1},
+{name: "icon_2", imgName: "icon_2", screen: 2, i: 1, j: 1},
+{name: "icon_3", imgName: "icon_3", screen: 2, i: 2, j: 1},
+{name: "icon_4", imgName: "icon_4", screen: 2, i: 3, j: 1},
+{name: "icon_5", imgName: "icon_5", screen: 2, i: 0, j: 0},
+{name: "icon_6", imgName: "icon_6", screen: 2, i: 1, j: 0},
+{name: "icon_8", imgName: "icon_8", screen: 2, i: 3, j: 0},
+{name: "icon_9", imgName: "icon_9", screen: 2, i: 0, j: 2},
+{name: "icon_11", imgName: "icon_11", screen: 2, i: 1, j: 2},
+{name: "icon_12", imgName: "icon_12", screen: 2, i: 2, j: 2},
+{name: "icon_13", imgName: "icon_13", screen: 2, i: 3, j: 2},
+{name: "icon_17", imgName: "icon_17", screen: 2, i: 0, j: 3},
 
 ];
 
@@ -150,7 +182,7 @@ var screenWidth = width * 4;
 		var app = appList[i];
 
 		var node = $('<li id="addressBook">'+
-			'<img src="res/img/'+ app.imgName + '.png" alt="Address Book" />'+
+			'<div class="app-img"><img src="res/img/'+ app.imgName + '.png" alt="Address Book" /></div>'+
 			'<div class="app-name">'+ app.name + '</div>'+
 			'</li>');
 
@@ -168,7 +200,7 @@ var screenWidth = width * 4;
 		node.width(contentWidth);
 		node.css('position', 'absolute');
 
-		var img = node.children("img");
+		var img = node.find(".app-img img");
 		img.width(iconWidth);
 		img.height('auto');
 //		node.attr('top', height * (i + 1) + "px");
