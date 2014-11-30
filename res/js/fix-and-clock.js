@@ -213,6 +213,14 @@ var screenWidth = width * 4;
 			adjustHeader();
 		});
 
+		node.mousedown(function () {
+			$(this).addClass('click');
+		});
+
+		node.mouseup(function () {
+			$(this).removeClass('click');
+		});
+
 		$('.app-list').append(node);
 
 	}
