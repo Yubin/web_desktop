@@ -2,6 +2,7 @@
 @import url("animation-moz.css") screen;
 @import url("dock.css") screen;
 @import url("window.css") screen;
+@import url("ripple.css") screen;
 
 /*-----------------------------------------------------------------------------------*/
 /*	0.	CSS Reset
@@ -863,9 +864,10 @@ a.button.blink:active, a.button.simple:active {
 
 .app-list li.click img {
 	margin: 1px 0 0 1px;
-	-webkit-filter: none;
-	filter: none;
-	-ms-filter: "";
+	-webkit-filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.5));
+	filter: url(shadow.svg#drop-shadow-2);
+	-ms-filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=2, OffY=2, Color='#444')";
+	filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=2, OffY=2, Color='#444')";
 }
 
 .app-list li span.app-name {

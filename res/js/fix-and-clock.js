@@ -182,6 +182,7 @@ var screenWidth = width * 4;
 		var app = appList[i];
 
 		var node = $('<li id="addressBook">'+
+			'<div class="effect"></div>' +
 			'<div class="app-img"><img src="res/img/'+ app.imgName + '.png" alt="Address Book" /></div>'+
 			'<div class="app-name">'+ app.name + '</div>'+
 			'</li>');
@@ -206,19 +207,26 @@ var screenWidth = width * 4;
 //		node.attr('top', height * (i + 1) + "px");
 //		node.attr('left', width * (j + 1) + "px");
 		node.on('click', function () {
-			openWindow(this);
-			addDock(this);
-			showCorner();
-			total_dock++;
-			adjustHeader();
+			setTimeout(function () {
+				openWindow(this);
+				addDock(this);
+				showCorner();
+				total_dock++;
+				adjustHeader();
+			}.bind(this), 200);
 		});
 
 		node.mousedown(function () {
+			$(this).children('div.effect').addClass('ripple');
+			// setTimeout(function () {
+			// 	$(this).children('div.effect').removeClass('ripple');
+			// }.bind(this), 900);
 			$(this).addClass('click');
 		});
 
 		node.mouseup(function () {
 			$(this).removeClass('click');
+
 		});
 
 		$('.app-list').append(node);
@@ -276,7 +284,6 @@ var adjustHeader = function () {
 	var width = (width_window - offset - width_sync) /2 ;
 	$(".head .left").width(width);
 	$(".head .right").width(width);
-
 }
 
 adjustHeader();
