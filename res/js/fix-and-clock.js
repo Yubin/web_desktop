@@ -11,6 +11,8 @@ var total_dock = 0;
 var height_window = $( window ).height();
 var width_window = $( window ).width();
 
+
+var nodeOnDraging = null;
 //-----------------------------------------------------------------------------------
 //	0.	Modernizr test
 //-----------------------------------------------------------------------------------
@@ -138,33 +140,33 @@ var appList =  [
 {name: "icon_16", imgName: "icon_16", screen: 0, i: 0, j: 4},
 
 
-{name: "icon_1", imgName: "icon_1", screen: 1, i: 1, j: 0},
-{name: "icon_2", imgName: "icon_2", screen: 1, i: 0, j: 0},
-{name: "icon_3", imgName: "icon_3", screen: 1, i: 3, j: 0},
-{name: "icon_4", imgName: "icon_4", screen: 1, i: 2, j: 0},
-{name: "icon_5", imgName: "icon_5", screen: 1, i: 0, j: 1},
-{name: "icon_7", imgName: "icon_7", screen: 1, i: 3, j: 1},
-{name: "icon_8", imgName: "icon_8", screen: 1, i: 2, j: 1},
-{name: "icon_9", imgName: "icon_9", screen: 1, i: 0, j: 2},
-{name: "icon_11", imgName: "icon_11", screen: 1, i: 2, j: 2},
-{name: "icon_12", imgName: "icon_12", screen: 1, i: 1, j: 2},
-{name: "icon_13", imgName: "icon_13", screen: 1, i: 3, j: 2},
-{name: "icon_14", imgName: "icon_14", screen: 1, i: 2, j: 3},
-{name: "icon_15", imgName: "icon_15", screen: 1, i: 1, j: 3},
-{name: "icon_16", imgName: "icon_16", screen: 1, i: 3, j: 3},
+{name: "icon_21", imgName: "icon_1", screen: 1, i: 1, j: 0},
+{name: "icon_22", imgName: "icon_2", screen: 1, i: 0, j: 0},
+{name: "icon_23", imgName: "icon_3", screen: 1, i: 3, j: 0},
+{name: "icon_24", imgName: "icon_4", screen: 1, i: 2, j: 0},
+{name: "icon_25", imgName: "icon_5", screen: 1, i: 0, j: 1},
+{name: "icon_27", imgName: "icon_7", screen: 1, i: 3, j: 1},
+{name: "icon_28", imgName: "icon_8", screen: 1, i: 2, j: 1},
+{name: "icon_29", imgName: "icon_9", screen: 1, i: 0, j: 2},
+{name: "icon_211", imgName: "icon_11", screen: 1, i: 2, j: 2},
+{name: "icon_212", imgName: "icon_12", screen: 1, i: 1, j: 2},
+{name: "icon_213", imgName: "icon_13", screen: 1, i: 3, j: 2},
+{name: "icon_214", imgName: "icon_14", screen: 1, i: 2, j: 3},
+{name: "icon_215", imgName: "icon_15", screen: 1, i: 1, j: 3},
+{name: "icon_216", imgName: "icon_16", screen: 1, i: 3, j: 3},
 
-{name: "icon_1", imgName: "icon_1", screen: 2, i: 0, j: 1},
-{name: "icon_2", imgName: "icon_2", screen: 2, i: 1, j: 1},
-{name: "icon_3", imgName: "icon_3", screen: 2, i: 2, j: 1},
-{name: "icon_4", imgName: "icon_4", screen: 2, i: 3, j: 1},
-{name: "icon_5", imgName: "icon_5", screen: 2, i: 0, j: 0},
-{name: "icon_6", imgName: "icon_6", screen: 2, i: 1, j: 0},
-{name: "icon_8", imgName: "icon_8", screen: 2, i: 3, j: 0},
-{name: "icon_9", imgName: "icon_9", screen: 2, i: 0, j: 2},
-{name: "icon_11", imgName: "icon_11", screen: 2, i: 1, j: 2},
-{name: "icon_12", imgName: "icon_12", screen: 2, i: 2, j: 2},
-{name: "icon_13", imgName: "icon_13", screen: 2, i: 3, j: 2},
-{name: "icon_17", imgName: "icon_17", screen: 2, i: 0, j: 3},
+{name: "icon_31", imgName: "icon_1", screen: 2, i: 0, j: 1},
+{name: "icon_32", imgName: "icon_2", screen: 2, i: 1, j: 1},
+{name: "icon_33", imgName: "icon_3", screen: 2, i: 2, j: 1},
+{name: "icon_34", imgName: "icon_4", screen: 2, i: 3, j: 1},
+{name: "icon_35", imgName: "icon_5", screen: 2, i: 0, j: 0},
+{name: "icon_36", imgName: "icon_6", screen: 2, i: 1, j: 0},
+{name: "icon_38", imgName: "icon_8", screen: 2, i: 3, j: 0},
+{name: "icon_39", imgName: "icon_9", screen: 2, i: 0, j: 2},
+{name: "icon_311", imgName: "icon_11", screen: 2, i: 1, j: 2},
+{name: "icon_312", imgName: "icon_12", screen: 2, i: 2, j: 2},
+{name: "icon_313", imgName: "icon_13", screen: 2, i: 3, j: 2},
+{name: "icon_317", imgName: "icon_17", screen: 2, i: 0, j: 3},
 
 ];
 
@@ -174,64 +176,110 @@ var offWidth = parseInt($( window ).width() * 0.013);
 var offHeight = parseInt($( window ).height() * 0.05);
 var iconWidth = width * 0.618;
 var contentWidth = width * 0.9;
+var contentHeight = height * 0.9;
 
 var screenWidth = width * 4;
 
-	for (i in appList) {
 
-		var app = appList[i];
+var gridster = $(".app-list ul").gridster({
+	widget_base_dimensions: [80, 60],
+	widget_margins: [15, 40],
+	max_cols: 4,
+	max_rows: 5,
+	max_size_x: 1,
+	max_size_y: 1
+	}).data('gridster');
 
-		var node = $('<li id="addressBook">'+
-			'<div class="effect"></div>' +
-			'<div class="app-img"><img src="res/img/'+ app.imgName + '.png" alt="Address Book" /></div>'+
-			'<div class="app-name">'+ app.name + '</div>'+
-			'</li>');
+var addApp = function (app) {
 
-		var screenIdx = app.screen;
-		var gap = screenIdx * (width + screenWidth);
-		var x = app.i + 1;
-		var y = app.j + 1;
+	var node = $('<li id="'+app.name+'" draggable="true">'+
+	'<div class="effect"></div>' +
+	'<div class="app-img"><img src="res/img/'+ app.imgName + '.png" alt="Address Book" /></div>'+
+	'<div class="app-name">'+ app.name + '</div>'+
+	'</li>');
 
-		console.log(y);
+	var screenIdx = app.screen;
+	var gap = screenIdx * (width + screenWidth);
+	var x = app.i + 1;
+	var y = app.j + 1;
 
-		console.log(height * y + offHeight);
+	// node.offset({ top: height * y + offHeight, left: width * x + gap  });
+	node.width(contentWidth);
+	node.height(contentHeight);
 
-		node.offset({ top: height * y + offHeight, left: width * x + gap  });
-		node.height('auto');
-		node.width(contentWidth);
-		node.css('position', 'absolute');
+	node.css('position', 'absolute');
 
-		var img = node.find(".app-img img");
-		img.width(iconWidth);
-		img.height('auto');
-//		node.attr('top', height * (i + 1) + "px");
-//		node.attr('left', width * (j + 1) + "px");
-		node.on('click', function () {
-			setTimeout(function () {
-				openWindow(this);
-				addDock(this);
-				showCorner();
-				total_dock++;
-				adjustHeader();
-			}.bind(this), 200);
-		});
+	var img = node.find(".app-img img");
+	img.width(iconWidth);
+	img.height('auto');
+	// node.attr('top', height * x + "px");
+	// node.attr('left', width * y + "px");
+	// node.on('click', function () {
+	// 	setTimeout(function () {
+	// 		openWindow(this);
+	// 		addDock(this);
+	// 		showCorner();
+	// 		total_dock++;
+	// 		adjustHeader();
+	// 	}.bind(this), 200);
+	// });
 
-		node.mousedown(function () {
-			$(this).children('div.effect').addClass('ripple');
-			// setTimeout(function () {
-			// 	$(this).children('div.effect').removeClass('ripple');
-			// }.bind(this), 900);
-			$(this).addClass('click');
-		});
+	node.mousedown(function () {
+		$(this).children('div.effect').addClass('ripple');
+		setTimeout(function () {
+			$(this).children('div.effect').removeClass('ripple');
+		}.bind(this), 900);
+		$(this).addClass('click');
+	});
 
-		node.mouseup(function () {
-			$(this).removeClass('click');
+	node.mouseup(function () {
+		$(this).removeClass('click');
 
-		});
+	});
 
-		$('.app-list').append(node);
 
-	}
+
+	// node.draggable({
+//		handle: '.title-inside',
+		// start: function(event, ui) {
+		// 	nodeOnDraging = ui;
+		// },
+		// drag: function( event, ui ) {
+		// 	var position = $(this).position();
+		// }
+	// });
+
+	// node.on('dragstart', function (ev) {
+	// 	ev.originalEvent.dataTransfer.effectAllowed = 'move';
+	// 	ev.originalEvent.dataTransfer.setData("text", this.id);
+	// 	console.log(this.id);
+	// 	// console.log(e);
+	// });
+	//
+	// node.on('dragover', function (ev) {
+	// 	var origin = ev.originalEvent.dataTransfer.getData("text");
+	// 	console.log(origin);
+	// 	// if (this !== origin) {
+	// 	// 	console.log(this);
+	// 	// }
+	//
+	// 	// console.log(e);
+	// });
+
+//	$('.app-list').append(node);
+	gridster.add_widget(node, 1, 1, x, y);
+}
+
+addApp(appList[0]);
+addApp(appList[1]);
+addApp(appList[2]);
+addApp(appList[3]);
+addApp(appList[4]);
+addApp(appList[5]);
+addApp(appList[6]);
+addApp(appList[7]);
+addApp(appList[8]);
+addApp(appList[9]);
 
 var openWindow = function (node) {
 
@@ -287,5 +335,6 @@ var adjustHeader = function () {
 }
 
 adjustHeader();
+
 
 });

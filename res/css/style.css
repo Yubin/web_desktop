@@ -3,6 +3,7 @@
 @import url("dock.css") screen;
 @import url("window.css") screen;
 @import url("ripple.css") screen;
+@import url("jquery.gridster.css") screen;
 
 /*-----------------------------------------------------------------------------------*/
 /*	0.	CSS Reset
