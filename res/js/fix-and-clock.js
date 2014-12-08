@@ -185,7 +185,7 @@ var dragging = false;
 var gridster = $(".app-list ul").gridster({
 	widget_base_dimensions: [80, 60],
 	widget_margins: [15, 40],
-	max_cols: 4,
+	max_cols: 14,
 	max_rows: 5,
 	max_size_x: 1,
 	max_size_y: 1,
