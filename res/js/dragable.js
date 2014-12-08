@@ -260,52 +260,50 @@
   };
 
 
-              fn.drag_handler = function(e) {
-                var node = e.target.nodeName;
-                // skip if drag is disabled, or click was not done with the mouse primary button
-                if (this.disabled || e.which !== 1 && !isTouch) {
-                  return;
-                }
+  fn.drag_handler = function(e) {
+    var node = e.target.nodeName;
+    // skip if drag is disabled, or click was not done with the mouse primary button
+    if (this.disabled || e.which !== 1 && !isTouch) {
+      return;
+    }
 
-                if (this.ignore_drag(e)) {
-                  return;
-                }
+    if (this.ignore_drag(e)) {
+      return;
+    }
 
-                var self = this;
-                var first = true;
-                this.$player = $(e.currentTarget);
+    var self = this;
+    var first = true;
+    this.$player = $(e.currentTarget);
 
-                this.el_init_pos = this.get_actual_pos(this.$player);
-                this.mouse_init_pos = this.get_mouse_pos(e);
-                this.offsetY = this.mouse_init_pos.top - this.el_init_pos.top;
+    this.el_init_pos = this.get_actual_pos(this.$player);
+    this.mouse_init_pos = this.get_mouse_pos(e);
+    this.offsetY = this.mouse_init_pos.top - this.el_init_pos.top;
 
-                this.$document.on(this.pointer_events.move, function(mme) {
-                  var mouse_actual_pos = self.get_mouse_pos(mme);
-                  var diff_x = Math.abs(
-                    mouse_actual_pos.left - self.mouse_init_pos.left);
-                    var diff_y = Math.abs(
-                      mouse_actual_pos.top - self.mouse_init_pos.top);
-                      if (!(diff_x > self.options.distance ||
-                        diff_y > self.options.distance)
-                      ) {
-                        return false;
-                      }
+    this.$document.on(this.pointer_events.move, function(mme) {
+      var mouse_actual_pos = self.get_mouse_pos(mme);
+      var diff_x = Math.abs(mouse_actual_pos.left - self.mouse_init_pos.left);
+      var diff_y = Math.abs(mouse_actual_pos.top - self.mouse_init_pos.top);
+      if (!(diff_x > self.options.distance ||
+        diff_y > self.options.distance)
+      ) {
+        return false;
+      }
 
-                      if (first) {
-                        first = false;
-                        self.on_dragstart.call(self, mme);
-                        return false;
-                      }
+      if (first) {
+        first = false;
+        self.on_dragstart.call(self, mme);
+        return false;
+      }
 
-                      if (self.is_dragging === true) {
-                        self.on_dragmove.call(self, mme);
-                      }
+      if (self.is_dragging === true) {
+        self.on_dragmove.call(self, mme);
+      }
 
-                      return false;
-                    });
+      return false;
+    });
 
-                    if (!isTouch) { return false; }
-                    };
+    if (!isTouch) { return false; }
+  };
 
 
   fn.on_dragstart = function(e) {

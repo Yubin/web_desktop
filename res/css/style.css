@@ -542,7 +542,7 @@ input[type=password]:focus ~ .tooltip-pass {
     top: 0;
 	padding:0 10px 0 10px;
     width: 20px;
-	height: 40px;
+	height: 48px;
 }
 .head nav#menu ul li a {
 	display:block;

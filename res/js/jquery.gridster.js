@@ -838,8 +838,7 @@
             container_width: this.cols * this.min_widget_width,
             limit: true,
             start: function(event, ui) {
-                self.$widgets.filter('.player-revert')
-                    .removeClass('player-revert');
+                self.$widgets.filter('.player-revert').removeClass('player-revert');
 
                 self.$player = $(this);
                 self.$helper = $(ui.$helper);

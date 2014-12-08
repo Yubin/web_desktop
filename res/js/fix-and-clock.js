@@ -28,7 +28,7 @@ else {
 //-----------------------------------------------------------------------------------
 
 var monthNames = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ];
-var dayNames= ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
+var dayNames = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
 
 var newDate = new Date();
 newDate.setDate(newDate.getDate());
@@ -180,6 +180,7 @@ var contentHeight = height * 0.9;
 
 var screenWidth = width * 4;
 
+var dragging = false;
 
 var gridster = $(".app-list ul").gridster({
 	widget_base_dimensions: [80, 60],
@@ -187,7 +188,20 @@ var gridster = $(".app-list ul").gridster({
 	max_cols: 4,
 	max_rows: 5,
 	max_size_x: 1,
-	max_size_y: 1
+	max_size_y: 1,
+	draggable: {
+		start: function (event, ui) {
+			dragging = true;
+		},
+		stop: function (event, ui) {
+			ui.$player.children('div.effect').addClass('ripple');
+			setTimeout(function () {
+				ui.$player.children('div.effect').removeClass('ripple');
+				dragging = false;
+			}.bind(this), 900);
+
+		}
+	}
 	}).data('gridster');
 
 var addApp = function (app) {
@@ -214,21 +228,23 @@ var addApp = function (app) {
 	img.height('auto');
 	// node.attr('top', height * x + "px");
 	// node.attr('left', width * y + "px");
-	// node.on('click', function () {
-	// 	setTimeout(function () {
-	// 		openWindow(this);
-	// 		addDock(this);
-	// 		showCorner();
-	// 		total_dock++;
-	// 		adjustHeader();
-	// 	}.bind(this), 200);
-	// });
-
-	node.mousedown(function () {
+	node.on('click', function () {
+		if(dragging) {return ;}
 		$(this).children('div.effect').addClass('ripple');
 		setTimeout(function () {
 			$(this).children('div.effect').removeClass('ripple');
 		}.bind(this), 900);
+		setTimeout(function () {
+			openWindow(this);
+			addDock(this);
+			showCorner();
+			total_dock++;
+			adjustHeader();
+		}.bind(this), 200);
+	});
+
+	node.mousedown(function () {
+
 		$(this).addClass('click');
 	});
 
@@ -236,35 +252,6 @@ var addApp = function (app) {
 		$(this).removeClass('click');
 
 	});
-
-
-
-	// node.draggable({
-//		handle: '.title-inside',
-		// start: function(event, ui) {
-		// 	nodeOnDraging = ui;
-		// },
-		// drag: function( event, ui ) {
-		// 	var position = $(this).position();
-		// }
-	// });
-
-	// node.on('dragstart', function (ev) {
-	// 	ev.originalEvent.dataTransfer.effectAllowed = 'move';
-	// 	ev.originalEvent.dataTransfer.setData("text", this.id);
-	// 	console.log(this.id);
-	// 	// console.log(e);
-	// });
-	//
-	// node.on('dragover', function (ev) {
-	// 	var origin = ev.originalEvent.dataTransfer.getData("text");
-	// 	console.log(origin);
-	// 	// if (this !== origin) {
-	// 	// 	console.log(this);
-	// 	// }
-	//
-	// 	// console.log(e);
-	// });
 
 //	$('.app-list').append(node);
 	gridster.add_widget(node, 1, 1, x, y);
@@ -287,7 +274,7 @@ var openWindow = function (node) {
 		'<nav class="control-window">' +
 	    '<a href="#" class="deactivate">deactivate</a>' +
 	    '<a href="#" class="minimize">minimize</a>' +
-	    '<a href="#finder" class="close" data-rel="close">close</a>' +
+	    '<a href="#" class="close" data-rel="close">close</a>' +
 	  '</nav>' +
     '<h1 class="titleInside">About Finder</h1>' +
     '<div class="container">' +
