@@ -55,7 +55,12 @@ $('.content').remove();
 
 var a = 3;
 $('.content,.specific,.project,.share').draggable({ handle: '.title-inside', start: function(event, ui) { $(this).css("z-index", a++); }});
-$(".window").draggable({ handle: '.titleInside, .title-mac, .tab', refreshPositions: true, containment: 'window', start: function(event, ui) { $(this).css("z-index", a++); } });
+$(".window").draggable({
+	handle: '.titleInside, .title-mac, .tab',
+	refreshPositions: true,
+	containment: 'window',
+	start: function(event, ui) { $(this).css("z-index", a++); }
+});
 
 
 //-----------------------------------------------------------------------------------
@@ -184,22 +189,23 @@ var dragging = false;
 
 var gridster = $(".app-list ul").gridster({
 	widget_base_dimensions: [80, 60],
-	widget_margins: [15, 40],
-	max_cols: 14,
+	widget_margins: [15, 35],
+	max_cols: 4,
 	max_rows: 5,
 	max_size_x: 1,
 	max_size_y: 1,
 	draggable: {
 		start: function (event, ui) {
+			ui.$helper.bind("click", function(event) { event.preventDefault(); });
 			dragging = true;
 		},
 		stop: function (event, ui) {
 			ui.$player.children('div.effect').addClass('ripple');
 			setTimeout(function () {
 				ui.$player.children('div.effect').removeClass('ripple');
+				ui.$helper.unbind("click");
 				dragging = false;
 			}.bind(this), 900);
-
 		}
 	}
 	}).data('gridster');
@@ -218,8 +224,8 @@ var addApp = function (app) {
 	var y = app.j + 1;
 
 	// node.offset({ top: height * y + offHeight, left: width * x + gap  });
-	node.width(contentWidth);
-	node.height(contentHeight);
+	// node.width(contentWidth);
+	// node.height(contentHeight);
 
 	node.css('position', 'absolute');
 
@@ -233,14 +239,12 @@ var addApp = function (app) {
 		$(this).children('div.effect').addClass('ripple');
 		setTimeout(function () {
 			$(this).children('div.effect').removeClass('ripple');
-		}.bind(this), 900);
-		setTimeout(function () {
 			openWindow(this);
 			addDock(this);
 			showCorner();
 			total_dock++;
 			adjustHeader();
-		}.bind(this), 200);
+		}.bind(this), 900);
 	});
 
 	node.mousedown(function () {
