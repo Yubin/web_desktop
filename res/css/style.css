@@ -3,6 +3,7 @@
 @import url("dock.css") screen;
 @import url("window.css") screen;
 @import url("ripple.css") screen;
+@import url("jquery.gridster.css") screen;
 
 /*-----------------------------------------------------------------------------------*/
 /*	0.	CSS Reset
@@ -541,7 +542,7 @@ input[type=password]:focus ~ .tooltip-pass {
     top: 0;
 	padding:0 10px 0 10px;
     width: 20px;
-	height: 40px;
+	height: 48px;
 }
 .head nav#menu ul li a {
 	display:block;

@@ -1,28 +1,22 @@
 <!DOCTYPE HTML>
 <html lang="en-US" class="no-js">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<link rel="stylesheet" type="text/css" media="screen" href="res/css/style.css"/>
-<title>Gausian Desktop</title>
-<meta name="description" content="Mac Os X Lion with CSS3 Experiment - I wanted to create with only use of CSS3 the boot, the login page and finally the desktop of the Mac OS X Lion." />
-<script type="text/javascript" src="res/js/jquery-1.11.1.min.js"></script>
-<script type="text/javascript" src="res/js/jquery-ui-1.11.1.min.js"></script>
-<script type="text/javascript" src="res/js/modernizr.js"></script>
-<script type="text/javascript" src="res/js/reflection.js"></script>
+	<link rel="stylesheet" type="text/css" media="screen" href="res/css/style.css"/>
+	<title>Gausian Desktop</title>
+	<meta name="description" content="Mac Os X Lion with CSS3 Experiment - I wanted to create with only use of CSS3 the boot, the login page and finally the desktop of the Mac OS X Lion." />
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<script type="text/javascript" src="res/js/jquery-1.11.1.min.js"></script>
+	<script type="text/javascript" src="res/js/jquery-ui-1.11.1.min.js"></script>
+	<script type="text/javascript" src="res/js/modernizr.js"></script>
+	<script type="text/javascript" src="res/js/reflection.js"></script>
+	<script type="text/javascript" src="res/js/coords.js"></script>
+	<script type="text/javascript" src="res/js/collision.js"></script>
+	<script type="text/javascript" src="res/js/delay.js"></script>
+	<script type="text/javascript" src="res/js/dragable.js"></script>
+	<script type="text/javascript" src="res/js/jquery.gridster.js"></script>
 </head>
 
 <body>
-
-<!-- FAIL -->
-<div id="fail">
-	<div class="fail-browser-logo">
-    	<img src="res/img/apple-logo-login.png" alt="Mac OS X" />
-    </div>
-    <div class="fail-browser">
-        <p><strong>I'm sorry to inform you that your browser don't support CSS3 Animations!</strong></p>
-        <p>This site uses features that <em>require</em> a modern browser - why not try <a href="http://www.mozilla.org/en-US/firefox/fx/" target="_blank" title="Download Firefox">Firefox</a> ?</p>
-    </div>
-</div>
 
 <!-- DESKTOP -->
 <div id="page" class="vis">
@@ -47,7 +41,6 @@
 	</div>
 	<div class="after empty"></div>
 
-
 	<div class="right">
 		<nav id="menu-dx">
 			<ul>
@@ -61,12 +54,14 @@
 		</nav>
 	</div>
 	<div class="sync"></div>
+	<div style='clear:left;'></div>
 </div>
 
-<div class="app-list">
+<div class="app-list gridster">
+	<ul>
 
+	</ul>
 </div>
-
 
 
 </div>
