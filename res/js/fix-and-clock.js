@@ -190,22 +190,20 @@ var dragging = false;
 var gridster = $(".app-list ul").gridster({
 	widget_base_dimensions: [80, 60],
 	widget_margins: [15, 35],
-	max_cols: 4,
+	max_cols: 14,
 	max_rows: 5,
 	max_size_x: 1,
 	max_size_y: 1,
 	draggable: {
 		start: function (event, ui) {
-			ui.$helper.bind("click", function(event) { event.preventDefault(); });
 			dragging = true;
 		},
 		stop: function (event, ui) {
 			ui.$player.children('div.effect').addClass('ripple');
 			setTimeout(function () {
 				ui.$player.children('div.effect').removeClass('ripple');
-				ui.$helper.unbind("click");
 				dragging = false;
-			}.bind(this), 900);
+			}.bind(this), 700);
 		}
 	}
 	}).data('gridster');

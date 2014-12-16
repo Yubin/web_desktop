@@ -1,0 +1,34 @@
+
+.app-list {
+  li {
+    position: absolute;
+    display: inline;
+    cursor: pointer;
+    float: left;
+    color: white;
+    font-size: 12px;
+    text-align: center;
+  }
+  .app-name {
+    margin-top: 8px;
+  }
+  li.click .app-name {
+    margin-top: 7px;
+  }
+  li img {
+    -webkit-filter: drop-shadow(5px 5px 5px rgba(0,0,0,0.5));
+    filter: url(shadow.svg#drop-shadow);
+    -ms-filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=5, OffY=5, Color='#444')";
+    filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=5, OffY=5, Color='#444')";
+  }
+  li.click img {
+    margin: 1px 0 0 1px;
+    -webkit-filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.5));
+    filter: url(shadow.svg#drop-shadow-2);
+    -ms-filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=2, OffY=2, Color='#444')";
+    filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=2, OffY=2, Color='#444')";
+  }
+  li span.app-name {
+    color: white;
+  }
+}
