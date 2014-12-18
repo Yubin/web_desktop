@@ -22,6 +22,9 @@ function importLegacyResource(file, symbols) {
 }
 
 app = new EmberApp({
+	fingerprint: {
+		enabled: false
+	},
 	ramdisk: {
 		removeTmp: true,
 		disabled: (function () {
