@@ -1,4 +1,5 @@
-
+@import "appicon.less";
+@import "window.less";
 /*-----------------------------------------------------------------------------------*/
 /*	0.	CSS Reset
 /*-----------------------------------------------------------------------------------*/
@@ -411,20 +412,30 @@ input[type=password]:focus ~ .tooltip-pass {
 /*	03.	Desktop
 /*-----------------------------------------------------------------------------------*/
 
-#page {
+.background-image {
   background:url(../img/wallpaper.jpg);
   background-size:100% 100%;
   background-repeat:no-repeat;
+  filter: blur(5px);
+  -webkit-filter: blur(5px);
+  -moz-filter: blur(5px);
+  height: 800px;
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 1;
+}
+
+#page{
   width:100%;
   height:100%;
   position:absolute;
-  z-index:-1;
+  z-index:2;
   font-family: "Lucida Grande", "Lucida Sans Unicode", sans-serif;
 }
 #page.vis {
   visibility:visible;
   opacity:1;
-  z-index:0;
   -moz-animation:none;
   -webkit-animation:none;
 }
