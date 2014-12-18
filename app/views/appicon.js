@@ -49,7 +49,7 @@ export default Ember.View.extend({
       'float': 'left'
     });
     this.$('.app-img').css({
-      'background': 'url(/img/' + this.get('content.imgName') + '.png) no-repeat',
+      'background': 'url(img/' + this.get('content.imgName') + '.png) no-repeat',
       "background-size": "100%"
     });
     this.position();

@@ -5,7 +5,7 @@ export default Ember.View.extend({
   classNames: ['window', 'share',  'windows-vis'],
 
   didInsertElement: function () {
-    this.$('.header').on('mousedown', function (event) { console.log('mousedown');
+    this.$('.header').on('mousedown', function (event) {
       var originEvt = event.originalEvent;
       var offsetX = originEvt.offsetX ? originEvt.offsetX : originEvt.layerX;
       var offsetY = originEvt.offsetY ? originEvt.offsetY : originEvt.layerY;
@@ -23,7 +23,7 @@ export default Ember.View.extend({
 
     }.bind(this));
 
-    this.$('.header').on('mouseup', function (event) { console.log('mouseup');
+    this.$('.header').on('mouseup', function () {
       Ember.$(this).off('mousemove');
     });
 

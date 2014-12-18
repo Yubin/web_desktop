@@ -33,13 +33,11 @@ export default Ember.CollectionView.extend({
   },
 
   shuffle: function (from, to) {
-    console.log(JSON.stringify(from) + JSON.stringify(to));
-    var toItemView, fromItemView;
     this.get('childViews').forEach(function (itemView) {
       var col = get(itemView, 'col');
       var row = get(itemView, 'row');
       if (col === get(to, 'col') && row === get(to, 'row') ) {
-        itemView.position(get(from, 'row'), get(from, 'col'));;
+        itemView.position(get(from, 'row'), get(from, 'col'));
       } else if (col === get(from, 'col') && row === get(from, 'row') ) {
         itemView.setProperties({
           col: get(to, 'col'),
