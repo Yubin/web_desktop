@@ -3,6 +3,19 @@
   position: absolute;
 }
 
+.appscreen:before {
+  content: '';
+  background: url(../img/wallpaper.jpg) -72px;
+  background-repeat: no-repeat;
+  background-position: -38px;
+  background-size: auto 100%;
+  position: absolute;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  margin: -25px 0 0 -25px;
+}
+
 .appscreen li {
   -webkit-transition: opacity, -webkit-transform 0.25s ease-in-out;
   transition: opacity, transform 0.25s ease-in-out;
@@ -47,9 +60,9 @@
   opacity: 0.75;
 }
 .appscreen li.dragging div {
-  -webkit-transform: scale(1.25);
-  -ms-transform: scale(1.25);
-  transform: scale(1.25);
+  -webkit-transform: scale(1.1);
+  -ms-transform: scale(1.1);
+  transform: scale(1.1);
 }
 .appscreen li.dragging div:after {
   opacity: 0.75;

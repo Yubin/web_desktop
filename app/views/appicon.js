@@ -4,8 +4,7 @@ export default Ember.View.extend({
   tagName: 'li',
   templateName: 'appicon',
 
-  height: 60,
-  width: 60,
+
 
   offsetHeight: 50,
   offsetWidth: 20,
@@ -18,32 +17,39 @@ export default Ember.View.extend({
     return this.get('content.col');
   }.property('content.col'),
 
+  iconWidth: function () {
+    return this.get('parentView.iconWidth');
+  }.property('parentView.iconWidth'),
+
+
   parentWidth: function () {
-    return this.get('parentView').$().width();
-  }.property(),
+    return this.get('parentView.width');
+  }.property('parentView.width'),
 
   parentHeight: function () {
-    return this.$().parent().height();
-  }.property(),
+    return this.get('parentView.height');
+  }.property('parentView.height'),
 
-  init: function () {
-    this._super();
-    // Ember.$(window).resize(function() {
-    //
-    //   this.handleSize();
-    // }.bind(this));
-  },
+  onIconSizeChange: function () {
+    this.handleSize();
+    this.position();
+  }.observes('iconWidth', 'parentWidth','parentHeight'),
 
   didInsertElement: function () {
     this.handleSize();
+    this.position();
   },
 
   handleSize: function () {
-    var iconHeight = this.get('height');
-    var iconWidth = this.get('width');
+    var iconWidth = this.get('iconWidth');
+
+    this.$('span').css({
+      'top': iconWidth + 5 * iconWidth / 60,
+      'font-size': 12 + Math.round(iconWidth / 60)
+    });
 
     this.$().css({
-      'height': iconHeight,
+      'height': iconWidth,
       'width':  iconWidth,
       'display': 'inline-block',
       'float': 'left'
@@ -52,11 +58,11 @@ export default Ember.View.extend({
       'background': 'url(img/' + this.get('content.imgName') + '.png) no-repeat',
       "background-size": "100%"
     });
-    this.position();
+
   },
 
 
-  position: function (row, col) {
+  position: function (row, col, duration) {
     row = !Ember.isEmpty(row) ? row : this.get('row');
     col = !Ember.isEmpty(col) ? col : this.get('col');
 
@@ -65,10 +71,18 @@ export default Ember.View.extend({
     var top = offsetHeight * row;
     var left = offsetWidth * col;
 
-    this.$().animate({
-      'top': top,
-      'left': left
-    });
+    if (duration) {
+      this.$().animate({
+        'top': top,
+        'left': left
+      }, duration);
+    } else {
+      this.$().css({
+        'top': top,
+        'left': left
+      });
+    }
+
 
     this.setProperties({
       row: row,
@@ -81,14 +95,7 @@ export default Ember.View.extend({
     var newRow = Math.round(top * 5 / this.get('parentHeight'));
     return {row: newRow, col: newCol};
   },
-  // dragStart: function (event) {
-  //   this.$().addClass('dragging');
-  //   console.log(event.originalEvent);
-  // },
-  //
-  // dragEnd: function () {
-  //   this.$().removeClass('dragging');
-  // },
+
   mouseDown: function (event) {
     var originEvt = event.originalEvent;
     this.setProperties({
