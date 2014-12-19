@@ -5,6 +5,8 @@ var get = Ember.get;
 export default Ember.CollectionView.extend({
   // templateName: 'appscreen',
   classNames: ['appscreen', 'appscreen-set', 'dropzone'],
+  classNameBindings: ['appTouch:background'],
+  appTouch: false,
   tagName: 'ul',
   height: 600,
   width: 400,
@@ -38,8 +40,8 @@ export default Ember.CollectionView.extend({
     var winWidth  = Math.max(Ember.$(window).width(), minWidthWin);
     var winHeight = Math.max(Ember.$(window).height(), minHeightWin);
 
-    var height = (winHeight - 60) * 5 / 6;
-    var width = winWidth / 4 ;
+    var height = (winHeight - 60);
+    var width = winWidth / 3 * 0.9 ;
 
     var top = (winHeight - 60 - height) / 2 + 60;
     var left = (winWidth - width * 3) / 4;

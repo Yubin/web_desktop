@@ -4,11 +4,6 @@ export default Ember.View.extend({
   tagName: 'li',
   templateName: 'appicon',
 
-
-
-  offsetHeight: 50,
-  offsetWidth: 20,
-
   row: function () {
     return this.get('content.row');
   }.property('content.row'),
@@ -66,10 +61,13 @@ export default Ember.View.extend({
     row = !Ember.isEmpty(row) ? row : this.get('row');
     col = !Ember.isEmpty(col) ? col : this.get('col');
 
-    var offsetHeight = this.get('parentHeight') / 5;
-    var offsetWidth = this.get('parentWidth') / 4;
-    var top = offsetHeight * row;
-    var left = offsetWidth * col;
+    var iconWidth = this.get('iconWidth');
+    var iconHeight = iconWidth * 4 / 3;
+
+    var offsetHeight = (this.get('parentHeight') - iconHeight * 5) / 6;
+    var offsetWidth  = (this.get('parentWidth') - iconWidth * 4) / 5;
+    var top  = (iconHeight + offsetHeight) * row + offsetHeight;
+    var left = (iconWidth + offsetWidth) * col + offsetWidth;
 
     if (duration) {
       this.$().animate({
@@ -83,14 +81,13 @@ export default Ember.View.extend({
       });
     }
 
-
     this.setProperties({
       row: row,
       col: col
     });
   },
 
-  getScreenRowCol: function (left, top) {
+  getScreenRowCol: function (left, top) { // TBD: refine accuracy
     var newCol = Math.round(left * 4 / this.get('parentWidth'));
     var newRow = Math.round(top * 5 / this.get('parentHeight'));
     return {row: newRow, col: newCol};
@@ -109,6 +106,8 @@ export default Ember.View.extend({
     this.on('mouseUp', this.onMouseRelease);
     this.on('mouseLeave', this.onMouseRelease);
     this.set('startTime', (new Date()).getTime());
+
+    this.set('parentView.appTouch', true);
   },
 
   onMouseMove: function (event) {
@@ -129,19 +128,18 @@ export default Ember.View.extend({
     }
   },
 
-
   onMouseRelease: function () {
     var node = this.$();
     node.removeClass('dragging');
     this.off('mouseMove', this.onMouseMove);
     this.off('mouseUp', this.onMouseRelease);
     this.off('mouseLeave', this.onMouseRelease);
-    this.position();
+    this.position(this.get('row'), this.get('col'), 300);
 
     node.css({
       'z-index': 1
     });
-
+    this.set('parentView.appTouch', false);
     var timeSpan = (new Date()).getTime() - this.get('startTime');
     if (timeSpan < 300) {
       this.get('parentView.controller').send('openApp', this.get('content'));
