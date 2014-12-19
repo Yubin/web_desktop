@@ -6,6 +6,8 @@ export default Ember.ArrayController.extend({
   itemController: 'applist-item',
   screenNum: 3,
 
+  appTouch: false,
+
   openApps: [],
 
   init: function () {
@@ -22,16 +24,27 @@ export default Ember.ArrayController.extend({
   },
 
   actions: {
+    showTrash: function (show) {
+      this.set('appTouch', show);
+    },
     openApp: function (item) {
-      var viewType = 'window';
-      var klass = this.container.lookupFactory('view:' + viewType);
-      var instant = klass.create({
-        content:    item,
-        parentView: this,
-        container:  this.container
-      }).appendTo('body');
+      var name = get(item, 'name');
 
-      this.get('openApps').pushObject({name: get(item, 'name'), instant: instant});
+      var find = this.get('openApps').any(function (it) {
+        return get(it, 'name') === name;
+      });
+
+      if (!find) {
+        var viewType = 'window';
+        var klass = this.container.lookupFactory('view:' + viewType);
+        var instant = klass.create({
+          content:    item,
+          parentView: this,
+          container:  this.container
+        }).appendTo('body');
+
+        this.get('openApps').pushObject({name: name, instant: instant});
+      }
     },
 
     closeApp: function (item) {
@@ -45,6 +58,14 @@ export default Ember.ArrayController.extend({
         this.get('openApps').removeObject(obj[0]);
         instant.destroy();
       }
+    },
+
+    addApp: function () { // TBD
+      console.log('addApp');
+    },
+
+    deleteApp: function (item) { // TBD
+      console.log('deleteApp');
     }
   }
 });

@@ -42,6 +42,10 @@ app = new EmberApp({
 		}
 	}
 });
+
+app.import('bower_components/fontawesome/css/font-awesome.css');
+
+
 //
 // app.import({
 // 	development: 'bower_components/lodash/dist/lodash.underscore.js',
@@ -108,6 +112,11 @@ app = new EmberApp({
 
 var trees = [];
 trees.push(app.toTree());
+trees.push(pickFiles('bower_components/fontawesome/fonts', {
+	srcDir: '/',
+	files: ['*'],
+	destDir: 'fonts'
+}));
 
 module.exports = mergeTrees(trees, {
 	overwrite: true

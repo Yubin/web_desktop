@@ -6,7 +6,7 @@ var Router = Ember.Router.extend({
 });
 
 Router.map(function() {
-  this.route('index.html', { path: '/' });
+  this.route('application', { path: '/' });
 });
 
 Router.reopen({

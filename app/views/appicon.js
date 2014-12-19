@@ -107,10 +107,11 @@ export default Ember.View.extend({
     this.on('mouseLeave', this.onMouseRelease);
     this.set('startTime', (new Date()).getTime());
 
-    this.set('parentView.appTouch', true);
   },
 
   onMouseMove: function (event) {
+    this.set('parentView.appTouch', true);
+
     var originEvt = event.originalEvent;
     var offset = this.$().parent().offset();
     var x = originEvt.clientX - this.get('offsetX') - offset.left;

@@ -30,7 +30,6 @@ export default Ember.CollectionView.extend({
 
   handleSize: function () {
 
-
     var minHeightIcon = 64;
     var minWidthIcon = 48;
     var minHeightScreen = minHeightIcon * 6;
@@ -40,14 +39,13 @@ export default Ember.CollectionView.extend({
     var winWidth  = Math.max(Ember.$(window).width(), minWidthWin);
     var winHeight = Math.max(Ember.$(window).height(), minHeightWin);
 
-    var height = (winHeight - 60);
+    var height = (winHeight - 60) * 0.9;
     var width = winWidth / 3 * 0.9 ;
 
-    var top = (winHeight - 60 - height) / 2 + 60;
+    var top = (winHeight - 60 - height) / 2 + 45;
     var left = (winWidth - width * 3) / 4;
 
     var iconWidth = Math.max(width/4 * 0.6, minWidthIcon);
-console.log(iconWidth);
     var node = this.$();
     node.css({
       width: width,
@@ -78,7 +76,11 @@ console.log(iconWidth);
         });
       }
     });
-  }
+  },
+
+  onAppTouch: function () {
+    this.get('controller').send('showTrash', this.get('appTouch'));
+  }.observes('appTouch')
 
 
 });
