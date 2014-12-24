@@ -23,6 +23,7 @@ export default Ember.Mixin.create({
   },
 
   didInsertElement: function () {
+    this.changeZindex();
     this.$().css({
       width: this.get('width'),
       height: this.get('height')

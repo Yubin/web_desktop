@@ -4,7 +4,7 @@ import WindowMixin from '../../mixins/window-view';
 export default Ember.View.extend(WindowMixin, {
 
   layoutName: 'window',
-  templateName: 'app/deliver-bid',
+  templateName: 'app/einventory',
   finalIndex: 3,
 
   didInsertElement: function () {
@@ -25,13 +25,13 @@ export default Ember.View.extend(WindowMixin, {
     var index = this.get('index');
 
     this.set('logoUrl', 'img/pictures_for_apps/VenderMatch_%@.jpg'.fmt(index));
-    if (index < this.get('finalIndex')) {
-      this.$('img.spinner').show();
-      Ember.run.later(function () {
-        this.set('index', index + 1);
-        this.$('img.spinner').hide();
-      }.bind(this), 600);
-    }
+    // if (index < this.get('finalIndex')) {
+    //   this.$('img.spinner').show();
+    //   Ember.run.later(function () {
+    //     this.set('index', index + 1);
+    //     this.$('img.spinner').hide();
+    //   }.bind(this), 600);
+    // }
 
 
 

@@ -24,13 +24,13 @@ export default Ember.View.extend(WindowMixin, {
     var index = this.get('index');
 
     this.set('logoUrl', 'img/pictures_for_apps/Einventory_%@.jpg'.fmt(index));
-    if (index < this.get('finalIndex')) {
-      this.$('img.spinner').show();
-      Ember.run.later(function () {
-        this.set('index', index + 1);
-        this.$('img.spinner').hide();
-      }.bind(this), 600);
-    }
+    // if (index < this.get('finalIndex')) {
+    //   this.$('img.spinner').show();
+    //   Ember.run.later(function () {
+    //     this.set('index', index + 1);
+    //     this.$('img.spinner').hide();
+    //   }.bind(this), 600);
+    // }
 
 
 
