@@ -95,50 +95,7 @@ export default Ember.View.extend({
 
     this.$().addClass('dragging');
     this.get('parentView').onMouseDown(this, offsetX, offsetY);
-    // this.on('mouseMove', this.onMouseMove);
-    // this.on('mouseUp', this.onMouseRelease);
-    // // this.on('mouseLeave', this.onMouseRelease);
-    // this.set('startTime', (new Date()).getTime());
-
   },
-
-  // onMouseMove: function (event) { console.log('onMouseMove');
-  //   this.set('parentView.appTouch', true);
-  //
-  //   var originEvt = event.originalEvent;
-  //   var offset = this.$().parent().offset();
-  //   var x = originEvt.clientX - this.get('offsetX') - offset.left;
-  //   var y = originEvt.clientY - this.get('offsetY') - offset.top;
-  //   this.$().css({ // image follow
-  //     'top': y,
-  //     'left': x,
-  //     'z-index': '100'
-  //   });
-  //   var rowCol = this.getScreenRowCol(x, y);
-  //   if (this.get('row') !== rowCol.row || this.get('col') !== rowCol.col) {
-  //     // this.get('parentView').shuffle(
-  //     //   {row: this.get('row'), col: this.get('col')},
-  //     //   rowCol);
-  //   }
-  // },
-  //
-  // onMouseRelease: function () {
-  //   var node = this.$();
-  //   node.removeClass('dragging');
-  //   this.off('mouseMove', this.onMouseMove);
-  //   this.off('mouseUp', this.onMouseRelease);
-  //   // this.off('mouseLeave', this.onMouseRelease);
-  //   this.position(this.get('row'), this.get('col'), 300);
-  //
-  //   node.css({
-  //     'z-index': 1
-  //   });
-  //   this.set('parentView.appTouch', false);
-  //   var timeSpan = (new Date()).getTime() - this.get('startTime');
-  //   if (timeSpan < 300) {
-  //     this.get('parentView.controller').send('openApp', this.get('content'));
-  //   }
-  // }
 
 
 });

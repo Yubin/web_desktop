@@ -90,6 +90,7 @@ export default Ember.CollectionView.extend({
 
   onMouseMove: function (event) {
     // this.set('parentView.appTouch', true);
+    this.set('controller.appTouch', true);
 
     var node = this.get('activeApp');
     var originEvt = event.originalEvent;
@@ -112,7 +113,7 @@ export default Ember.CollectionView.extend({
   onMouseRelease: function () {
     var node = this.get('activeApp');
     node.$().removeClass('dragging');
-    this.off('mouseMove', this.onMouseMove);
+    this.$(document).off('mousemove');
     this.off('mouseUp', this.onMouseRelease);
     // this.off('mouseLeave', this.onMouseRelease);
     node.position(node.get('row'), node.get('col'), 300);
@@ -120,11 +121,10 @@ export default Ember.CollectionView.extend({
     node.$().css({
       'z-index': 1
     });
-    this.set('controller.appTouch', false);
-    var timeSpan = (new Date()).getTime() - this.get('startTime');
-    if (timeSpan < 300) {
+    if (!this.get('controller.appTouch')) {
       this.get('controller').send('openApp', node.get('content'));
     }
+    this.set('controller.appTouch', false);
   },
 
   onMouseDown: function (app, offsetX, offsetY) { // this will be called by item
@@ -134,13 +134,13 @@ export default Ember.CollectionView.extend({
       'offsetY': offsetY
     });
 
-    this.on('mouseMove', this.onMouseMove);
+    this.$(document).on('mousemove', this.onMouseMove.bind(this));
     this.on('mouseUp', this.onMouseRelease);
     //this.on('mouseLeave', this.onMouseRelease);
-    this.set('startTime', (new Date()).getTime());
   },
 
   shuffle: function (from, to) {  // TBD add screen constrain
+    console.log(JSON.stringify(from) + ' -> ' + JSON.stringify(to));
     this.get('childViews').forEach(function (itemView) {
       var col = get(itemView, 'col');
       var row = get(itemView, 'row');
