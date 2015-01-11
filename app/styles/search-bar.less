@@ -1,0 +1,73 @@
+.search-bar {
+  text-align: center;
+  padding: 15px 0 15px 0;
+
+  .search {
+    display: inline-block;
+
+    height:30px;
+    width: 350px;
+
+    border:2px solid white;
+    padding: 2px 10px 2px 0px;
+
+    -webkit-border-radius:10px;
+    -moz-border-radius:10px;
+    border-radius:10px;
+
+    .search-icon {
+      display: inline-block;
+      position: relative;
+      width: 10px;
+      height: 10px;
+      margin: 0 5px;
+      background: transparent;
+      border: 3px solid white;
+      border-radius: 50%;
+      cursor: pointer;
+      &:after {
+        content: '';
+        position: absolute;
+        width: 3px;
+        height: 10px;
+        bottom: -7px;
+        right: -5px;
+        background-color: white;
+        border-radius: 2px;
+        -webkit-transform: rotate(-50deg);
+        -moz-transform: rotate(-50deg);
+        -o-transform: rotate(-50deg);
+        -ms-transform: rotate(-50deg);
+        transform: rotate(-50deg);
+      }
+    }
+
+    input {
+      padding: 2px 0 1px 0;
+      font-size: 20px;
+      color: white;
+      border: none;
+      background-color: transparent;
+      width: 80px;
+      -webkit-transition: width 0.5s ease, height 0.5s ease;
+      -moz-transition: width 0.5s ease, height 0.5s ease;
+      -o-transition: width 0.5s ease, height 0.5s ease;
+      -ms-transition: width 0.5s ease, height 0.5s ease;
+      transition: width 0.5s ease, height 0.5s ease;
+
+      &:focus {
+        width: 300px;
+      }
+    }
+
+    input:after {
+      content: 'asdfasdf';
+      color: red;
+      position: absolute;
+      width: 100px;
+      height: 100px;
+
+    }
+  }
+
+}
