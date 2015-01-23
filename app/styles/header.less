@@ -10,18 +10,31 @@
   display: flex;
   -webkit-flex-flow: row wrap;
   justify-content: space-between;
+  list-style-type: none;
+  padding: 0px;
+  margin: 0px;
+  li {
+    margin:0;
+    padding:0;
+    height: 60px;
+    span {
+      display: block;
+      position: relative;
+      top: 50%;
+      -webkit-transform: translateY(-50%);
+      -ms-transform: translateY(-50%);
+      transform: translateY(-50%);
+      color: white;
+    }
+  }
   .logo {
-    margin-top: 15px;
     margin-left: 20px;
     color: white;
     font-size: 28px;
-
   }
   .login {
-    margin-top: 20px;
     margin-right: 20px;
-    h4 {
-      color: red;
+    span {
       font-size: 20px;
     }
 

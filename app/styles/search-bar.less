@@ -49,11 +49,6 @@
       border: none;
       background-color: transparent;
       width: 80px;
-      -webkit-transition: width 0.5s ease, height 0.5s ease;
-      -moz-transition: width 0.5s ease, height 0.5s ease;
-      -o-transition: width 0.5s ease, height 0.5s ease;
-      -ms-transition: width 0.5s ease, height 0.5s ease;
-      transition: width 0.5s ease, height 0.5s ease;
 
       &:focus {
         width: 300px;
@@ -69,5 +64,89 @@
 
     }
   }
+
+  .overlay{
+    position: absolute;
+    display: none;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    background-color: rgba(255,255,255,0.5); /*dim the background*/
+    .modal {
+      width: 400px;
+      //height: 500px;
+      max-height: 80%;
+      // line-height: 200px;
+      position: fixed;
+      top: 12%;
+      left: 50%;
+      margin-left: -200px;
+      background-color: black;
+      border-radius: 25px;
+      text-align: center;
+      z-index: 11; /* 1px higher than the overlay layer */
+      -webkit-border-radius:20px;
+      -moz-border-radius:20px;
+      border-radius:20px;
+      input {
+        color: white;
+        background-color: black;
+        width: 375px;
+        font-size: 32px;
+        border:2px solid white;
+        margin: 0;
+        padding: 5px 10px 5px 10px;
+
+        -webkit-border-radius:20px;
+        -moz-border-radius:20px;
+        border-radius:20px;
+      }
+      .search-results {
+        color: white;
+        .search-results-item {
+          display: flex;
+          flex-direction: row;
+          justify-content:space-between;
+          margin: 10px 15px 10px 15px;
+          .icon {
+            width: 60px;
+            img{
+              width: 60px;
+              height: auto;
+            }
+          }
+          .detail {
+            .name {
+              color: blue;
+              text-decoration: none;
+              font-size: 18px;
+              cursor: pointer;
+            }
+          }
+          .action {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 60px;
+            &:hover {
+              cursor: pointer;
+            }
+          }
+          .action.get {
+            background-color: orange;
+          }
+          .action.open {
+            background-color: blue;
+          }
+        }
+      }
+
+    }
+  }
+
+
 
 }

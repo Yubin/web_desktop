@@ -7,7 +7,6 @@ export default Ember.CollectionView.extend({
   classNames: ['appscreen', 'appscreen-set', 'dropzone'],
   classNameBindings: ['appTouch:background'],
   appTouch: false,
-  tagName: 'ul',
   height: 600,
   width: 400,
 

@@ -86,8 +86,6 @@ export default Ember.View.extend({
     });
   },
 
-
-
   mouseDown: function (event) {
     var originEvt = event.originalEvent;
     var offsetX = originEvt.offsetX ? originEvt.offsetX : originEvt.layerX;

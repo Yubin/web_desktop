@@ -1,4 +1,11 @@
 <div class="search">
   <div class="search-icon"></div>
-  {{input type="text" value=view.query placeholder="Search"}}
+  {{input type="text" placeholder="Search" disabled=true}}
+</div>
+
+<div class="overlay">
+  <div class="modal">
+    {{input type="text" value=view.query}}
+    {{view 'search-results' content=view.searchContent}}
+  </div>
 </div>

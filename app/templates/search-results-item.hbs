@@ -1,0 +1,11 @@
+<div class="icon">
+  <img {{bind-attr src=view.content.icon}} />
+</div>
+<div class="detail">
+  <a class="name">{{view.content.name}}</a> {{star-rating content=view.content.rating}}
+  <p>{{view.content.category}}</p>
+  <p>{{view.content.freeDay}} days free trail, ${{view.content.price}}/month</p>
+</div>
+<div {{bind-attr class=":action content.installed:open:get"}}>
+  {{view.label}}
+<div>

@@ -1,25 +1,31 @@
-
-.appscreen {
+.applist{
   position: absolute;
-}
+  width: 100%;
+  height: 84%;
+  .appscreen {
+    background: inherit;
+    position: absolute;
+    margin: 0;
+    border-radius: 10px;
+    border: 5px solid rgba(255,255,255,.15);
+    box-shadow: 1px 1px 4px rgba(0,0,0,.3);
+    z-index: 5;
+    font-size: 1.4rem;
+    cursor: move;
 
-.appscreen.background {
-  background: url(../img/wallpaper.jpg);
-  background-repeat: no-repeat;
-  background-size: auto 100%;
-  border-radius: 25px;
-}
-
-.appscreen li {
-  -webkit-transition: opacity, -webkit-transform 0.25s ease-in-out;
-  transition: opacity, transform 0.25s ease-in-out;
-  cursor: pointer;
-  list-style: none;
-  position: absolute;
-  text-align: center;
-  font-size: 11px;
-  color: #000;
-  font-family: Helvetica, Arial, sans-serif;
+    &:before {
+      content: '';
+      position: absolute;
+      top: 0; left:0; right:0; bottom:0;
+      background: inherit;
+      filter: blur(5px);
+      -webkit-filter: blur(6px);
+      -moz-filter: blur(6px);
+      -o-filter: blur(6px);
+      -ms-filter: blur(6px);
+      filter: url(#blur);filter:progid:DXImageTransform.Microsoft.Blur(PixelRadius='6');
+    }
+  }
 }
 
 .appscreen li .app-img {

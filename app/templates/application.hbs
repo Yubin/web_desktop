@@ -1,11 +1,9 @@
 <!-- DESKTOP -->
-<div class="background-image"></div>
 
-<div id="page" class="vis">
 
 {{outlet header}}
 
-{{render searchBar}}
+{{render "searchBar"}}
 
 {{outlet applist}}
 
@@ -13,4 +11,8 @@
   <img src="assets/img/gausian_logo.png" >
 </div>
 
-</div>
+<svg version="1.1" xmlns='http://www.w3.org/2000/svg'>
+  <filter id='blur'>
+    <feGaussianBlur stdDeviation='6' />
+  </filter>
+</svg>
