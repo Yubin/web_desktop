@@ -3,6 +3,9 @@ import Ember from 'ember';
 export default Ember.View.extend({
   tagName: 'li',
   templateName: 'appicon',
+  attributeBindings : [ 'draggable' ],
+  draggable         : 'true',
+
 
   row: function () {
     return this.get('content.row');
@@ -12,18 +15,22 @@ export default Ember.View.extend({
     return this.get('content.col');
   }.property('content.col'),
 
+  scr: function () {
+    return this.get('content.screen');
+  }.property('content.screen'),
+
   iconWidth: function () {
     return this.get('parentView.iconWidth');
   }.property('parentView.iconWidth'),
 
 
   parentWidth: function () {
-    return this.get('parentView.width');
-  }.property('parentView.width'),
+    return this.get('parentView.screenWidth');
+  }.property('parentView.screenWidth'),
 
   parentHeight: function () {
-    return this.get('parentView.height');
-  }.property('parentView.height'),
+    return this.get('parentView.screenHeight');
+  }.property('parentView.screenHeight'),
 
   onIconSizeChange: function () {
     this.handleSize();
@@ -31,6 +38,7 @@ export default Ember.View.extend({
   }.observes('iconWidth', 'parentWidth','parentHeight'),
 
   didInsertElement: function () {
+    this.$().draggable();
     this.handleSize();
     this.position();
   },
@@ -53,21 +61,24 @@ export default Ember.View.extend({
       'background': 'url(img/' + this.get('content.imgName') + '.png) no-repeat',
       "background-size": "100%"
     });
-
   },
 
 
-  position: function (row, col, duration) {
+  position: function (row, col, scr, duration) {
     row = !Ember.isEmpty(row) ? row : this.get('row');
     col = !Ember.isEmpty(col) ? col : this.get('col');
-
+    scr = !Ember.isEmpty(scr) ? scr : this.get('scr');
     var iconWidth = this.get('iconWidth');
-    var iconHeight = iconWidth * 4 / 3;
+    var iconHeight = this.get('parentView.iconHeight');
+    var offsetHeight = this.get('parentView.offsetHeight');
+    var offsetWidth  = this.get('parentView.offsetWidth');
 
-    var offsetHeight = (this.get('parentHeight') - iconHeight * 5) / 6;
-    var offsetWidth  = (this.get('parentWidth') - iconWidth * 4) / 5;
+    var screnWidth = this.get('parentView.screenWidth');
+    var widthOffset = this.get('parentView.widthOffset');
+    var screenLeft = scr * (screnWidth + widthOffset + 10) + widthOffset;
+
     var top  = (iconHeight + offsetHeight) * row + offsetHeight;
-    var left = (iconWidth + offsetWidth) * col + offsetWidth;
+    var left = (iconWidth + offsetWidth) * col + offsetWidth + screenLeft;
 
     if (duration) {
       this.$().animate({
@@ -81,8 +92,9 @@ export default Ember.View.extend({
       });
     }
     this.setProperties({
-      row: row,
-      col: col
+      'content.row': row,
+      'content.col': col,
+      'content.screen': scr
     });
   },
 
@@ -95,5 +107,9 @@ export default Ember.View.extend({
     this.get('parentView').onMouseDown(this, offsetX, offsetY);
   },
 
+  mouseUp: function (evt) {
+    this.$().removeClass('dragging');
+    return true;
+  }
 
 });

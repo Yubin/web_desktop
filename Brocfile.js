@@ -42,7 +42,8 @@ app = new EmberApp({
 		}
 	}
 });
-
+app.import('bower_components/jquery-ui/jquery-ui.js');
+app.import('bower_components/jquery-mousewheel/jquery.mousewheel.js');
 app.import('bower_components/fontawesome/css/font-awesome.css');
 
 

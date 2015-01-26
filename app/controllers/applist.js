@@ -1,10 +1,14 @@
 import Ember from 'ember';
 
 var get = Ember.get;
+var set = Ember.set;
 
-export default Ember.ArrayController.extend({
-  itemController: 'applist-item',
+export default Ember.Controller.extend({
+  // itemController: 'applist-item',
   screenNum: 3,
+  screens: [{ id: 0, hasApp: false},
+  { id: 1, hasApp: false},
+  { id: 2, hasApp: false}],
 
   appTouch: true,
 
@@ -22,6 +26,19 @@ export default Ember.ArrayController.extend({
   //     Ember.defineProperty(this, name, Ember.computed.filterBy('@this', 'screen', i));
   //   }
   // },
+
+  appScreenChange: function () {
+    var apps = this.get('content');
+    var screens = this.get('screens');
+    screens.forEach(function (scr) {
+      var index = get(scr, 'id');
+      var hasApp = apps.any(function (app) {
+
+        return get(app, 'screen') === index;
+      });
+      set(scr, 'hasApp', hasApp);
+    });
+  }.observes('content.@each.screen'),
 
   actions: {
     showTrash: function (show) {

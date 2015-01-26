@@ -7,7 +7,6 @@ export default Ember.Component.extend({
   stars: function () {
     var rating = this.get('content') || 0;
     var array = new Array(rating);
-    console.log(array);
     return array;
   }.property('content')
 

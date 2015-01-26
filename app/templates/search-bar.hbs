@@ -6,6 +6,10 @@
 <div class="overlay">
   <div class="modal">
     {{input type="text" value=view.query}}
+    <div class="container">
     {{view 'search-results' content=view.searchContent}}
+
+    {{view 'scroll-bar' trackLen=view.trackLen  handlerLen=view.handlerLen handlerTop=view.handlerTop}}
+    </div>
   </div>
 </div>
