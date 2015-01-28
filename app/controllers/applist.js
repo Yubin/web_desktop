@@ -89,5 +89,9 @@ export default Ember.Controller.extend({
       console.log('moveImage' + key);
     },
 
+    activateWindow: function (content) {
+      console.log(activateWindow);
+    }
+
   }
 });

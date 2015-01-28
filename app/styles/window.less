@@ -3,8 +3,6 @@
 /*-----------------------------------------------------------------------------------*/
 
 .window {
-  background: -webkit-linear-gradient(rgba(233, 233, 233, 1.0), rgba(178, 178, 178, 1.0) 40px, #EDEDED, #EDEDED 23px);
-  background: -moz-linear-gradient(rgba(233, 233, 233, 1.0), rgba(178, 178, 178, 1.0) 40px, #EDEDED, #EDEDED 23px);
   border-radius: 5px;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.6), 0 22px 70px 4px rgba(0,0,0,0.56), 0 0 0 1px rgba(0, 0, 0, 0.3);
   text-align: left;
@@ -12,14 +10,21 @@
   z-index:10;
   visibility:hidden;
   opacity:0;
+  .header {
+    background-color: gray;
+    padding: 0 5px 0 25px;
+  }
 
   .spinner {
     position: absolute;
     display: none;
   }
+  &.active {
+    .header{
+      background-color: Chocolate;
+    }
+  }
 }
-
-
 
 .window.windows-vis {
   visibility:visible;
@@ -33,16 +38,17 @@
   padding:20px 30px;
   text-align:center;
 }
-h1.titleInside {
+span.titleInside {
+  color: white;
   position:relative;
   z-index:2;
-  color:#3c3c3c;
   font-size:18px;
   line-height:30px;
   text-decoration:none;
   text-shadow: 0 1px 1px #e7e7e7;
   text-align:center;
   text-transform:capitalize;
+
 }
 nav.control-window {
   position:absolute;

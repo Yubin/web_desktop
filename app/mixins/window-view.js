@@ -1,8 +1,9 @@
 import Ember from 'ember';
 
 export default Ember.Mixin.create({
-  classNames: ['window', 'share',  'windows-vis'],
-
+  classNames: ['window', 'windows-vis'],
+  classNameBindings: ['active'],
+  active: true,
   width: 800,
   height: 500,
 
@@ -20,6 +21,10 @@ export default Ember.Mixin.create({
 
   mouseDown: function () {
     this.changeZindex();
+  },
+
+  click: function () {
+    this.get('parentView').send('activateWindow', this.get('content'));
   },
 
   didInsertElement: function () {
@@ -46,15 +51,15 @@ export default Ember.Mixin.create({
 
     }.bind(this));
 
-    this.$('.header').on('mouseup', function () {
+    this.$('.header').on('mouseup', function () {console.log('mixin -  mouseup');
       this.$(document).off('mousemove');
     }.bind(this));
 
   },
 
   willDestroyElement: function () {
-    this.$('.header').on('mousedown');
-    this.$('.header').on('mouseup');
+    this.$('.header').off('mousedown');
+    this.$('.header').off('mouseup');
   }
 
 });

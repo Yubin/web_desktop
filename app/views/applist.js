@@ -90,7 +90,7 @@ export default Ember.View.extend({
     //this.on('mouseLeave', this.onMouseRelease);
   },
 
-  onMouseMove: function (event) {
+  onMouseMove: function (event) {console.log('onMouseMove');
     // this.set('parentView.appTouch', true);
     this.set('controller.appTouch', true);
 
