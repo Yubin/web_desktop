@@ -524,36 +524,35 @@ h1.title-mac {
   width: 100%;
   height: 100%;
   z-index: 10;
-  background-color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(255, 255, 255, 0.6);
   /*dim the background*/
 }
 .search-bar .overlay .modal {
-  width: 400px;
-  position: fixed;
-  top: 12%;
-  left: 50%;
-  margin-left: -200px;
-  background-color: black;
-  border-radius: 25px;
-  text-align: center;
-  z-index: 11;
-  /* 1px higher than the overlay layer */
-  -webkit-border-radius: 20px;
-  -moz-border-radius: 20px;
-  border-radius: 20px;
+width: 560px;
+position: fixed;
+top: 9%;
+left: 50%;
+margin-left: -280px;
+background-color: black;
+border-radius: 25px;
+text-align: center;
+z-index: 11;
+-webkit-border-radius: 20px;
+-moz-border-radius: 20px;
+border-radius: 15px;
 }
 .search-bar .overlay .modal input {
-  color: white;
-  background-color: black;
-  width: 375px;
-  font-size: 32px;
-  border: 2px solid white;
-  margin: 0;
-  padding: 5px 10px 5px 10px;
-  outline: 0;
-  -webkit-border-radius: 20px;
-  -moz-border-radius: 20px;
-  border-radius: 20px;
+color: white;
+background-color: rgb(79, 79, 79);
+width: 540px;
+font-size: 24px;
+border: 2px solid white;
+margin: 0;
+padding: 5px 10px 5px 10px;
+outline: 0;
+-webkit-border-radius: 20px;
+-moz-border-radius: 20px;
+border-radius: 15px;
 }
 .search-bar .overlay .modal .container {
   overflow: hidden;
