@@ -649,9 +649,9 @@ div.applist {
   width: 60px;
 }
 .search-corner-logo {
-  position: fixed;
-  right: 20px;
-  bottom: 20px;
+position: relative;
+left: -144px;
+bottom: -4px;
 }
 .search-corner-logo img {
   width: 30px;
