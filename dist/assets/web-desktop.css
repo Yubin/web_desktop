@@ -648,3 +648,11 @@ div.applist {
 .right-corner-logo img {
   width: 60px;
 }
+.search-corner-logo {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+}
+.search-corner-logo img {
+  width: 30px;
+}
