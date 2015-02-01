@@ -3,15 +3,15 @@ define('web-desktop/app', ['exports', 'ember', 'ember/resolver', 'ember/load-ini
   'use strict';
 
   Ember['default'].MODEL_FACTORY_INJECTIONS = true;
-
+  
   var App = Ember['default'].Application.extend({
     modulePrefix: config['default'].modulePrefix,
     podModulePrefix: config['default'].podModulePrefix,
     Resolver: Resolver['default']
   });
-
+  
   loadInitializers['default'](App, config['default'].modulePrefix);
-
+  
   exports['default'] = App;
 
 });
@@ -27,7 +27,7 @@ define('web-desktop/components/star-rating', ['exports', 'ember'], function (exp
       var array = new Array(rating);
       return array;
     }.property('content')
-
+  
   });
 
 });
@@ -36,11 +36,11 @@ define('web-desktop/components/trash-can', ['exports', 'ember', '../mixins/drag-
   'use strict';
 
   exports['default'] = Ember['default'].Component.extend(DragDrop['default'].Droppable,{
-
+  
     drop: function () {
       console.log('drop');
     }
-
+  
   });
 
 });
@@ -59,23 +59,23 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
 
   var get = Ember['default'].get;
   var set = Ember['default'].set;
-
+  
   exports['default'] = Ember['default'].Controller.extend({
     // itemController: 'applist-item',
     screenNum: 3,
     screens: [{ id: 0, hasApp: false},
     { id: 1, hasApp: false},
     { id: 2, hasApp: false}],
-
+  
     appTouch: true,
-
+  
     openApps: [],
-
+  
     init: function () {
       this._super.apply(this, arguments);
       // this.setupOperator();
     },
-
+  
     // setupOperator: function () {
     //   var i = 0;
     //   for (i = 0; i <= this.get('screenNum'); i++) {
@@ -83,31 +83,31 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
     //     Ember.defineProperty(this, name, Ember.computed.filterBy('@this', 'screen', i));
     //   }
     // },
-
+  
     appScreenChange: function () {
       var apps = this.get('content');
       var screens = this.get('screens');
       screens.forEach(function (scr) {
         var index = get(scr, 'id');
         var hasApp = apps.any(function (app) {
-
+  
           return get(app, 'screen') === index;
         });
         set(scr, 'hasApp', hasApp);
       });
     }.observes('content.@each.screen'),
-
+  
     actions: {
       showTrash: function (show) {
         this.set('appTouch', show);
       },
       openApp: function (item) { console.log('openApp');
         var name = get(item, 'name');
-
+  
         var find = this.get('openApps').any(function (it) {
           return get(it, 'name') === name;
         });
-
+  
         if (!find) {
           var viewType = 'app.' + get(item, 'viewName');
           var klass = this.container.lookupFactory('view:' + viewType);
@@ -119,7 +119,7 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
           this.get('openApps').pushObject({name: name, instant: instant});
         }
       },
-
+  
       closeApp: function (item) {
         var name = get(item, 'name');
         var obj = this.get('openApps').filter(function (it) {
@@ -132,20 +132,20 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
           instant.destroy();
         }
       },
-
+  
       addApp: function () { // TBD
         console.log('addApp');
       },
-
+  
       deleteApp: function (/*item*/) { // TBD
         console.log('deleteApp');
       },
-
+  
       moveImage: function (key) {
-
+  
         console.log('moveImage' + key);
       },
-
+  
     }
   });
 
@@ -194,12 +194,12 @@ define('web-desktop/mixins/drag-n-drop-view', ['exports', 'ember'], function (ex
   'use strict';
 
   var Drag = Ember['default'].Namespace.create({});
-
+  
   Drag.cancel = function (event) {
     event.preventDefault();
     return false;
   };
-
+  
   Drag.Draggable = Ember['default'].Mixin.create({
     attributeBindings: 'draggable',
     draggable: 'true',
@@ -208,7 +208,7 @@ define('web-desktop/mixins/drag-n-drop-view', ['exports', 'ember'], function (ex
       evt.originalEvent.dataTransfer.setData('text/plain', 'DRAGGABLE');
     }
   });
-
+  
   Drag.Droppable = Ember['default'].Mixin.create({
     placeholder: null,
     dragEnter: Drag.cancel,
@@ -218,7 +218,7 @@ define('web-desktop/mixins/drag-n-drop-view', ['exports', 'ember'], function (ex
       return false;
     }
   });
-
+  
   exports['default'] = Drag;
 
 });
@@ -228,10 +228,10 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
 
   exports['default'] = Ember['default'].Mixin.create({
     classNames: ['window', 'share',  'windows-vis'],
-
+  
     width: 800,
     height: 500,
-
+  
     changeZindex: function () {
       var zindex = -1;
       Ember['default'].$('.window').each(function () {
@@ -240,26 +240,26 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
           zindex = z;
         }
       });
-
+  
       this.$().css('z-index', zindex + 1);
     },
-
+  
     mouseDown: function () {
       this.changeZindex();
     },
-
+  
     didInsertElement: function () {
       this.changeZindex();
       this.$().css({
         width: this.get('width'),
         height: this.get('height')
       });
-
+  
       this.$('.header').on('mousedown', function (event) {
         var originEvt = event.originalEvent;
         var offsetX = originEvt.offsetX ? originEvt.offsetX : originEvt.layerX;
         var offsetY = originEvt.offsetY ? originEvt.offsetY : originEvt.layerY;
-
+  
         this.$(document).on('mousemove', function (event) {
           var originEvt = event.originalEvent;
           var x = originEvt.clientX - offsetX;
@@ -269,20 +269,20 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
             'left': x
           });
         }.bind(this));
-
+  
       }.bind(this));
-
+  
       this.$('.header').on('mouseup', function () {
         this.$(document).off('mousemove');
       }.bind(this));
-
+  
     },
-
+  
     willDestroyElement: function () {
       this.$('.header').on('mousedown');
       this.$('.header').on('mouseup');
     }
-
+  
   });
 
 });
@@ -293,15 +293,15 @@ define('web-desktop/router', ['exports', 'ember', './config/environment'], funct
   var Router = Ember['default'].Router.extend({
     location: config['default'].locationType
   });
-
+  
   Router.map(function() {
     this.route('application', { path: '/' });
   });
-
+  
   Router.reopen({
     rootURL: '/'
   });
-
+  
   exports['default'] = Router;
 
 });
@@ -311,7 +311,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
 
   var get = Ember['default'].get;
   exports['default'] = Ember['default'].Route.extend({
-
+  
     model: function () {
       return {
         applist:[
@@ -371,11 +371,11 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
         ]
       };
     },
-
+  
     setupController: function (controller, model) {
       this.controllerFor('applist').set('model', get(model, 'applist'));
     },
-
+  
     renderTemplate: function() {
       this.render();
       this.render('header', {
@@ -404,7 +404,7 @@ define('web-desktop/templates/app/deliver-bid', ['exports', 'ember'], function (
     data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
       'src': ("view.logoUrl")
     },hashTypes:{'src': "ID"},hashContexts:{'src': depth0},contexts:[],types:[],data:data})));
-    data.buffer.push(" width=\"100%\" height=\"100%\">\n<img src=\"img/spinnerSmall.gif\" class='spinner' style=\"top:270px; left:37px\">\n");
+    data.buffer.push(" width=\"100%\" height=\"100%\">\r\n<img src=\"img/spinnerSmall.gif\" class='spinner' style=\"top:270px; left:37px\">\r\n");
     return buffer;
     
   });
@@ -424,7 +424,7 @@ define('web-desktop/templates/app/einventory', ['exports', 'ember'], function (e
     data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
       'src': ("view.logoUrl")
     },hashTypes:{'src': "ID"},hashContexts:{'src': depth0},contexts:[],types:[],data:data})));
-    data.buffer.push(" width=\"100%\" height=\"100%\">\n<img src=\"img/spinnerSmall.gif\" class='spinner' style=\"top:270px; left:37px\">\n");
+    data.buffer.push(" width=\"100%\" height=\"100%\">\r\n<img src=\"img/spinnerSmall.gif\" class='spinner' style=\"top:270px; left:37px\">\r\n");
     return buffer;
     
   });
@@ -444,7 +444,7 @@ define('web-desktop/templates/app/vendor-match', ['exports', 'ember'], function 
     data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
       'src': ("view.logoUrl")
     },hashTypes:{'src': "ID"},hashContexts:{'src': depth0},contexts:[],types:[],data:data})));
-    data.buffer.push(" width=\"100%\" height=\"100%\">\n<img src=\"img/spinnerSmall.gif\" class='spinner' style=\"top:270px; left:37px\">\n");
+    data.buffer.push(" width=\"100%\" height=\"100%\">\r\n<img src=\"img/spinnerSmall.gif\" class='spinner' style=\"top:270px; left:37px\">\r\n");
     return buffer;
     
   });
@@ -460,9 +460,9 @@ define('web-desktop/templates/appicon', ['exports', 'ember'], function (exports,
     var buffer = '', escapeExpression=this.escapeExpression;
 
 
-    data.buffer.push("<div class=\"effect\"></div>\n<div class=\"app-img\">\n  <span>");
+    data.buffer.push("<div class=\"effect\"></div>\r\n<div class=\"app-img\">\r\n  <span>");
     data.buffer.push(escapeExpression(helpers.unbound.call(depth0, "view.content.name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data})));
-    data.buffer.push("</span>\n</div>\n");
+    data.buffer.push("</span>\r\n</div>\r\n");
     return buffer;
     
   });
@@ -478,13 +478,13 @@ define('web-desktop/templates/application', ['exports', 'ember'], function (expo
     var buffer = '', helper, options, helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
 
 
-    data.buffer.push("<!-- DESKTOP -->\n\n\n");
+    data.buffer.push("<!-- DESKTOP -->\r\n\r\n\r\n");
     data.buffer.push(escapeExpression((helper = helpers.outlet || (depth0 && depth0.outlet),options={hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data},helper ? helper.call(depth0, "header", options) : helperMissing.call(depth0, "outlet", "header", options))));
-    data.buffer.push("\n\n");
+    data.buffer.push("\r\n\r\n");
     data.buffer.push(escapeExpression((helper = helpers.render || (depth0 && depth0.render),options={hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data},helper ? helper.call(depth0, "searchBar", options) : helperMissing.call(depth0, "render", "searchBar", options))));
-    data.buffer.push("\n\n");
+    data.buffer.push("\r\n\r\n");
     data.buffer.push(escapeExpression((helper = helpers.outlet || (depth0 && depth0.outlet),options={hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data},helper ? helper.call(depth0, "applist", options) : helperMissing.call(depth0, "outlet", "applist", options))));
-    data.buffer.push("\n\n<div class=\"right-corner-logo\">\n  <img src=\"assets/img/GAUSIAN_logo.png\" >\n</div>\n<div class=\"search-box-logo\">\n  <img src=\"assets/img/GAUSIAN_logo.png\" >\n</div>\n\n<svg version=\"1.1\" xmlns='http://www.w3.org/2000/svg'>\n  <filter id='blur'>\n    <feGaussianBlur stdDeviation='6' />\n  </filter>\n</svg>\n");
+    data.buffer.push("\r\n\r\n<div class=\"top-corner-logo\">\r\n  <img src=\"assets/img/GAUSIAN_logo.png\" >\r\n</div>\r\n<div class=\"search-box-logo\">\r\n  <img src=\"assets/img/GAUSIAN_logo.png\" >\r\n</div>\r\n\r\n<svg version=\"1.1\" xmlns='http://www.w3.org/2000/svg'>\r\n  <filter id='blur'>\r\n    <feGaussianBlur stdDeviation='6' />\r\n  </filter>\r\n</svg>\r\n");
     return buffer;
     
   });
@@ -502,33 +502,33 @@ define('web-desktop/templates/applist', ['exports', 'ember'], function (exports,
   function program1(depth0,data) {
     
     var buffer = '';
-    data.buffer.push("\n  ");
+    data.buffer.push("\r\n  ");
     data.buffer.push(escapeExpression(helpers.view.call(depth0, "appscreen", {hash:{
       'index': ("id"),
       'hasApp': ("hasApp")
     },hashTypes:{'index': "ID",'hasApp': "ID"},hashContexts:{'index': depth0,'hasApp': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push("\n  ");
+    data.buffer.push("\r\n  ");
     return buffer;
     }
 
   function program3(depth0,data) {
     
     var buffer = '';
-    data.buffer.push("\n    ");
+    data.buffer.push("\r\n    ");
     data.buffer.push(escapeExpression(helpers.view.call(depth0, "appicon", {hash:{
       'content': ("app")
     },hashTypes:{'content': "ID"},hashContexts:{'content': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push("\n    ");
+    data.buffer.push("\r\n    ");
     return buffer;
     }
 
-    data.buffer.push("\n\n\n  ");
+    data.buffer.push("\r\n\r\n\r\n  ");
     stack1 = helpers.each.call(depth0, "view.controller.screens", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\n\n  <ul>\n    ");
+    data.buffer.push("\r\n\r\n  <ul>\r\n    ");
     stack1 = helpers.each.call(depth0, "app", "in", "view.controller.model", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(3, program3, data),contexts:[depth0,depth0,depth0],types:["ID","ID","ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\n  </ul>\n\n");
+    data.buffer.push("\r\n  </ul>\r\n\r\n");
     return buffer;
     
   });
@@ -544,7 +544,7 @@ define('web-desktop/templates/appscreen', ['exports', 'ember'], function (export
     
 
 
-    data.buffer.push("\n");
+    data.buffer.push("\r\n");
     
   });
 
@@ -561,12 +561,12 @@ define('web-desktop/templates/components/star-rating', ['exports', 'ember'], fun
   function program1(depth0,data) {
     
     
-    data.buffer.push("\n  <i class=\"fa fa-star\"></i>\n");
+    data.buffer.push("\r\n  <i class=\"fa fa-star\"></i>\r\n");
     }
 
     stack1 = helpers.each.call(depth0, "stars", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\n");
+    data.buffer.push("\r\n");
     return buffer;
     
   });
@@ -582,7 +582,7 @@ define('web-desktop/templates/components/trash-can', ['exports', 'ember'], funct
     
 
 
-    data.buffer.push("\n<div class=\"trash\">\n  <i class=\"fa fa-trash-o fa-4x\"></i>\n</div>\n");
+    data.buffer.push("\r\n<div class=\"trash\">\r\n  <i class=\"fa fa-trash-o fa-4x\"></i>\r\n</div>\r\n");
     
   });
 
@@ -597,7 +597,7 @@ define('web-desktop/templates/header', ['exports', 'ember'], function (exports, 
     
 
 
-    data.buffer.push("<ul class=\"nav\">\n  <li class=\"logo\">\n    <span>GAUSIAN Desktop</h3>\n  </li>\n  <li class=\"dock\">\n\n  </li>\n  <li class=\"login\">\n    <span>\n      <a>Sign Up</a> / <a>Log In</a>\n    </span>\n  </li>\n</ul>\n");
+    data.buffer.push("<ul class=\"nav\">\r\n  <li class=\"logo\">\r\n    <span>GAUSIAN Enterprise Desktop</h3>\r\n  </li>\r\n  <li class=\"dock\">\r\n\r\n  </li>\r\n  <li class=\"login\">\r\n    <span>\r\n      <a>Sign Up</a> / <a>Log In</a>\r\n    </span>\r\n  </li>\r\n</ul>\r\n");
     
   });
 
@@ -616,7 +616,7 @@ define('web-desktop/templates/scroll-bar-handler', ['exports', 'ember'], functio
     data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
       'style': ("view.style")
     },hashTypes:{'style': "STRING"},hashContexts:{'style': depth0},contexts:[],types:[],data:data})));
-    data.buffer.push(">\n  <div class=\"jspDragTop\"></div>\n  <div class=\"jspDragBottom\"></div>\n</div>\n");
+    data.buffer.push(">\r\n  <div class=\"jspDragTop\"></div>\r\n  <div class=\"jspDragBottom\"></div>\r\n</div>\r\n");
     return buffer;
     
   });
@@ -632,16 +632,16 @@ define('web-desktop/templates/scroll-bar', ['exports', 'ember'], function (expor
     var buffer = '', escapeExpression=this.escapeExpression;
 
 
-    data.buffer.push("<div class=\"jspCap jspCapTop\"></div>\n<div class=\"jspTrack\" ");
+    data.buffer.push("<div class=\"jspCap jspCapTop\"></div>\r\n<div class=\"jspTrack\" ");
     data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
       'style': ("view.trackStyle")
     },hashTypes:{'style': "STRING"},hashContexts:{'style': depth0},contexts:[],types:[],data:data})));
-    data.buffer.push(">\n  ");
+    data.buffer.push(">\r\n  ");
     data.buffer.push(escapeExpression(helpers.view.call(depth0, "scroll-bar-handler", {hash:{
       'len': ("view.handlerLen"),
       'top': ("view.handlerTop")
     },hashTypes:{'len': "ID",'top': "ID"},hashContexts:{'len': depth0,'top': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push("\n</div>\n<div class=\"jspCap jspCapBottom\"></div>\n");
+    data.buffer.push("\r\n</div>\r\n<div class=\"jspCap jspCapBottom\"></div>\r\n");
     return buffer;
     
   });
@@ -657,28 +657,28 @@ define('web-desktop/templates/search-bar', ['exports', 'ember'], function (expor
     var buffer = '', helper, options, helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
 
 
-    data.buffer.push("<div class=\"search\">\n  <div class=\"right-corner-logo\">\n  	<img src=\"assets/img/GAUSIAN_logo.png\">\n  </div>\n  <div class=\"search-icon\"></div>\n  ");
+    data.buffer.push("<div class=\"search\">\r\n  <div class=\"top-corner-logo\">\r\n  	<img src=\"assets/img/GAUSIAN_logo.png\">\r\n  </div>\r\n  <div class=\"search-icon\"></div>\r\n  ");
     data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
       'type': ("text"),
-      'placeholder': ("Search"),
+      'placeholder': ("Search APPs"),
       'disabled': (true)
     },hashTypes:{'type': "STRING",'placeholder': "STRING",'disabled': "BOOLEAN"},hashContexts:{'type': depth0,'placeholder': depth0,'disabled': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
-    data.buffer.push("\n</div>\n\n<div class=\"overlay\">\n  <div class=\"modal\">\n    ");
+    data.buffer.push("\r\n</div>\r\n\r\n<div class=\"overlay\">\r\n  <div class=\"modal\">\r\n    ");
     data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
       'type': ("text"),
       'value': ("view.query")
     },hashTypes:{'type': "STRING",'value': "ID"},hashContexts:{'type': depth0,'value': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
-    data.buffer.push("\n    <div class=\"container\">\n    ");
+    data.buffer.push("\r\n    <div class=\"container\">\r\n    ");
     data.buffer.push(escapeExpression(helpers.view.call(depth0, "search-results", {hash:{
       'content': ("view.searchContent")
     },hashTypes:{'content': "ID"},hashContexts:{'content': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push("\n\n    ");
+    data.buffer.push("\r\n\r\n    ");
     data.buffer.push(escapeExpression(helpers.view.call(depth0, "scroll-bar", {hash:{
       'trackLen': ("view.trackLen"),
       'handlerLen': ("view.handlerLen"),
       'handlerTop': ("view.handlerTop")
     },hashTypes:{'trackLen': "ID",'handlerLen': "ID",'handlerTop': "ID"},hashContexts:{'trackLen': depth0,'handlerLen': depth0,'handlerTop': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push("\n    </div>\n  </div>\n</div>\n");
+    data.buffer.push("\r\n    </div>\r\n  </div>\r\n</div>\r\n");
     return buffer;
     
   });
@@ -694,34 +694,34 @@ define('web-desktop/templates/search-results-item', ['exports', 'ember'], functi
     var buffer = '', stack1, helper, options, escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing;
 
 
-    data.buffer.push("<div class=\"icon\">\n  <img ");
+    data.buffer.push("<div class=\"icon\">\r\n  <img ");
     data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
       'src': ("view.content.icon")
     },hashTypes:{'src': "ID"},hashContexts:{'src': depth0},contexts:[],types:[],data:data})));
-    data.buffer.push(" />\n</div>\n<div class=\"detail\">\n  <a class=\"name\">");
+    data.buffer.push(" />\r\n</div>\r\n<div class=\"detail\">\r\n  <a class=\"name\">");
     stack1 = helpers._triageMustache.call(depth0, "view.content.name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
     data.buffer.push("</a> ");
     data.buffer.push(escapeExpression((helper = helpers['star-rating'] || (depth0 && depth0['star-rating']),options={hash:{
       'content': ("view.content.rating")
     },hashTypes:{'content': "ID"},hashContexts:{'content': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "star-rating", options))));
-    data.buffer.push("\n  <p>");
+    data.buffer.push("\r\n  <p>");
     stack1 = helpers._triageMustache.call(depth0, "view.content.category", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("</p>\n  <p>");
+    data.buffer.push("</p>\r\n  <p>");
     stack1 = helpers._triageMustache.call(depth0, "view.content.freeDay", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
     data.buffer.push(" days free trail, $");
     stack1 = helpers._triageMustache.call(depth0, "view.content.price", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("/month</p>\n</div>\n<div ");
+    data.buffer.push("/month</p>\r\n</div>\r\n<div ");
     data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
       'class': (":action content.installed:open:get")
     },hashTypes:{'class': "STRING"},hashContexts:{'class': depth0},contexts:[],types:[],data:data})));
-    data.buffer.push(">\n  ");
+    data.buffer.push(">\r\n  ");
     stack1 = helpers._triageMustache.call(depth0, "view.label", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\n<div>\n");
+    data.buffer.push("\r\n<div>\r\n");
     return buffer;
     
   });
@@ -737,21 +737,21 @@ define('web-desktop/templates/window', ['exports', 'ember'], function (exports, 
     var buffer = '', stack1, escapeExpression=this.escapeExpression;
 
 
-    data.buffer.push("<div class=\"header\">\n<h1 class=\"titleInside\">");
+    data.buffer.push("<div class=\"header\">\r\n<h1 class=\"titleInside\">");
     stack1 = helpers._triageMustache.call(depth0, "view.content.name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("</h1>\n</div>\n<nav class=\"control-window\">\n  <a href=\"#\" class=\"minimize\" ");
+    data.buffer.push("</h1>\r\n</div>\r\n<nav class=\"control-window\">\r\n  <a href=\"#\" class=\"minimize\" ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "minimizeApp", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push(">&nbsp;</a>\n  <a href=\"#\" class=\"maximize\" ");
+    data.buffer.push(">&nbsp;</a>\r\n  <a href=\"#\" class=\"maximize\" ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "maximizeApp", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push(">maximize</a>\n  <a href=\"#\" class=\"close\" ");
+    data.buffer.push(">maximize</a>\r\n  <a href=\"#\" class=\"close\" ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "closeApp", "view.content", {hash:{
       'target': ("view.parentView")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0,depth0],types:["STRING","ID"],data:data})));
-    data.buffer.push(">close</a>\n</nav>\n<div class=\"container\">\n  ");
+    data.buffer.push(">close</a>\r\n</nav>\r\n<div class=\"container\">\r\n  ");
     stack1 = helpers._triageMustache.call(depth0, "yield", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\n</div>\n");
+    data.buffer.push("\r\n</div>\r\n");
     return buffer;
     
   });
@@ -762,12 +762,12 @@ define('web-desktop/tests/helpers/resolver', ['exports', 'ember/resolver', '../.
   'use strict';
 
   var resolver = Resolver['default'].create();
-
+  
   resolver.namespace = {
     modulePrefix: config['default'].modulePrefix,
     podModulePrefix: config['default'].podModulePrefix
   };
-
+  
   exports['default'] = resolver;
 
 });
@@ -777,22 +777,22 @@ define('web-desktop/tests/helpers/start-app', ['exports', 'ember', '../../app', 
 
   function startApp(attrs) {
     var App;
-
+  
     var attributes = Ember['default'].merge({}, config['default'].APP);
     attributes = Ember['default'].merge(attributes, attrs); // use defaults, but you can override;
-
+  
     Router['default'].reopen({
       location: 'none'
     });
-
+  
     Ember['default'].run(function() {
       App = Application['default'].create(attributes);
       App.setupForTesting();
       App.injectTestHelpers();
     });
-
+  
     App.reset(); // this shouldn't be needed, i want to be able to "start an app at a specific URL"
-
+  
     return App;
   }
   exports['default'] = startApp;
@@ -803,9 +803,9 @@ define('web-desktop/tests/test-helper', ['./helpers/resolver', 'ember-qunit'], f
   'use strict';
 
   ember_qunit.setResolver(resolver['default']);
-
+  
   document.write('<div id="ember-testing-container"><div id="ember-testing"></div></div>');
-
+  
   QUnit.config.urlConfig.push({ id: 'nocontainer', label: 'Hide container'});
   var containerVisibility = QUnit.urlParams.nocontainer ? 'hidden' : 'visible';
   document.getElementById('ember-testing-container').style.visibility = containerVisibility;
@@ -819,7 +819,7 @@ define('web-desktop/utils/keys', ['exports'], function (exports) {
   * Created by Jordan Hawker (hawkerj)
   * Date: 9/9/2014
   */
-
+  
   var keyUtils = {
     KEYS: {
       BACKSPACE: 8,
@@ -923,16 +923,16 @@ define('web-desktop/utils/keys', ['exports'], function (exports) {
       CLOSE_BRACKET: 221,
       SINGLE_QUOTE: 222
     },
-
+  
     isNumberKey: function (keyCode) {
       return (keyCode > 47 && keyCode < 58); // Number keys
     }
   };
-
+  
   if (Object.freeze) {
     Object.freeze(keyUtils.KEYS);
   }
-
+  
   exports['default'] = keyUtils;
 
 });
@@ -941,28 +941,28 @@ define('web-desktop/views/app/deliver-bid', ['exports', 'ember', '../../mixins/w
   'use strict';
 
   exports['default'] = Ember['default'].View.extend(WindowMixin['default'], {
-
+  
     layoutName: 'window',
     templateName: 'app/deliver-bid',
     finalIndex: 5,
-
+  
     didInsertElement: function () {
       this._super();
       this.set('index', 1);
       this.$('img:first').on('mousedown', function () {
         var index = this.get('index');
-
+  
         index = index === this.get('finalIndex') ? 1 : index + 1;
-
+  
         this.set('index', index);
       }.bind(this));
     },
-
+  
     onImageChange: function () {
       console.log('onImageChange');
-
+  
       var index = this.get('index');
-
+  
       this.set('logoUrl', 'img/pictures_for_apps/DeliverBid_%@.jpg'.fmt(index));
       if (index === 1 || index === 4) {
         this.$('img.spinner').show();
@@ -971,9 +971,9 @@ define('web-desktop/views/app/deliver-bid', ['exports', 'ember', '../../mixins/w
           this.$('img.spinner').hide();
         }.bind(this), 600);
       }
-
+  
     }.observes('index')
-
+  
   });
 
 });
@@ -982,28 +982,28 @@ define('web-desktop/views/app/einventory', ['exports', 'ember', '../../mixins/wi
   'use strict';
 
   exports['default'] = Ember['default'].View.extend(WindowMixin['default'], {
-
+  
     layoutName: 'window',
     templateName: 'app/einventory',
     finalIndex: 3,
-
+  
     didInsertElement: function () {
       this._super();
       this.set('index', 1);
       this.$('img:first').on('mousedown', function () {
         var index = this.get('index');
-
+  
         index = index === this.get('finalIndex') ? 1 : index + 1;
-
+  
         this.set('index', index);
       }.bind(this));
     },
-
+  
     onImageChange: function () {
       console.log('onImageChange');
-
+  
       var index = this.get('index');
-
+  
       this.set('logoUrl', 'img/pictures_for_apps/VenderMatch_%@.jpg'.fmt(index));
       // if (index < this.get('finalIndex')) {
       //   this.$('img.spinner').show();
@@ -1012,11 +1012,11 @@ define('web-desktop/views/app/einventory', ['exports', 'ember', '../../mixins/wi
       //     this.$('img.spinner').hide();
       //   }.bind(this), 600);
       // }
-
-
-
+  
+  
+  
     }.observes('index')
-
+  
   });
 
 });
@@ -1025,27 +1025,27 @@ define('web-desktop/views/app/gausian-store', ['exports', 'ember', '../../mixins
   'use strict';
 
   exports['default'] = Ember['default'].View.extend(WindowMixin['default'], {
-
+  
     layoutName: 'window',
     templateName: 'app/deliver-bid',
     finalIndex: 4,
-
+  
     didInsertElement: function () {
       this._super();
       this.set('index', 1);
       this.$('img:first').on('mousedown', function () {
         var index = this.get('index');
-
+  
         index = index === this.get('finalIndex') ? 1 : index + 1;
-
+  
         this.set('index', index);
       }.bind(this));
     },
-
+  
     onImageChange: function () {
-
+  
       var index = this.get('index');
-
+  
       this.set('logoUrl', 'img/pictures_for_apps/Gausian_Store_%@.jpg'.fmt(index));
       // if (index < this.get('finalIndex')) {
       //   this.$('img.spinner').show();
@@ -1054,11 +1054,11 @@ define('web-desktop/views/app/gausian-store', ['exports', 'ember', '../../mixins
       //     this.$('img.spinner').hide();
       //   }.bind(this), 600);
       // }
-
-
-
+  
+  
+  
     }.observes('index')
-
+  
   });
 
 });
@@ -1067,27 +1067,27 @@ define('web-desktop/views/app/vendor-match', ['exports', 'ember', '../../mixins/
   'use strict';
 
   exports['default'] = Ember['default'].View.extend(WindowMixin['default'], {
-
+  
     layoutName: 'window',
     templateName: 'app/deliver-bid',
     finalIndex: 3,
-
+  
     didInsertElement: function () {
       this._super();
       this.set('index', 1);
       this.$('img:first').on('mousedown', function () {
         var index = this.get('index');
-
+  
         index = index === this.get('finalIndex') ? 1 : index + 1;
-
+  
         this.set('index', index);
       }.bind(this));
     },
-
+  
     onImageChange: function () {
-
+  
       var index = this.get('index');
-
+  
       this.set('logoUrl', 'img/pictures_for_apps/Einventory_%@.jpg'.fmt(index));
       // if (index < this.get('finalIndex')) {
       //   this.$('img.spinner').show();
@@ -1096,11 +1096,11 @@ define('web-desktop/views/app/vendor-match', ['exports', 'ember', '../../mixins/
       //     this.$('img.spinner').hide();
       //   }.bind(this), 600);
       // }
-
-
-
+  
+  
+  
     }.observes('index')
-
+  
   });
 
 });
@@ -1113,52 +1113,52 @@ define('web-desktop/views/appicon', ['exports', 'ember'], function (exports, Emb
     templateName: 'appicon',
     attributeBindings : [ 'draggable' ],
     draggable         : 'true',
-
-
+  
+  
     row: function () {
       return this.get('content.row');
     }.property('content.row'),
-
+  
     col: function () {
       return this.get('content.col');
     }.property('content.col'),
-
+  
     scr: function () {
       return this.get('content.screen');
     }.property('content.screen'),
-
+  
     iconWidth: function () {
       return this.get('parentView.iconWidth');
     }.property('parentView.iconWidth'),
-
-
+  
+  
     parentWidth: function () {
       return this.get('parentView.screenWidth');
     }.property('parentView.screenWidth'),
-
+  
     parentHeight: function () {
       return this.get('parentView.screenHeight');
     }.property('parentView.screenHeight'),
-
+  
     onIconSizeChange: function () {
       this.handleSize();
       this.position();
     }.observes('iconWidth', 'parentWidth','parentHeight'),
-
+  
     didInsertElement: function () {
       this.$().draggable();
       this.handleSize();
       this.position();
     },
-
+  
     handleSize: function () {
       var iconWidth = this.get('iconWidth');
-
+  
       this.$('span').css({
         'top': iconWidth + 5 * iconWidth / 60,
         'font-size': 12 + Math.round(iconWidth / 60)
       });
-
+  
       this.$().css({
         'height': iconWidth,
         'width':  iconWidth,
@@ -1170,8 +1170,8 @@ define('web-desktop/views/appicon', ['exports', 'ember'], function (exports, Emb
         "background-size": "100%"
       });
     },
-
-
+  
+  
     position: function (row, col, scr, duration) {
       row = !Ember['default'].isEmpty(row) ? row : this.get('row');
       col = !Ember['default'].isEmpty(col) ? col : this.get('col');
@@ -1180,14 +1180,14 @@ define('web-desktop/views/appicon', ['exports', 'ember'], function (exports, Emb
       var iconHeight = this.get('parentView.iconHeight');
       var offsetHeight = this.get('parentView.offsetHeight');
       var offsetWidth  = this.get('parentView.offsetWidth');
-
+  
       var screnWidth = this.get('parentView.screenWidth');
       var widthOffset = this.get('parentView.widthOffset');
       var screenLeft = scr * (screnWidth + widthOffset + 10) + widthOffset;
-
+  
       var top  = (iconHeight + offsetHeight) * row + offsetHeight;
       var left = (iconWidth + offsetWidth) * col + offsetWidth + screenLeft;
-
+  
       if (duration) {
         this.$().animate({
           'top': top,
@@ -1205,21 +1205,21 @@ define('web-desktop/views/appicon', ['exports', 'ember'], function (exports, Emb
         'content.screen': scr
       });
     },
-
+  
     mouseDown: function (event) {
       var originEvt = event.originalEvent;
       var offsetX = originEvt.offsetX ? originEvt.offsetX : originEvt.layerX;
       var offsetY = originEvt.offsetY ? originEvt.offsetY : originEvt.layerY;
-
+  
       this.$().addClass('dragging');
       this.get('parentView').onMouseDown(this, offsetX, offsetY);
     },
-
+  
     mouseUp: function (evt) {
       this.$().removeClass('dragging');
       return true;
     }
-
+  
   });
 
 });
@@ -1238,17 +1238,17 @@ define('web-desktop/views/applist', ['exports', 'ember', '../utils/keys'], funct
 
   var KEYS = keyUtils['default'].KEYS;
   var get = Ember['default'].get;
-
+  
   exports['default'] = Ember['default'].View.extend({
     templateName: 'applist',
     classNames: ['applist'],
-
+  
     height: 600,
     width: 400,
-
+  
     left: 89,
     top: 103,
-
+  
     init: function () {
       this._super();
       this.handleSize();
@@ -1256,29 +1256,29 @@ define('web-desktop/views/applist', ['exports', 'ember', '../utils/keys'], funct
         this.handleSize();
       }.bind(this));
     },
-
+  
     didInsertElement: function () {
       this.handleSize();
     },
-
+  
     handleSize: function () {
-
+  
       var minWidthIcon = 48;
       var minHeightWin = 600;
       var minWidthWin = 800;
       var winWidth  = Math.max(Ember['default'].$(window).width(), minWidthWin);
       var winHeight = Math.max(Ember['default'].$(window).height()*0.85, minHeightWin);
-
+  
       var height = (winHeight) * 0.9;
       var width = winWidth / 3 * 0.8 ;
       var widthOffset = (winWidth - 3 * (width + 10)) / 4;
-
+  
       var iconWidth = Math.max(width/4 * 0.6, minWidthIcon);
       var iconHeight = iconWidth * 4 / 3;
-
+  
       var offsetWidth  = (width - iconWidth * 4) / 5;
       var offsetHeight = (height - iconHeight * 5) / 6;
-
+  
       this.setProperties({
         screenWidth:  width,
         screenHeight: height,
@@ -1290,45 +1290,45 @@ define('web-desktop/views/applist', ['exports', 'ember', '../utils/keys'], funct
         offsetWidth:  offsetWidth
       });
     },
-
+  
     getScreenRowCol: function (left, top) {
       var offsetWidth = this.get('offsetWidth');
       var offsetHeight = this.get('offsetHeight');
       var screenWidth = this.get('screenWidth');
       var widthOffset = this.get('widthOffset');
       var screenLeft = screenWidth + widthOffset + 10;
-
+  
       var newScr = 0;
       for (var i = 0 ; i < 3; i++) {
         if (left >= screenLeft * i + widthOffset && left < screenLeft * (i + 1) + widthOffset) {
           newScr = i;
         }
       }
-
+  
       var newCol = Math.round((left - offsetWidth/2 - newScr * screenLeft - widthOffset) * 4 / screenWidth);
       var newRow = Math.round((top - offsetHeight/2) * 5 / this.get('screenHeight'));
-
+  
       newCol = newCol < 0 ? 0: newCol;
       newCol = newCol > 3 ? 3: newCol;
       return {row: newRow, col: newCol, scr: newScr};
     },
-
+  
     onMouseDown: function (app, offsetX, offsetY) { // this will be called by item
       this.setProperties({
         'activeApp': app,
         'offsetX': offsetX,
         'offsetY': offsetY
       });
-
+  
       this.$(document).on('mousemove', this.onMouseMove.bind(this));
       this.on('mouseUp', this.onMouseRelease);
       //this.on('mouseLeave', this.onMouseRelease);
     },
-
+  
     onMouseMove: function (event) {
       // this.set('parentView.appTouch', true);
       this.set('controller.appTouch', true);
-
+  
       var node = this.get('activeApp');
       var originEvt = event.originalEvent;
       var offset = node.$().parent().offset(); // TBD
@@ -1350,7 +1350,7 @@ define('web-desktop/views/applist', ['exports', 'ember', '../utils/keys'], funct
         }, rowCol);
       }
     },
-
+  
     onMouseRelease: function () {
       var node = this.get('activeApp');
       node.$().removeClass('dragging');
@@ -1358,7 +1358,7 @@ define('web-desktop/views/applist', ['exports', 'ember', '../utils/keys'], funct
       this.off('mouseUp', this.onMouseRelease);
       // this.off('mouseLeave', this.onMouseRelease);
       node.position(node.get('row'), node.get('col'), node.get('scr'), 300);
-
+  
       node.$().css({
         'z-index': 1
       });
@@ -1367,7 +1367,7 @@ define('web-desktop/views/applist', ['exports', 'ember', '../utils/keys'], funct
       }
       this.set('controller.appTouch', false);
     },
-
+  
     shuffle: function (from, to) {  // TBD add screen constrain
       console.log(JSON.stringify(from) + ' -> ' + JSON.stringify(to));
       var isSamePosition = function (pos1, pos2) {
@@ -1388,9 +1388,9 @@ define('web-desktop/views/applist', ['exports', 'ember', '../utils/keys'], funct
         }
       });
     },
-
-
-
+  
+  
+  
   });
 
 });
@@ -1399,22 +1399,22 @@ define('web-desktop/views/appscreen', ['exports', 'ember'], function (exports, E
   'use strict';
 
   var get = Ember['default'].get;
-
+  
   exports['default'] = Ember['default'].View.extend({
     // templateName: 'appscreen',
     classNames: ['appscreen', 'appscreen-set', 'dropzone'],
     classNameBindings: ['appTouch:background', 'hasApp'],
     appTouch: false,
-
+  
     hasApp: false,
-
+  
     init: function () {
       this._super();
       Ember['default'].$(window).resize(function() {
         this.handleSize();
       }.bind(this));
     },
-
+  
     handleSize: function () {
       var index = this.get('index') || 0;
       var width = this.get('parentView.screenWidth');
@@ -1427,8 +1427,8 @@ define('web-desktop/views/appscreen', ['exports', 'ember'], function (exports, E
         height: this.get('parentView.screenHeight')
       });
     }.on('didInsertElement')
-
-
+  
+  
   });
 
 });
@@ -1438,7 +1438,7 @@ define('web-desktop/views/backup', ['exports', 'ember', '../utils/keys'], functi
 
   var KEYS = keyUtils['default'].KEYS;
   var get = Ember['default'].get;
-
+  
   exports['default'] = Ember['default'].CollectionView.extend({
     // templateName: 'appscreen',
     classNames: ['appscreen', 'appscreen-set', 'dropzone'],
@@ -1448,27 +1448,27 @@ define('web-desktop/views/backup', ['exports', 'ember', '../utils/keys'], functi
     tagName: 'ul',
     height: 600,
     width: 400,
-
+  
     left: 89,
     top: 103,
-
+  
     itemViewClass: 'appicon',
-
+  
     activeApp: null,
-
+  
     init: function () {
       this._super();
       Ember['default'].$(window).resize(function() {
-
+  
         this.handleSize();
       }.bind(this));
     },
-
+  
     didInsertElement: function () {
       this.handleSize();
       Ember['default'].$(document).on('keyup.applist', this.onKeyUp.bind(this));
     },
-
+  
     onKeyUp: function (evt) {
       // key event 27 is the escape key
       if (evt.which === KEYS.LEFT_ARROW || evt.which === KEYS.RIGHT_ARROW) {
@@ -1477,9 +1477,9 @@ define('web-desktop/views/backup', ['exports', 'ember', '../utils/keys'], functi
         });
       }
     },
-
+  
     handleSize: function () {
-
+  
       var minHeightIcon = 64;
       var minWidthIcon = 48;
       var minHeightScreen = minHeightIcon * 6;
@@ -1488,13 +1488,13 @@ define('web-desktop/views/backup', ['exports', 'ember', '../utils/keys'], functi
       var minWidthWin = minWidthScreen * 4;
       var winWidth  = Math.max(Ember['default'].$(window).width(), minWidthWin);
       var winHeight = Math.max(Ember['default'].$(window).height(), minHeightWin);
-
+  
       var height = (winHeight - 60) * 0.9;
       var width = winWidth / 3 * 0.9 ;
-
+  
       var top = (winHeight - 60 - height) / 2 + 45;
       var left = (winWidth - width * 3) / 4;
-
+  
       var iconWidth = Math.max(width/4 * 0.6, minWidthIcon);
       // var node = this.$();
       // node.css({
@@ -1515,18 +1515,18 @@ define('web-desktop/views/backup', ['exports', 'ember', '../utils/keys'], functi
         iconWidth: iconWidth
       });
     },
-
-
+  
+  
     getScreenRowCol: function (left, top) { // TBD: refine accuracy
       var newCol = Math.round(left * 4 / this.get('screenWidth'));
       var newRow = Math.round(top * 5 / this.get('screenHeight'));
       return {row: newRow, col: newCol};
     },
-
+  
     onMouseMove: function (event) {
       // this.set('parentView.appTouch', true);
       this.set('controller.appTouch', true);
-
+  
       var node = this.get('activeApp');
       var originEvt = event.originalEvent;
       var offset = node.$().parent().offset(); // TBD
@@ -1544,7 +1544,7 @@ define('web-desktop/views/backup', ['exports', 'ember', '../utils/keys'], functi
         rowCol);
       }
     },
-
+  
     onMouseRelease: function () {
       var node = this.get('activeApp');
       node.$().removeClass('dragging');
@@ -1552,7 +1552,7 @@ define('web-desktop/views/backup', ['exports', 'ember', '../utils/keys'], functi
       this.off('mouseUp', this.onMouseRelease);
       // this.off('mouseLeave', this.onMouseRelease);
       node.position(node.get('row'), node.get('col'), 300);
-
+  
       node.$().css({
         'z-index': 1
       });
@@ -1561,19 +1561,19 @@ define('web-desktop/views/backup', ['exports', 'ember', '../utils/keys'], functi
       }
       this.set('controller.appTouch', false);
     },
-
+  
     onMouseDown: function (app, offsetX, offsetY) { // this will be called by item
       this.setProperties({
         'activeApp': app,
         'offsetX': offsetX,
         'offsetY': offsetY
       });
-
+  
       this.$(document).on('mousemove', this.onMouseMove.bind(this));
       this.on('mouseUp', this.onMouseRelease);
       //this.on('mouseLeave', this.onMouseRelease);
     },
-
+  
     shuffle: function (from, to) {  // TBD add screen constrain
       console.log(JSON.stringify(from) + ' -> ' + JSON.stringify(to));
       this.get('childViews').forEach(function (itemView) {
@@ -1589,8 +1589,8 @@ define('web-desktop/views/backup', ['exports', 'ember', '../utils/keys'], functi
         }
       });
     }
-
-
+  
+  
   });
 
 });
@@ -1604,7 +1604,7 @@ define('web-desktop/views/header', ['exports', 'ember'], function (exports, Embe
     width_dock_icon: 52,
     width_dock_corner: 25,
     width_sync: 66,
-
+  
     adjustSize: function () {
       var total_dock = this.get('content.dock.length');
       var offset = total_dock ? total_dock * this.get('width_dock_icon') + 2 * this.get('width_dock_corner') : 0;
@@ -1614,7 +1614,7 @@ define('web-desktop/views/header', ['exports', 'ember'], function (exports, Embe
         this.$('.right').width(width);
       }
     }.observes('content.dock.length'),
-
+  
     init: function() {
       this._super();
       Ember['default'].$(window).bind('resize', function () {
@@ -1624,8 +1624,8 @@ define('web-desktop/views/header', ['exports', 'ember'], function (exports, Embe
     didInsertElement: function () {
       this.adjustSize();
     },
-
-
+  
+  
   });
 
 });
@@ -1635,38 +1635,38 @@ define('web-desktop/views/scroll-bar-handler', ['exports', 'ember'], function (e
 
   exports['default'] = Ember['default'].View.extend({
     classNames: ['jspDrag'],
-
+  
     onLenChange: function () {
-
+  
       var len = this.get('len')||0;
       var top = this.get('top')||0;
-
+  
       this.$().css({
         height: len + 'px',
         top: top +'px'
       });
     }.observes('len', 'top'),
-
+  
     mouseEnter: function () {
       this.$().addClass('jspHover');
     },
-
+  
     mouseLeave: function () {
       this.$().removeClass('jspHover');
     },
-
+  
     mouseDown: function (evt) {
       this.$().addClass('jspActive');
       this.get('parentView').jspActive(evt);
     },
-
+  
     mouseUp: function () {
       this.$().removeClass('jspActive');
       this.get('parentView').jspDeactive();
     },
-
-
-
+  
+  
+  
   });
 
 });
@@ -1677,12 +1677,12 @@ define('web-desktop/views/scroll-bar', ['exports', 'ember'], function (exports, 
   exports['default'] = Ember['default'].View.extend({
     classNames: ['jspVerticalBar'],
     templateName: 'scroll-bar',
-
+  
     trackStyle: function () {
       console.log('trackStyle');
       return 'height: %@px'.fmt(this.get('trackLen')||0);
     }.property('trackLen'),
-
+  
     jspActive: function (evt) {
       var offsetY =  evt.originalEvent.offsetY
       Ember['default'].$('.overlay').on('mousemove', function (evt) { //TBD : better event handle
@@ -1691,26 +1691,26 @@ define('web-desktop/views/scroll-bar', ['exports', 'ember'], function (exports, 
           var slideLen = this.get('trackLen') - this.get('handlerLen');
           if (offset > 0 && offset < slideLen) {
             console.log(evt.clientY + ' - ' + evt.offsetY + ' - ' + offsetY + ' = ' + offset);
-
+  
             this.set('handlerTop', offset);
             var percent = offset / slideLen;
             this.get('parentView').scrollList(percent);
           }
         }.bind(this), 50);
-
+  
       }.bind(this));
-
+  
       Ember['default'].$('.overlay').on('mouseup', function () {
         this.jspDeactive();
-
+  
       }.bind(this));
-
+  
     },
-
+  
     jspDeactive: function () {
       Ember['default'].$('.overlay').off('mousemove');
     },
-
+  
     // mouseMove: function (evt) {
     //     if (this.get('active')) {
     //
@@ -1724,7 +1724,7 @@ define('web-desktop/views/scroll-bar', ['exports', 'ember'], function (exports, 
     //       // console.log(offset);
     //     }
     // }
-
+  
   });
 
 });
@@ -1733,19 +1733,19 @@ define('web-desktop/views/search-bar', ['exports', 'ember'], function (exports, 
   'use strict';
 
   var get = Ember['default'].get;
-
+  
   exports['default'] = Ember['default'].View.extend({
     templateName: 'search-bar',
     classNames: ['search-bar'],
     query: '',
-
+  
     didInsertElement: function () {
       this.$('.search').on('click', function () {
         this.$('.overlay').show();
         this.$('.search').hide();
         this.$('.overlay input').focus();
       }.bind(this));
-
+  
       // this.$('.overlay').on('click', function () {
       //   this.$('.search').show();
       //   this.$('.overlay').hide();
@@ -1754,8 +1754,8 @@ define('web-desktop/views/search-bar', ['exports', 'ember'], function (exports, 
       // this.$('.modal').on('click', function (evt) {
       //   evt.stopPropagation();
       // });
-
-
+  
+  
       this.$('.modal').on('mousewheel', function(event) {
         var viewLen = this.$('.container').height() - 20; // 20 is padding
         var contentLen = this.get('controller.resultDivHeight');
@@ -1771,7 +1771,7 @@ define('web-desktop/views/search-bar', ['exports', 'ember'], function (exports, 
         }
       }.bind(this));
     },
-
+  
     all: [
       {
         name: 'Check',
@@ -1823,7 +1823,7 @@ define('web-desktop/views/search-bar', ['exports', 'ember'], function (exports, 
         installed: false
       }
     ],
-
+  
     searchContent: function () {
       var array = [];
       var query = this.get('query');
@@ -1835,7 +1835,7 @@ define('web-desktop/views/search-bar', ['exports', 'ember'], function (exports, 
       }
       return array;
     }.property('query'),
-
+  
     keyUp: function (evt) {
       var query = this.get('query');
       if (evt.keyCode === 27) {
@@ -1847,14 +1847,14 @@ define('web-desktop/views/search-bar', ['exports', 'ember'], function (exports, 
         }
       }
     },
-
+  
     updateHeight: function () {
       if (this.get('_state') === 'inDOM') {
         var viewLen = this.$('.container').height() - 20; // 20 is padding
         var contentLen = this.get('controller.resultDivHeight');
         var trackLen = viewLen;
         var handlerLen = trackLen * viewLen / contentLen;
-
+  
         if (trackLen <= handlerLen) {
           this.setProperties({
             trackLen: 0,
@@ -1868,14 +1868,14 @@ define('web-desktop/views/search-bar', ['exports', 'ember'], function (exports, 
         }
       }
     }.observes('controller.resultDivHeight'),
-
+  
     scrollList: function (percent) {
       var viewLen = this.$('.container').height() - 20; // 20 is padding
       var contentLen = this.get('controller.resultDivHeight');
       var top = (viewLen - contentLen) * percent;
       this.$('.container ul').css({top: top + 'px'});
     }
-
+  
   });
 
 });
@@ -1910,7 +1910,7 @@ define('web-desktop/views/search-results', ['exports', 'ember'], function (expor
         Ember['default'].run.scheduleOnce( 'afterRender', this, 'childViewsDidRender' );
       }
     }.observes('childViews'),
-
+  
     childViewsDidRender : function(){
       this.get('controller').set('resultDivHeight', this.$().height());
     }
@@ -1924,22 +1924,22 @@ define('web-desktop/views/window', ['exports', 'ember'], function (exports, Embe
   exports['default'] = Ember['default'].View.extend({
     templateName: 'window',
     classNames: ['window', 'share',  'windows-vis'],
-
+  
     width: 800,
     height: 600,
-
+  
     didInsertElement: function () {
-
+  
       this.$().css({
         width: this.get('width'),
         height: this.get('height')
       });
-
+  
       this.$('.header').on('mousedown', function (event) {
         var originEvt = event.originalEvent;
         var offsetX = originEvt.offsetX ? originEvt.offsetX : originEvt.layerX;
         var offsetY = originEvt.offsetY ? originEvt.offsetY : originEvt.layerY;
-
+  
         this.$('.header').on('mousemove', function (event) {
           var originEvt = event.originalEvent;
           var x = originEvt.clientX - offsetX;
@@ -1950,20 +1950,20 @@ define('web-desktop/views/window', ['exports', 'ember'], function (exports, Embe
             'z-index': '1000'
           });
         }.bind(this));
-
+  
       }.bind(this));
-
+  
       this.$('.header').on('mouseup', function () {
         Ember['default'].$(this).off('mousemove');
       });
-
+  
     },
-
+  
     willDestroyElement: function () {
       this.$('.header').on('mousedown');
       this.$('.header').on('mouseup');
     }
-
+  
   });
 
 });
