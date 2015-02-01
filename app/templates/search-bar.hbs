@@ -1,11 +1,12 @@
 <div class="search">
   <div class="search-icon"></div>
-  {{input type="text" placeholder="Search" disabled=true}}
+  {{input type="text" placeholder="Search APPs" disabled=true}}
 </div>
 
 <div class="overlay">
   <div class="modal">
     {{input type="text" value=view.query}}
+    <div class="cancel_search">Cancel</div>
     <div class="container">
     {{view 'search-results' content=view.searchContent}}
 
