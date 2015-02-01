@@ -1,0 +1,15 @@
+{{!-- TBD: dynamic instead of hardcode --}}
+
+
+  {{#each view.controller.screens}}
+  {{view 'appscreen' index=id hasApp=hasApp}}
+  {{/each}}
+
+  <ul>
+    {{#each app in view.controller.model}}
+    {{view 'appicon' content=app}}
+    {{/each}}
+  </ul>
+{{#if controller.appTouch}}
+  {{trash-can}}
+{{/if}}

@@ -1,0 +1,16 @@
+<div class="search">
+  <div class="search-icon"></div>
+  {{input type="text" placeholder="Search APPs" disabled=true}}
+</div>
+
+<div class="overlay">
+  <div class="modal">
+    {{input type="text" value=view.query}}
+    <a class="cancel_search" {{action 'cancel' target=view}}>Cancel</a>
+    <div class="container">
+    {{view 'search-results' content=view.searchContent}}
+
+    {{view 'scroll-bar' trackLen=view.trackLen  handlerLen=view.handlerLen handlerTop=view.handlerTop}}
+    </div>
+  </div>
+</div>

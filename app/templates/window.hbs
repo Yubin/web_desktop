@@ -1,0 +1,11 @@
+<div class="header">
+  <span class="titleInside">{{view.content.name}}</span>
+</div>
+<nav class="control-window">
+  <a href="#" class="minimize" {{action 'minimizeApp'}}>&nbsp;</a>
+  <a href="#" class="maximize" {{action 'maximizeApp'}}>maximize</a>
+  <a href="#" class="close" {{action 'closeApp' view.content target=view.parentView}}>close</a>
+</nav>
+<div class="container">
+  {{yield}}
+</div>
