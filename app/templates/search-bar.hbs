@@ -1,7 +1,4 @@
 <div class="search">
-  <div class="top-corner-logo">
-  	<img src="assets/img/GAUSIAN_logo.png">
-  </div>
   <div class="search-icon"></div>
   {{input type="text" placeholder="Search APPs" disabled=true}}
 </div>
@@ -9,6 +6,7 @@
 <div class="overlay">
   <div class="modal">
     {{input type="text" value=view.query}}
+    <div class="cancel_search">Cancel</div>
     <div class="container">
     {{view 'search-results' content=view.searchContent}}
 

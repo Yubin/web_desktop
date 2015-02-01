@@ -484,7 +484,7 @@ define('web-desktop/templates/application', ['exports', 'ember'], function (expo
     data.buffer.push(escapeExpression((helper = helpers.render || (depth0 && depth0.render),options={hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data},helper ? helper.call(depth0, "searchBar", options) : helperMissing.call(depth0, "render", "searchBar", options))));
     data.buffer.push("\r\n\r\n");
     data.buffer.push(escapeExpression((helper = helpers.outlet || (depth0 && depth0.outlet),options={hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data},helper ? helper.call(depth0, "applist", options) : helperMissing.call(depth0, "outlet", "applist", options))));
-    data.buffer.push("\r\n\r\n<div class=\"top-corner-logo\">\r\n  <img src=\"assets/img/GAUSIAN_logo.png\" >\r\n</div>\r\n<div class=\"search-box-logo\">\r\n  <img src=\"assets/img/GAUSIAN_logo.png\" >\r\n</div>\r\n\r\n<svg version=\"1.1\" xmlns='http://www.w3.org/2000/svg'>\r\n  <filter id='blur'>\r\n    <feGaussianBlur stdDeviation='6' />\r\n  </filter>\r\n</svg>\r\n");
+    data.buffer.push("\r\n\r\n<div class=\"top-corner-logo\">\r\n  <img src=\"assets/img/GAUSIAN_logo.png\" >\r\n</div>\r\n\r\n<svg version=\"1.1\" xmlns='http://www.w3.org/2000/svg'>\r\n  <filter id='blur'>\r\n    <feGaussianBlur stdDeviation='6' />\r\n  </filter>\r\n</svg>\r\n");
     return buffer;
     
   });
@@ -657,7 +657,7 @@ define('web-desktop/templates/search-bar', ['exports', 'ember'], function (expor
     var buffer = '', helper, options, helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
 
 
-    data.buffer.push("<div class=\"search\">\r\n  <div class=\"top-corner-logo\">\r\n  	<img src=\"assets/img/GAUSIAN_logo.png\">\r\n  </div>\r\n  <div class=\"search-icon\"></div>\r\n  ");
+    data.buffer.push("<div class=\"search\">\r\n  <div class=\"search-icon\"></div>\r\n  ");
     data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
       'type': ("text"),
       'placeholder': ("Search APPs"),
@@ -668,7 +668,7 @@ define('web-desktop/templates/search-bar', ['exports', 'ember'], function (expor
       'type': ("text"),
       'value': ("view.query")
     },hashTypes:{'type': "STRING",'value': "ID"},hashContexts:{'type': depth0,'value': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
-    data.buffer.push("\r\n    <div class=\"container\">\r\n    ");
+    data.buffer.push("\r\n    <div class=\"cancel_search\">Cancel</div>\r\n    <div class=\"container\">\r\n    ");
     data.buffer.push(escapeExpression(helpers.view.call(depth0, "search-results", {hash:{
       'content': ("view.searchContent")
     },hashTypes:{'content': "ID"},hashContexts:{'content': depth0},contexts:[depth0],types:["STRING"],data:data})));

@@ -1,54 +1,57 @@
 .search-bar {
   text-align: center;
-  padding: 15px 0 15px 0;
+  padding: 23px 0 23px 0;
 
   .search {
     display: inline-block;
 
-    height:30px;
-    width: 350px;
+    height:27px;
+    width: 374px;
 
     border:2px solid white;
     padding: 2px 10px 2px 0px;
 
     -webkit-border-radius:10px;
     -moz-border-radius:10px;
-    border-radius:10px;
+    border-radius:40px;
+    background: rgba(50,50,50,0.3);
 
     .search-icon {
       display: inline-block;
       position: relative;
-      width: 10px;
-      height: 10px;
-      margin: 0 5px;
+      width: 9px;
+      height: 9px;
+      margin: 0 7px;
       background: transparent;
-      border: 3px solid white;
+      border: 2px solid rgb(185, 185, 185);
       border-radius: 50%;
+      cursor: pointer;
+      bottom: 3px;
       cursor: pointer;
       &:after {
         content: '';
         position: absolute;
-        width: 3px;
-        height: 10px;
+        width: 2px;
+        height: 8px;
         bottom: -7px;
-        right: -5px;
-        background-color: white;
+        right: -2px;
+        background-color: #b8b8b8;
         border-radius: 2px;
-        -webkit-transform: rotate(-50deg);
-        -moz-transform: rotate(-50deg);
-        -o-transform: rotate(-50deg);
-        -ms-transform: rotate(-50deg);
-        transform: rotate(-50deg);
+        -webkit-transform: rotate(-38deg);
+        -moz-transform: rotate(-38deg);
+        -o-transform: rotate(-38deg);
+        -ms-transform: rotate(-38deg);
+        transform: rotate(-38deg);
       }
     }
 
     input {
-      padding: 2px 0 1px 0;
-      font-size: 20px;
+      padding: 4px 0 1px 0;
+      font-size: 19px;
       color: white;
       border: none;
       background-color: transparent;
-      width: 80px;
+      width: 116px;
 
       &:focus {
         width: 300px;
@@ -75,36 +78,54 @@
     z-index: 10;
     background-color: rgba(255,255,255,0.5); /*dim the background*/
     .modal {
-      width: 400px;
-      //height: 500px;
-      // line-height: 200px;
+      width: 560px;
       position: fixed;
-      top: 12%;
+      top: 67px;
       left: 50%;
-      margin-left: -200px;
-      background-color: black;
+      margin-left: -280px;
       border-radius: 25px;
       text-align: center;
-      z-index: 11; /* 1px higher than the overlay layer */
-      -webkit-border-radius:20px;
-      -moz-border-radius:20px;
-      border-radius:20px;
+      z-index: 11;
+      -webkit-border-radius: 20px;
+      -moz-border-radius: 20px;
+      border-radius: 40px;
+      height: 37px;
       input {
         color: white;
-        background-color: black;
-        width: 375px;
-        font-size: 32px;
-        border:2px solid white;
-        margin: 0;
-        padding: 5px 10px 5px 10px;
+        background-color: rgba(50, 50, 50, 1);
+        width: 510px;
+        font-size: 20px;
+        border: 2px solid white;
+        margin: 0px;
+        padding: 0px 0px 0px 25px;
         outline: 0;
-        -webkit-border-radius:20px;
-        -moz-border-radius:20px;
-        border-radius:20px;
+        -webkit-border-radius: 20px;
+        -moz-border-radius: 20px;
+        border-radius: 40px;
+        height: 37px;
+      }
+      .cancel_search {
+        font-size: 20px;
+        position: absolute;
+        right: 35px;
+        top: 9px;
+        font-weight: bold;
+        color: rgb(247, 0, 0);
       }
       .container {
         overflow: hidden;
         max-height: 400px;
+        background: rgba(74, 74, 74, 1);
+        position: relative;
+        top: -41px;
+        margin-top: 0px;
+        padding-top: 38px;
+        padding-left: 19px;
+        left: 11px;
+        z-index: -1;
+        border-radius: 21px;
+        width: 516px;
+        border: 2px solid white;
         .search-results {
           top: 0;
           color: white;
