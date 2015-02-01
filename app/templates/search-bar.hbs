@@ -6,7 +6,7 @@
 <div class="overlay">
   <div class="modal">
     {{input type="text" value=view.query}}
-    <div class="cancel_search">Cancel</div>
+    <a class="cancel_search" {{action 'cancel' target=view}}>Cancel</a>
     <div class="container">
     {{view 'search-results' content=view.searchContent}}
 

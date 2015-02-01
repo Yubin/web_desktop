@@ -10,7 +10,7 @@ export default Ember.Controller.extend({
   { id: 1, hasApp: false},
   { id: 2, hasApp: false}],
 
-  appTouch: true,
+  appTouch: false,
 
   openApps: [],
 
@@ -54,7 +54,12 @@ export default Ember.Controller.extend({
       if (!find) {
         var viewType = 'app.' + get(item, 'viewName');
         var klass = this.container.lookupFactory('view:' + viewType);
+        var length = this.get('openApps').length;
+        var top = 150 + 20 * length;
+        var left = 350 + 20 * length;
         var instant = klass.create({
+          top: top,
+          left: left,
           content:    item,
           parentView: this,
           container:  this.container
@@ -74,6 +79,20 @@ export default Ember.Controller.extend({
         this.get('openApps').removeObject(obj[0]);
         instant.destroy();
       }
+
+      var mostTopApp = null;
+      var mostTopZindex = -1;
+      this.get('openApps').forEach(function (app) {
+        var instant = app.instant;
+        var zindex = parseInt(Ember.$(instant.get('element')).css("z-index"));
+        if (zindex > mostTopZindex) {
+          mostTopZindex = zindex;
+          mostTopApp = instant;
+        }
+      });
+      if (mostTopApp) {
+        mostTopApp.changeZindex();
+      }
     },
 
     addApp: function () { // TBD
@@ -89,8 +108,8 @@ export default Ember.Controller.extend({
       console.log('moveImage' + key);
     },
 
-    activateWindow: function (content) {
-      console.log(activateWindow);
+    activateWindow: function (/*content*/) {
+      console.log('activateWindow');
     }
 
   }

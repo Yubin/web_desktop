@@ -6,6 +6,8 @@ export default Ember.Mixin.create({
   active: true,
   width: 800,
   height: 500,
+  left: 0,
+  top: 0,
 
   changeZindex: function () {
     var zindex = -1;
@@ -14,27 +16,32 @@ export default Ember.Mixin.create({
       if (z > zindex) {
         zindex = z;
       }
+      Ember.$(this).removeClass('active');
     });
 
     this.$().css('z-index', zindex + 1);
+    this.$().addClass('active');
   },
 
   mouseDown: function () {
     this.changeZindex();
   },
 
-  click: function () {
-    this.get('parentView').send('activateWindow', this.get('content'));
-  },
+  // click: function () {
+  //   this.get('parentView').send('activateWindow', this.get('content'));
+  // },
 
   didInsertElement: function () {
     this.changeZindex();
     this.$().css({
       width: this.get('width'),
-      height: this.get('height')
+      height: this.get('height'),
+      left: this.get('left'),
+      top: this.get('top')
     });
 
     this.$('.header').on('mousedown', function (event) {
+      if (event.which !== 1) { return ;}
       var originEvt = event.originalEvent;
       var offsetX = originEvt.offsetX ? originEvt.offsetX : originEvt.layerX;
       var offsetY = originEvt.offsetY ? originEvt.offsetY : originEvt.layerY;

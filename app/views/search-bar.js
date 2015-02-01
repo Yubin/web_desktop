@@ -142,6 +142,19 @@ export default Ember.View.extend({
     var contentLen = this.get('controller.resultDivHeight');
     var top = (viewLen - contentLen) * percent;
     this.$('.container ul').css({top: top + 'px'});
+  },
+
+  actions: {
+    cancel: function () {
+      var query = this.get('query');
+      if (query) {
+        this.set('query', '');
+        this.$('.overlay input').focus();
+      } else {
+        this.$('.search').show();
+        this.$('.overlay').hide();
+      }
+    }
   }
 
 });
