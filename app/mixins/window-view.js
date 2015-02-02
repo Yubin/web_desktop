@@ -5,7 +5,7 @@ export default Ember.Mixin.create({
   classNameBindings: ['active'],
   active: true,
   width: 800,
-  height: 500,
+  height: 494,
   left: 0,
   top: 0,
 

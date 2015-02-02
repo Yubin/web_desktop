@@ -254,7 +254,7 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
     classNameBindings: ['active'],
     active: true,
     width: 800,
-    height: 500,
+    height: 494,
     left: 0,
     top: 0,
   
@@ -630,7 +630,7 @@ define('web-desktop/templates/components/trash-can', ['exports', 'ember'], funct
     
 
 
-    data.buffer.push("\r\n<div class=\"trash\">Delete</div>\r\n");
+    data.buffer.push("\r\n<div class=\"trash\">Delete this APP</div>\r\n");
     
   });
 
