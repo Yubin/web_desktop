@@ -645,7 +645,7 @@ define('web-desktop/templates/header', ['exports', 'ember'], function (exports, 
     
 
 
-    data.buffer.push("<ul class=\"nav\">\r\n  <li class=\"logo\">\r\n    <span>GAUSIAN Enterprise Desktop</h3>\r\n  </li>\r\n  <li class=\"dock\">\r\n\r\n  </li>\r\n  <li class=\"login\">\r\n    <span>\r\n      <a>Sign Up</a> / <a>Log In</a>\r\n    </span>\r\n  </li>\r\n</ul>\r\n");
+    data.buffer.push("<ul class=\"nav\">\r\n  <li class=\"logo\">\r\n    <span>GAUSIAN is Your Business Desktop</span>\r\n  </li>\r\n  <li class=\"dock\">\r\n\r\n  </li>\r\n  <li class=\"login\">\r\n    <span>\r\n      <a>Sign Up</a> / <a>Log In</a>\r\n    </span>\r\n  </li>\r\n</ul>\r\n");
     
   });
 
