@@ -495,9 +495,9 @@ define('web-desktop/templates/appicon', ['exports', 'ember'], function (exports,
     var buffer = '', escapeExpression=this.escapeExpression;
 
 
-    data.buffer.push("<div class=\"effect\"></div>\r\n<div class=\"app-img\">\r\n  <span>");
+    data.buffer.push("<div class=\"effect\"></div>\r\n<div class=\"app-edge\"></div>\r\n<div class=\"app-img\"></div>\r\n<div class=\"app-text\">");
     data.buffer.push(escapeExpression(helpers.unbound.call(depth0, "view.content.name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data})));
-    data.buffer.push("</span>\r\n</div>\r\n");
+    data.buffer.push("</div>");
     return buffer;
     
   });
