@@ -1322,8 +1322,8 @@ define('web-desktop/views/applist', ['exports', 'ember', '../utils/keys'], funct
       var winHeight = Math.max(Ember['default'].$(window).height()*0.85, minHeightWin);
   
       var height = (winHeight) * 0.9;
-      var width = winWidth / 3 * 0.8 ;
-      var widthOffset = (winWidth - 3 * (width + 10)) / 4;
+      var width = winWidth / 3 * 0.86 ;
+      var widthOffset = (winWidth - 3 * (width)) / 4;
   
       var iconWidth = Math.max(width/4 * 0.6, minWidthIcon);
       var iconHeight = iconWidth * 4 / 3;
@@ -1471,7 +1471,7 @@ define('web-desktop/views/appscreen', ['exports', 'ember'], function (exports, E
       var index = this.get('index') || 0;
       var width = this.get('parentView.screenWidth');
       var widthOffset = this.get('parentView.widthOffset');
-      var left = index * (width + widthOffset + 10) + widthOffset;
+      var left = index * (width + widthOffset) + widthOffset;
       this.$().css({
         top: this.get('parentView.screenTop'),
         left: left,

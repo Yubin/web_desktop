@@ -35,8 +35,8 @@ export default Ember.View.extend({
     var winHeight = Math.max(Ember.$(window).height()*0.85, minHeightWin);
 
     var height = (winHeight) * 0.9;
-    var width = winWidth / 3 * 0.8 ;
-    var widthOffset = (winWidth - 3 * (width + 10)) / 4;
+    var width = winWidth / 3 * 0.86 ;
+    var widthOffset = (winWidth - 3 * (width)) / 4;
 
     var iconWidth = Math.max(width/4 * 0.6, minWidthIcon);
     var iconHeight = iconWidth * 4 / 3;

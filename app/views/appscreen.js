@@ -21,7 +21,7 @@ export default Ember.View.extend({
     var index = this.get('index') || 0;
     var width = this.get('parentView.screenWidth');
     var widthOffset = this.get('parentView.widthOffset');
-    var left = index * (width + widthOffset + 10) + widthOffset;
+    var left = index * (width + widthOffset) + widthOffset;
     this.$().css({
       top: this.get('parentView.screenTop'),
       left: left,
