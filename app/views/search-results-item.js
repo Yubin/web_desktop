@@ -9,5 +9,12 @@ export default Ember.View.extend({
     } else {
       return 'Get';
     }
-  }.property('content.installed')
+  }.property('content.installed'),
+
+  actions: {
+    installApp: function () {
+      this.set('content.installed', true);
+      this.get('controller').send('installApp', this.get('content'));
+    }
+  }
 });
