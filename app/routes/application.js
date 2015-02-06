@@ -69,13 +69,18 @@ screen: 0, col: 0, row: 3},
 
   renderTemplate: function() {
     this.render();
-    this.render('header', {
-      outlet: 'header',
-      into: 'application'
-    });
     this.render('applist', {
       outlet: 'applist',
       into: 'application'
     });
+  },
+
+  actions: {
+    appMoving: function () {
+      this.set('controller.appMoving', true);
+    },
+    appStop: function () {
+      this.set('controller.appMoving', false);
+    }
   }
 });

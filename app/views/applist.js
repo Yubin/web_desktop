@@ -90,10 +90,9 @@ export default Ember.View.extend({
     //this.on('mouseLeave', this.onMouseRelease);
   },
 
-  onMouseMove: function (event) {console.log('onMouseMove');
-    // this.set('parentView.appTouch', true);
-    this.set('controller.appTouch', true);
-
+  onMouseMove: function (event) {
+    this.get('controller').send('appMoving');
+    this.set('appTouch', true);
     var node = this.get('activeApp');
     var originEvt = event.originalEvent;
     var offset = node.$().parent().offset(); // TBD
@@ -127,10 +126,11 @@ export default Ember.View.extend({
     node.$().css({
       'z-index': 1
     });
-    if (!this.get('controller.appTouch')) {
+    if (!this.get('appTouch')) {
+      this.set('appTouch', false);
       this.get('controller').send('openApp', node.get('content'));
     }
-    this.set('controller.appTouch', false);
+    this.get('controller').send('appStop');
   },
 
   shuffle: function (from, to) {  // TBD add screen constrain

@@ -1,11 +1,16 @@
 <!-- DESKTOP -->
 
-
-{{outlet header}}
+{{#unless controller.appMoving}}
+{{render "header"}}
 
 {{render "searchBar"}}
+{{/unless}}
 
 {{outlet applist}}
+
+{{#if controller.appMoving}}
+  {{trash-can}}
+{{/if}}
 
 <div class="top-corner-logo">
   <img src="assets/img/GAUSIAN_logo.png" >

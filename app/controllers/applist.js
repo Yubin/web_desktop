@@ -57,14 +57,16 @@ export default Ember.Controller.extend({
         var length = this.get('openApps').length;
         var top = 150 + 20 * length;
         var left = 350 + 20 * length;
-        var instant = klass.create({
-          top: top,
-          left: left,
-          content:    item,
-          parentView: this,
-          container:  this.container
-        }).appendTo('body');
-        this.get('openApps').pushObject({name: name, instant: instant});
+        if (klass) {
+          var instant = klass.create({
+            top: top,
+            left: left,
+            content:    item,
+            parentView: this,
+            container:  this.container
+          }).appendTo('body');
+          this.get('openApps').pushObject({name: name, instant: instant});
+        }
       }
     },
 

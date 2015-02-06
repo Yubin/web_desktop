@@ -107,12 +107,9 @@ export default Ember.View.extend({
   keyUp: function (evt) {
     var query = this.get('query');
     if (evt.keyCode === 27) {
-      if (query) {
-        this.set('query', '');
-      } else {
-        this.$('.search').show();
-        this.$('.overlay').hide();
-      }
+      this.set('query', '');
+      this.$('.search').show();
+      this.$('.overlay').hide();
     }
   },
 
@@ -146,14 +143,9 @@ export default Ember.View.extend({
 
   actions: {
     cancel: function () {
-      var query = this.get('query');
-      if (query) {
         this.set('query', '');
-        this.$('.overlay input').focus();
-      } else {
         this.$('.search').show();
         this.$('.overlay').hide();
-      }
     }
   }
 
