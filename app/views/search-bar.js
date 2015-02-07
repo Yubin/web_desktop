@@ -42,54 +42,76 @@ export default Ember.View.extend({
 
   all: [
     {
-      name: 'Check',
+      name: 'Customer',
       rating: 5,
-      category: 'Inventory Management',
+      category: 'Base',
       price: 4,
       freeDays: 30,
-      icon: 'img/icon_1.png',
-      installed: false
-    }, {
-      name: 'Aplus',
+      icon: 'img/icon_15.png',
+      viewName: 'customer',
+      installed: false,
+      url: 'http://gausian-developers.github.io/user-app-template5/app/'
+    },
+    {
+      name: 'Pixlr',
       rating: 5,
-      category: 'Inventory Management',
-      price: 8,
-      freeDays: 30,
-      icon: 'img/icon_1.png',
-      installed: false
-    }, {
-      name: 'Docs',
-      rating: 4,
-      category: 'Inventory Management',
-      price: 6,
-      freeDays: 30,
-      icon: 'img/icon_3.png',
-      installed: false
-    }, {
-      name: 'Report',
-      rating: 4,
-      category: 'Inventory Management',
-      price: 2,
-      freeDays: 30,
-      icon: 'img/icon_8.png',
-      installed: false
-    }, {
-      name: 'Match',
-      rating: 3,
-      category: 'Inventory Management',
-      price: 8,
-      freeDays: 30,
-      icon: 'img/icon_4.png',
-      installed: false
-    }, {
-      name: 'Scan',
-      rating: 5,
-      category: 'Inventory Management',
+      category: 'Creative',
       price: 4,
-      freeDays: 30,
-      icon: 'img/icon_5.png',
-      installed: false
+      freeDays: 15,
+      icon: 'img/pixlr.png',
+      viewName: 'customer',
+      installed: false,
+      url: 'http://pixlr.com/editor/?loc=zh-cn'
     }
+    // {
+    //   name: 'Check',
+    //   rating: 5,
+    //   category: 'Inventory Management',
+    //   price: 4,
+    //   freeDays: 30,
+    //   icon: 'img/icon_1.png',
+    //   installed: false
+    // }, {
+    //   name: 'Aplus',
+    //   rating: 5,
+    //   category: 'Inventory Management',
+    //   price: 8,
+    //   freeDays: 30,
+    //   icon: 'img/icon_1.png',
+    //   installed: false
+    // }, {
+    //   name: 'Docs',
+    //   rating: 4,
+    //   category: 'Inventory Management',
+    //   price: 6,
+    //   freeDays: 30,
+    //   icon: 'img/icon_3.png',
+    //   installed: false
+    // }, {
+    //   name: 'Report',
+    //   rating: 4,
+    //   category: 'Inventory Management',
+    //   price: 2,
+    //   freeDays: 30,
+    //   icon: 'img/icon_8.png',
+    //   installed: false
+    // }, {
+    //   name: 'Match',
+    //   rating: 3,
+    //   category: 'Inventory Management',
+    //   price: 8,
+    //   freeDays: 30,
+    //   icon: 'img/icon_4.png',
+    //   installed: false
+    // }, {
+    //   name: 'Scan',
+    //   rating: 5,
+    //   category: 'Inventory Management',
+    //   price: 4,
+    //   freeDays: 30,
+    //   icon: 'img/icon_5.png',
+    //   installed: false
+    // }
   ],
 
   searchContent: function () {
@@ -105,7 +127,6 @@ export default Ember.View.extend({
   }.property('query'),
 
   keyUp: function (evt) {
-    var query = this.get('query');
     if (evt.keyCode === 27) {
       this.set('query', '');
       this.$('.search').show();

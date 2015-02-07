@@ -8,6 +8,7 @@ export default Ember.Mixin.create({
   height: 494,
   left: 0,
   top: 0,
+  layoutName: 'window',
 
   changeZindex: function () {
     var zindex = -1;

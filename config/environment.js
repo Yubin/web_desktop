@@ -23,7 +23,7 @@ module.exports = function(environment) {
       'connect-src': "'self'",
       'img-src': "'self' data:",
       'style-src': "'self' 'unsafe-inline' use.typekit.net",
-      'frame-src': "s-static.ak.facebook.com static.ak.facebook.com www.facebook.com"
+      'frame-src': "s-static.ak.facebook.com static.ak.facebook.com www.facebook.com gausian-developers.github.io"
     }
   };
 
