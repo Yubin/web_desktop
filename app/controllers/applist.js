@@ -44,7 +44,7 @@ export default Ember.Controller.extend({
     showTrash: function (show) {
       this.set('appTouch', show);
     },
-    openApp: function (item) { console.log('openApp');
+    openApp: function (item) { console.log(item);
       var name = get(item, 'name');
 
       var find = this.get('openApps').any(function (it) {

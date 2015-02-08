@@ -9,6 +9,7 @@ export default Ember.Mixin.create({
   left: 0,
   top: 0,
   layoutName: 'window',
+  isFullSize: false,
 
   changeZindex: function () {
     var zindex = -1;
@@ -55,8 +56,14 @@ export default Ember.Mixin.create({
           'top': y,
           'left': x
         });
+        this.setProperties({
+          top: y,
+          left: x
+        });
       }.bind(this));
 
+    }.bind(this)).on('dblclick', function () {
+      this._actions['maximizeApp'].apply(this);
     }.bind(this));
 
     this.$('.header').on('mouseup', function () {console.log('mixin -  mouseup');
@@ -66,8 +73,33 @@ export default Ember.Mixin.create({
   },
 
   willDestroyElement: function () {
-    this.$('.header').off('mousedown');
+    this.$('.header').off('mousedown').off('dblclick');
     this.$('.header').off('mouseup');
+  },
+
+  actions: {
+    maximizeApp: function () {
+      if (this.get('isFullSize')) {
+        this.$().animate({ // image follow
+          'top': this.get('top'),
+          'left': this.get('left'),
+          'width': this.get('width'),
+          'height': this.get('height')
+        });
+      } else {
+        this.$().animate({ // image follow
+          'top': 45,
+          'left': 0,
+          'width': '100%',
+          'height': '100%'
+        });
+      }
+      this.toggleProperty('isFullSize');
+    },
+
+    minimizeApp: function () {
+      //TBD
+    }
   }
 
 });

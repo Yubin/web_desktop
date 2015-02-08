@@ -141,6 +141,10 @@ export default Ember.Route.extend({
           col: col,
           row: row
         }, content));
+    },
+    openApp: function (content) {
+      var ctrl = this.controllerFor('applist');
+      ctrl._actions['openApp'].apply(ctrl, arguments);
     }
   }
 });
