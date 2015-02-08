@@ -40,7 +40,7 @@ export default Ember.Mixin.create({
       left: this.get('left'),
       top: this.get('top')
     });
-
+    this.$().resizable();
     this.$('.header').on('mousedown', function (event) {
       if (event.which !== 1) { return ;}
       var originEvt = event.originalEvent;
