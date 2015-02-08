@@ -1,161 +1,2037 @@
-eval("//# sourceURL=vendor/ember-cli/loader.js");
-
-;eval("define(\"web-desktop/app\", \n  [\"ember\",\"ember/resolver\",\"ember/load-initializers\",\"web-desktop/config/environment\",\"exports\"],\n  function(__dependency1__, __dependency2__, __dependency3__, __dependency4__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n    var Resolver = __dependency2__[\"default\"];\n    var loadInitializers = __dependency3__[\"default\"];\n    var config = __dependency4__[\"default\"];\n\n    Ember.MODEL_FACTORY_INJECTIONS = true;\n\n    var App = Ember.Application.extend({\n      modulePrefix: config.modulePrefix,\n      podModulePrefix: config.podModulePrefix,\n      Resolver: Resolver\n    });\n\n    loadInitializers(App, config.modulePrefix);\n\n    __exports__[\"default\"] = App;\n  });//# sourceURL=web-desktop/app.js");
-
-;eval("define(\"web-desktop/components/star-rating\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n\n\n    __exports__[\"default\"] = Ember.Component.extend({\n      tagName: \'span\',\n      classNames: [\'star-rating\'],\n      stars: function () {\n        var rating = this.get(\'content\') || 0;\n        var array = new Array(rating);\n        return array;\n      }.property(\'content\')\n\n    });\n  });//# sourceURL=web-desktop/components/star-rating.js");
-
-;eval("define(\"web-desktop/components/trash-can\", \n  [\"ember\",\"web-desktop/mixins/drag-n-drop-view\",\"exports\"],\n  function(__dependency1__, __dependency2__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n    var DragDrop = __dependency2__[\"default\"];\n\n\n    __exports__[\"default\"] = Ember.Component.extend(DragDrop.Droppable,{\n\n      drop: function () {\n        console.log(\'drop\');\n      }\n\n    });\n  });//# sourceURL=web-desktop/components/trash-can.js");
-
-;eval("define(\"web-desktop/mixins/drag-n-drop-view\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n\n    var Drag = Ember.Namespace.create({});\n\n    Drag.cancel = function (event) {\n      event.preventDefault();\n      return false;\n    };\n\n    Drag.Draggable = Ember.Mixin.create({\n      attributeBindings: \'draggable\',\n      draggable: \'true\',\n      dragStart: function (evt) {\n        /* firefox will only allow dragStart if it has data */\n        evt.originalEvent.dataTransfer.setData(\'text/plain\', \'DRAGGABLE\');\n      }\n    });\n\n    Drag.Droppable = Ember.Mixin.create({\n      placeholder: null,\n      dragEnter: Drag.cancel,\n    //  dragOver: Drag.cancel,\n      drop: function (event) {\n        event.preventDefault();\n        return false;\n      }\n    });\n\n    __exports__[\"default\"] = Drag;\n  });//# sourceURL=web-desktop/mixins/drag-n-drop-view.js");
-
-;eval("define(\"web-desktop/controllers/applist-item\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n\n    __exports__[\"default\"] = Ember.ObjectController.extend({\n      \n    });\n  });//# sourceURL=web-desktop/controllers/applist-item.js");
-
-;eval("define(\"web-desktop/controllers/applist\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n\n    var get = Ember.get;\n    var set = Ember.set;\n\n    __exports__[\"default\"] = Ember.Controller.extend({\n      // itemController: \'applist-item\',\n      screenNum: 3,\n      screens: [{ id: 0, hasApp: false},\n      { id: 1, hasApp: false},\n      { id: 2, hasApp: false}],\n\n      appTouch: false,\n\n      openApps: [],\n\n      init: function () {\n        this._super.apply(this, arguments);\n        // this.setupOperator();\n      },\n\n      // setupOperator: function () {\n      //   var i = 0;\n      //   for (i = 0; i <= this.get(\'screenNum\'); i++) {\n      //     var name = \'screen_\' + i;\n      //     Ember.defineProperty(this, name, Ember.computed.filterBy(\'@this\', \'screen\', i));\n      //   }\n      // },\n\n      appScreenChange: function () {\n        var apps = this.get(\'content\');\n        var screens = this.get(\'screens\');\n        screens.forEach(function (scr) {\n          var index = get(scr, \'id\');\n          var hasApp = apps.any(function (app) {\n\n            return get(app, \'screen\') === index;\n          });\n          set(scr, \'hasApp\', hasApp);\n        });\n      }.observes(\'content.@each.screen\'),\n\n      actions: {\n        showTrash: function (show) {\n          this.set(\'appTouch\', show);\n        },\n        openApp: function (item) { console.log(\'openApp\');\n          var name = get(item, \'name\');\n\n          var find = this.get(\'openApps\').any(function (it) {\n            return get(it, \'name\') === name;\n          });\n\n          if (!find) {\n            var viewType = \'app.\' + get(item, \'viewName\');\n            var klass = this.container.lookupFactory(\'view:\' + viewType);\n            var length = this.get(\'openApps\').length;\n            var top = 150 + 20 * length;\n            var left = 350 + 20 * length;\n            var instant = klass.create({\n              top: top,\n              left: left,\n              content:    item,\n              parentView: this,\n              container:  this.container\n            }).appendTo(\'body\');\n            this.get(\'openApps\').pushObject({name: name, instant: instant});\n          }\n        },\n\n        closeApp: function (item) {\n          var name = get(item, \'name\');\n          var obj = this.get(\'openApps\').filter(function (it) {\n            return get(it, \'name\') === name;\n          });\n          //\n          var instant = get(obj[0], \'instant\');\n          if (instant) {\n            this.get(\'openApps\').removeObject(obj[0]);\n            instant.destroy();\n          }\n\n          var mostTopApp = null;\n          var mostTopZindex = -1;\n          this.get(\'openApps\').forEach(function (app) {\n            var instant = app.instant;\n            var zindex = parseInt(Ember.$(instant.get(\'element\')).css(\"z-index\"));\n            if (zindex > mostTopZindex) {\n              mostTopZindex = zindex;\n              mostTopApp = instant;\n            }\n          });\n          if (mostTopApp) {\n            mostTopApp.changeZindex();\n          }\n        },\n\n        addApp: function () { // TBD\n          console.log(\'addApp\');\n        },\n\n        deleteApp: function (/*item*/) { // TBD\n          console.log(\'deleteApp\');\n        },\n\n        moveImage: function (key) {\n\n          console.log(\'moveImage\' + key);\n        },\n\n        activateWindow: function (/*content*/) {\n          console.log(\'activateWindow\');\n        }\n\n      }\n    });\n  });//# sourceURL=web-desktop/controllers/applist.js");
-
-;eval("define(\"web-desktop/controllers/header\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n\n    __exports__[\"default\"] = Ember.Controller.extend({\n      dock: []\n    });\n  });//# sourceURL=web-desktop/controllers/header.js");
-
-;eval("define(\"web-desktop/controllers/search-bar\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n\n    __exports__[\"default\"] = Ember.Controller.extend({\n      resultDivHeight: 0\n    });\n  });//# sourceURL=web-desktop/controllers/search-bar.js");
-
-;eval("define(\"web-desktop/initializers/export-application-global\", \n  [\"ember\",\"web-desktop/config/environment\",\"exports\"],\n  function(__dependency1__, __dependency2__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n    var config = __dependency2__[\"default\"];\n\n    function initialize(container, application) {\n      var classifiedName = Ember.String.classify(config.modulePrefix);\n\n      if (config.exportApplicationGlobal) {\n        window[classifiedName] = application;\n      }\n    };\n    __exports__.initialize = initialize;\n    __exports__[\"default\"] = {\n      name: \'export-application-global\',\n\n      initialize: initialize\n    };\n  });//# sourceURL=web-desktop/initializers/export-application-global.js");
-
-;eval("define(\"web-desktop/mixins/window-view\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n\n    __exports__[\"default\"] = Ember.Mixin.create({\n      classNames: [\'window\', \'windows-vis\'],\n      classNameBindings: [\'active\'],\n      active: true,\n      width: 800,\n      height: 500,\n      left: 0,\n      top: 0,\n\n      changeZindex: function () {\n        var zindex = -1;\n        Ember.$(\'.window\').each(function () {\n          var z = parseInt(Ember.$(this).css(\'z-index\'));\n          if (z > zindex) {\n            zindex = z;\n          }\n          Ember.$(this).removeClass(\'active\');\n        });\n\n        this.$().css(\'z-index\', zindex + 1);\n        this.$().addClass(\'active\');\n      },\n\n      mouseDown: function () {\n        this.changeZindex();\n      },\n\n      // click: function () {\n      //   this.get(\'parentView\').send(\'activateWindow\', this.get(\'content\'));\n      // },\n\n      didInsertElement: function () {\n        this.changeZindex();\n        this.$().css({\n          width: this.get(\'width\'),\n          height: this.get(\'height\'),\n          left: this.get(\'left\'),\n          top: this.get(\'top\')\n        });\n\n        this.$(\'.header\').on(\'mousedown\', function (event) {\n          if (event.which !== 1) { return ;}\n          var originEvt = event.originalEvent;\n          var offsetX = originEvt.offsetX ? originEvt.offsetX : originEvt.layerX;\n          var offsetY = originEvt.offsetY ? originEvt.offsetY : originEvt.layerY;\n\n          this.$(document).on(\'mousemove\', function (event) {\n            var originEvt = event.originalEvent;\n            var x = originEvt.clientX - offsetX;\n            var y = originEvt.clientY - offsetY;\n            this.$().css({ // image follow\n              \'top\': y,\n              \'left\': x\n            });\n          }.bind(this));\n\n        }.bind(this));\n\n        this.$(\'.header\').on(\'mouseup\', function () {console.log(\'mixin -  mouseup\');\n          this.$(document).off(\'mousemove\');\n        }.bind(this));\n\n      },\n\n      willDestroyElement: function () {\n        this.$(\'.header\').off(\'mousedown\');\n        this.$(\'.header\').off(\'mouseup\');\n      }\n\n    });\n  });//# sourceURL=web-desktop/mixins/window-view.js");
-
-;eval("define(\"web-desktop/router\", \n  [\"ember\",\"web-desktop/config/environment\",\"exports\"],\n  function(__dependency1__, __dependency2__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n    var config = __dependency2__[\"default\"];\n\n    var Router = Ember.Router.extend({\n      location: config.locationType\n    });\n\n    Router.map(function() {\n      this.route(\'application\', { path: \'/\' });\n    });\n\n    Router.reopen({\n      rootURL: \'/\'\n    });\n\n    __exports__[\"default\"] = Router;\n  });//# sourceURL=web-desktop/router.js");
-
-;eval("define(\"web-desktop/routes/application\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n\n    var get = Ember.get;\n    __exports__[\"default\"] = Ember.Route.extend({\n\n      model: function () {\n        return {\n          applist:[\n    {name: \"Deliver Bid\",\n    imgName: \"DeliverBid_logo\",\n    viewName: \'deliverBid\',\n    screen: 0, col: 0, row: 0},\n    {name: \"E-Inventory\",\n    imgName: \"Einventory_logo\",\n    viewName: \'Einventory\',\n    screen: 0, col: 0, row: 2},\n    {name: \"Vender Match\",\n    imgName: \"VenderMatch_logo\",\n    viewName: \'vendorMatch\',\n    screen: 0, col: 0, row: 1},\n    {name: \"Gausian Store\",\n    imgName: \"icon_17\",\n    viewName: \'gausianStore\',\n    screen: 0, col: 0, row: 3},\n    //\n    //       {name: \"icon_11\", imgName: \"icon_11\", screen: 0, col: 1, row: 2},\n    //       {name: \"icon_12\", imgName: \"icon_12\", screen: 0, col: 2, row: 2},\n    //       {name: \"icon_13\", imgName: \"icon_13\", screen: 0, col: 3, row: 2},\n    //       {name: \"icon_14\", imgName: \"icon_14\", screen: 0, col: 1, row: 3},\n    //       {name: \"icon_15\", imgName: \"icon_15\", screen: 0, col: 2, row: 3},\n    //       {name: \"icon_16\", imgName: \"icon_16\", screen: 0, col: 3, row: 3},\n    //       {name: \"icon_13\", imgName: \"icon_13\", screen: 0, col: 3, row: 4},\n    //       {name: \"icon_14\", imgName: \"icon_14\", screen: 0, col: 2, row: 4},\n    //       {name: \"icon_15\", imgName: \"icon_15\", screen: 0, col: 1, row: 4},\n    //       {name: \"icon_16\", imgName: \"icon_16\", screen: 0, col: 0, row: 4},\n          // {name: \"icon_21\", imgName: \"icon_1\", screen: 1, col: 11, row: 0},\n          // {name: \"icon_22\", imgName: \"icon_2\", screen: 1, col: 12, row: 0},\n          // {name: \"icon_23\", imgName: \"icon_3\", screen: 1, col: 13, row: 0},\n          // {name: \"icon_24\", imgName: \"icon_4\", screen: 1, col: 14, row: 0},\n          // {name: \"icon_25\", imgName: \"icon_5\", screen: 1, col: 15, row: 1},\n          // {name: \"icon_27\", imgName: \"icon_7\", screen: 1, col: 16, row: 1},\n          // {name: \"icon_28\", imgName: \"icon_8\", screen: 1, col: 11, row: 1},\n          // {name: \"icon_29\", imgName: \"icon_9\", screen: 1, col: 12, row: 2},\n          // {name: \"icon_211\", imgName: \"icon_11\", screen: 1, col: 13, row: 2},\n          // {name: \"icon_212\", imgName: \"icon_12\", screen: 1, col: 14, row: 2},\n          // {name: \"icon_213\", imgName: \"icon_13\", screen: 1, col: 15, row: 2},\n          // {name: \"icon_214\", imgName: \"icon_14\", screen: 1, col: 16, row: 2},\n          // {name: \"icon_215\", imgName: \"icon_15\", screen: 1, col: 1, row: 3},\n          {name: \"icon_216\", imgName: \"icon_16\", screen: 1, col: 3, row: 3},\n          // {name: \"icon_31\", imgName: \"icon_1\", screen: 2, col: 0, row: 1},\n          // {name: \"icon_32\", imgName: \"icon_2\", screen: 2, col: 1, row: 1},\n          // {name: \"icon_33\", imgName: \"icon_3\", screen: 2, col: 2, row: 1},\n          // {name: \"icon_34\", imgName: \"icon_4\", screen: 2, col: 3, row: 1},\n          // {name: \"icon_35\", imgName: \"icon_5\", screen: 2, col: 0, row: 0},\n          // {name: \"icon_36\", imgName: \"icon_6\", screen: 2, col: 1, row: 0},\n          // {name: \"icon_38\", imgName: \"icon_8\", screen: 2, col: 3, row: 0},\n          // {name: \"icon_39\", imgName: \"icon_9\", screen: 2, col: 0, row: 2},\n          // {name: \"icon_311\", imgName: \"icon_11\", screen: 2, col: 1, row: 2},\n          // {name: \"icon_312\", imgName: \"icon_12\", screen: 2, col: 2, row: 2},\n          // {name: \"icon_313\", imgName: \"icon_13\", screen: 2, col: 3, row: 2},\n          {name: \"icon_317\", imgName: \"icon_17\", screen: 2, col: 0, row: 3},\n          ]\n        };\n      },\n\n      setupController: function (controller, model) {\n        this.controllerFor(\'applist\').set(\'model\', get(model, \'applist\'));\n      },\n\n      renderTemplate: function() {\n        this.render();\n        this.render(\'header\', {\n          outlet: \'header\',\n          into: \'application\'\n        });\n        this.render(\'applist\', {\n          outlet: \'applist\',\n          into: \'application\'\n        });\n      }\n    });\n  });//# sourceURL=web-desktop/routes/application.js");
-
-;eval("define(\"web-desktop/templates/app/deliver-bid\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n    __exports__[\"default\"] = Ember.Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {\n    this.compilerInfo = [4,\'>= 1.0.0\'];\n    helpers = this.merge(helpers, Ember.Handlebars.helpers); data = data || {};\n      var buffer = \'\', escapeExpression=this.escapeExpression;\n\n\n      data.buffer.push(\"<img \");\n      data.buffer.push(escapeExpression(helpers[\'bind-attr\'].call(depth0, {hash:{\n        \'src\': (\"view.logoUrl\")\n      },hashTypes:{\'src\': \"ID\"},hashContexts:{\'src\': depth0},contexts:[],types:[],data:data})));\n      data.buffer.push(\" width=\\\"100%\\\" height=\\\"100%\\\">\\n<img src=\\\"img/spinnerSmall.gif\\\" class=\'spinner\' style=\\\"top:270px; left:37px\\\">\\n\");\n      return buffer;\n      \n    });\n  });//# sourceURL=web-desktop/templates/app/deliver-bid.js");
-
-;eval("define(\"web-desktop/templates/app/einventory\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n    __exports__[\"default\"] = Ember.Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {\n    this.compilerInfo = [4,\'>= 1.0.0\'];\n    helpers = this.merge(helpers, Ember.Handlebars.helpers); data = data || {};\n      var buffer = \'\', escapeExpression=this.escapeExpression;\n\n\n      data.buffer.push(\"<img \");\n      data.buffer.push(escapeExpression(helpers[\'bind-attr\'].call(depth0, {hash:{\n        \'src\': (\"view.logoUrl\")\n      },hashTypes:{\'src\': \"ID\"},hashContexts:{\'src\': depth0},contexts:[],types:[],data:data})));\n      data.buffer.push(\" width=\\\"100%\\\" height=\\\"100%\\\">\\n<img src=\\\"img/spinnerSmall.gif\\\" class=\'spinner\' style=\\\"top:270px; left:37px\\\">\\n\");\n      return buffer;\n      \n    });\n  });//# sourceURL=web-desktop/templates/app/einventory.js");
-
-;eval("define(\"web-desktop/templates/app/vendor-match\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n    __exports__[\"default\"] = Ember.Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {\n    this.compilerInfo = [4,\'>= 1.0.0\'];\n    helpers = this.merge(helpers, Ember.Handlebars.helpers); data = data || {};\n      var buffer = \'\', escapeExpression=this.escapeExpression;\n\n\n      data.buffer.push(\"<img \");\n      data.buffer.push(escapeExpression(helpers[\'bind-attr\'].call(depth0, {hash:{\n        \'src\': (\"view.logoUrl\")\n      },hashTypes:{\'src\': \"ID\"},hashContexts:{\'src\': depth0},contexts:[],types:[],data:data})));\n      data.buffer.push(\" width=\\\"100%\\\" height=\\\"100%\\\">\\n<img src=\\\"img/spinnerSmall.gif\\\" class=\'spinner\' style=\\\"top:270px; left:37px\\\">\\n\");\n      return buffer;\n      \n    });\n  });//# sourceURL=web-desktop/templates/app/vendor-match.js");
-
-;eval("define(\"web-desktop/templates/appicon\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n    __exports__[\"default\"] = Ember.Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {\n    this.compilerInfo = [4,\'>= 1.0.0\'];\n    helpers = this.merge(helpers, Ember.Handlebars.helpers); data = data || {};\n      var buffer = \'\', escapeExpression=this.escapeExpression;\n\n\n      data.buffer.push(\"<div class=\\\"effect\\\"></div>\\n<div class=\\\"app-img\\\">\\n  <span>\");\n      data.buffer.push(escapeExpression(helpers.unbound.call(depth0, \"view.content.name\", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:[\"ID\"],data:data})));\n      data.buffer.push(\"</span>\\n</div>\\n\");\n      return buffer;\n      \n    });\n  });//# sourceURL=web-desktop/templates/appicon.js");
-
-;eval("define(\"web-desktop/templates/application\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n    __exports__[\"default\"] = Ember.Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {\n    this.compilerInfo = [4,\'>= 1.0.0\'];\n    helpers = this.merge(helpers, Ember.Handlebars.helpers); data = data || {};\n      var buffer = \'\', helper, options, helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;\n\n\n      data.buffer.push(\"<!-- DESKTOP -->\\n\\n\\n\");\n      data.buffer.push(escapeExpression((helper = helpers.outlet || (depth0 && depth0.outlet),options={hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:[\"ID\"],data:data},helper ? helper.call(depth0, \"header\", options) : helperMissing.call(depth0, \"outlet\", \"header\", options))));\n      data.buffer.push(\"\\n\\n\");\n      data.buffer.push(escapeExpression((helper = helpers.render || (depth0 && depth0.render),options={hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:[\"STRING\"],data:data},helper ? helper.call(depth0, \"searchBar\", options) : helperMissing.call(depth0, \"render\", \"searchBar\", options))));\n      data.buffer.push(\"\\n\\n\");\n      data.buffer.push(escapeExpression((helper = helpers.outlet || (depth0 && depth0.outlet),options={hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:[\"ID\"],data:data},helper ? helper.call(depth0, \"applist\", options) : helperMissing.call(depth0, \"outlet\", \"applist\", options))));\n      data.buffer.push(\"\\n\\n<div class=\\\"top-corner-logo\\\">\\n  <img src=\\\"assets/img/GAUSIAN_logo.png\\\" >\\n</div>\\n\\n<svg version=\\\"1.1\\\" xmlns=\'http://www.w3.org/2000/svg\'>\\n  <filter id=\'blur\'>\\n    <feGaussianBlur stdDeviation=\'6\' />\\n  </filter>\\n</svg>\\n\");\n      return buffer;\n      \n    });\n  });//# sourceURL=web-desktop/templates/application.js");
-
-;eval("define(\"web-desktop/templates/applist\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n    __exports__[\"default\"] = Ember.Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {\n    this.compilerInfo = [4,\'>= 1.0.0\'];\n    helpers = this.merge(helpers, Ember.Handlebars.helpers); data = data || {};\n      var buffer = \'\', stack1, escapeExpression=this.escapeExpression, self=this;\n\n    function program1(depth0,data) {\n      \n      var buffer = \'\';\n      data.buffer.push(\"\\n  \");\n      data.buffer.push(escapeExpression(helpers.view.call(depth0, \"appscreen\", {hash:{\n        \'index\': (\"id\"),\n        \'hasApp\': (\"hasApp\")\n      },hashTypes:{\'index\': \"ID\",\'hasApp\': \"ID\"},hashContexts:{\'index\': depth0,\'hasApp\': depth0},contexts:[depth0],types:[\"STRING\"],data:data})));\n      data.buffer.push(\"\\n  \");\n      return buffer;\n      }\n\n    function program3(depth0,data) {\n      \n      var buffer = \'\';\n      data.buffer.push(\"\\n    \");\n      data.buffer.push(escapeExpression(helpers.view.call(depth0, \"appicon\", {hash:{\n        \'content\': (\"app\")\n      },hashTypes:{\'content\': \"ID\"},hashContexts:{\'content\': depth0},contexts:[depth0],types:[\"STRING\"],data:data})));\n      data.buffer.push(\"\\n    \");\n      return buffer;\n      }\n\n    function program5(depth0,data) {\n      \n      var buffer = \'\', stack1;\n      data.buffer.push(\"\\n  \");\n      stack1 = helpers._triageMustache.call(depth0, \"trash-can\", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:[\"ID\"],data:data});\n      if(stack1 || stack1 === 0) { data.buffer.push(stack1); }\n      data.buffer.push(\"\\n\");\n      return buffer;\n      }\n\n      data.buffer.push(\"\\n\\n\\n  \");\n      stack1 = helpers.each.call(depth0, \"view.controller.screens\", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[depth0],types:[\"ID\"],data:data});\n      if(stack1 || stack1 === 0) { data.buffer.push(stack1); }\n      data.buffer.push(\"\\n\\n  <ul>\\n    \");\n      stack1 = helpers.each.call(depth0, \"app\", \"in\", \"view.controller.model\", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(3, program3, data),contexts:[depth0,depth0,depth0],types:[\"ID\",\"ID\",\"ID\"],data:data});\n      if(stack1 || stack1 === 0) { data.buffer.push(stack1); }\n      data.buffer.push(\"\\n  </ul>\\n\");\n      stack1 = helpers[\'if\'].call(depth0, \"controller.appTouch\", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(5, program5, data),contexts:[depth0],types:[\"ID\"],data:data});\n      if(stack1 || stack1 === 0) { data.buffer.push(stack1); }\n      data.buffer.push(\"\\n\");\n      return buffer;\n      \n    });\n  });//# sourceURL=web-desktop/templates/applist.js");
-
-;eval("define(\"web-desktop/templates/appscreen\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n    __exports__[\"default\"] = Ember.Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {\n    this.compilerInfo = [4,\'>= 1.0.0\'];\n    helpers = this.merge(helpers, Ember.Handlebars.helpers); data = data || {};\n      \n\n\n      data.buffer.push(\"\\n\");\n      \n    });\n  });//# sourceURL=web-desktop/templates/appscreen.js");
-
-;eval("define(\"web-desktop/templates/components/star-rating\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n    __exports__[\"default\"] = Ember.Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {\n    this.compilerInfo = [4,\'>= 1.0.0\'];\n    helpers = this.merge(helpers, Ember.Handlebars.helpers); data = data || {};\n      var buffer = \'\', stack1, self=this;\n\n    function program1(depth0,data) {\n      \n      \n      data.buffer.push(\"\\n  <i class=\\\"fa fa-star\\\"></i>\\n\");\n      }\n\n      stack1 = helpers.each.call(depth0, \"stars\", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[depth0],types:[\"ID\"],data:data});\n      if(stack1 || stack1 === 0) { data.buffer.push(stack1); }\n      data.buffer.push(\"\\n\");\n      return buffer;\n      \n    });\n  });//# sourceURL=web-desktop/templates/components/star-rating.js");
-
-;eval("define(\"web-desktop/templates/components/trash-can\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n    __exports__[\"default\"] = Ember.Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {\n    this.compilerInfo = [4,\'>= 1.0.0\'];\n    helpers = this.merge(helpers, Ember.Handlebars.helpers); data = data || {};\n      \n\n\n      data.buffer.push(\"\\n<div class=\\\"trash\\\">Delete</div>\\n\");\n      \n    });\n  });//# sourceURL=web-desktop/templates/components/trash-can.js");
-
-;eval("define(\"web-desktop/templates/header\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n    __exports__[\"default\"] = Ember.Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {\n    this.compilerInfo = [4,\'>= 1.0.0\'];\n    helpers = this.merge(helpers, Ember.Handlebars.helpers); data = data || {};\n      \n\n\n      data.buffer.push(\"<ul class=\\\"nav\\\">\\n  <li class=\\\"logo\\\">\\n    <span>GAUSIAN Enterprise Desktop</h3>\\n  </li>\\n  <li class=\\\"dock\\\">\\n\\n  </li>\\n  <li class=\\\"login\\\">\\n    <span>\\n      <a>Sign Up</a> / <a>Log In</a>\\n    </span>\\n  </li>\\n</ul>\\n\");\n      \n    });\n  });//# sourceURL=web-desktop/templates/header.js");
-
-;eval("define(\"web-desktop/templates/scroll-bar-handler\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n    __exports__[\"default\"] = Ember.Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {\n    this.compilerInfo = [4,\'>= 1.0.0\'];\n    helpers = this.merge(helpers, Ember.Handlebars.helpers); data = data || {};\n      var buffer = \'\', escapeExpression=this.escapeExpression;\n\n\n      data.buffer.push(\"<div class=\\\"jspDrag\\\" \");\n      data.buffer.push(escapeExpression(helpers[\'bind-attr\'].call(depth0, {hash:{\n        \'style\': (\"view.style\")\n      },hashTypes:{\'style\': \"STRING\"},hashContexts:{\'style\': depth0},contexts:[],types:[],data:data})));\n      data.buffer.push(\">\\n  <div class=\\\"jspDragTop\\\"></div>\\n  <div class=\\\"jspDragBottom\\\"></div>\\n</div>\\n\");\n      return buffer;\n      \n    });\n  });//# sourceURL=web-desktop/templates/scroll-bar-handler.js");
-
-;eval("define(\"web-desktop/templates/scroll-bar\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n    __exports__[\"default\"] = Ember.Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {\n    this.compilerInfo = [4,\'>= 1.0.0\'];\n    helpers = this.merge(helpers, Ember.Handlebars.helpers); data = data || {};\n      var buffer = \'\', escapeExpression=this.escapeExpression;\n\n\n      data.buffer.push(\"<div class=\\\"jspCap jspCapTop\\\"></div>\\n<div class=\\\"jspTrack\\\" \");\n      data.buffer.push(escapeExpression(helpers[\'bind-attr\'].call(depth0, {hash:{\n        \'style\': (\"view.trackStyle\")\n      },hashTypes:{\'style\': \"STRING\"},hashContexts:{\'style\': depth0},contexts:[],types:[],data:data})));\n      data.buffer.push(\">\\n  \");\n      data.buffer.push(escapeExpression(helpers.view.call(depth0, \"scroll-bar-handler\", {hash:{\n        \'len\': (\"view.handlerLen\"),\n        \'top\': (\"view.handlerTop\")\n      },hashTypes:{\'len\': \"ID\",\'top\': \"ID\"},hashContexts:{\'len\': depth0,\'top\': depth0},contexts:[depth0],types:[\"STRING\"],data:data})));\n      data.buffer.push(\"\\n</div>\\n<div class=\\\"jspCap jspCapBottom\\\"></div>\\n\");\n      return buffer;\n      \n    });\n  });//# sourceURL=web-desktop/templates/scroll-bar.js");
-
-;eval("define(\"web-desktop/templates/search-bar\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n    __exports__[\"default\"] = Ember.Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {\n    this.compilerInfo = [4,\'>= 1.0.0\'];\n    helpers = this.merge(helpers, Ember.Handlebars.helpers); data = data || {};\n      var buffer = \'\', helper, options, helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;\n\n\n      data.buffer.push(\"<div class=\\\"search\\\">\\n  <div class=\\\"search-icon\\\"></div>\\n  \");\n      data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{\n        \'type\': (\"text\"),\n        \'placeholder\': (\"Search APPs\"),\n        \'disabled\': (true)\n      },hashTypes:{\'type\': \"STRING\",\'placeholder\': \"STRING\",\'disabled\': \"BOOLEAN\"},hashContexts:{\'type\': depth0,\'placeholder\': depth0,\'disabled\': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, \"input\", options))));\n      data.buffer.push(\"\\n</div>\\n\\n<div class=\\\"overlay\\\">\\n  <div class=\\\"modal\\\">\\n    \");\n      data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{\n        \'type\': (\"text\"),\n        \'value\': (\"view.query\")\n      },hashTypes:{\'type\': \"STRING\",\'value\': \"ID\"},hashContexts:{\'type\': depth0,\'value\': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, \"input\", options))));\n      data.buffer.push(\"\\n    <a class=\\\"cancel_search\\\" \");\n      data.buffer.push(escapeExpression(helpers.action.call(depth0, \"cancel\", {hash:{\n        \'target\': (\"view\")\n      },hashTypes:{\'target\': \"ID\"},hashContexts:{\'target\': depth0},contexts:[depth0],types:[\"STRING\"],data:data})));\n      data.buffer.push(\">Cancel</a>\\n    <div class=\\\"container\\\">\\n    \");\n      data.buffer.push(escapeExpression(helpers.view.call(depth0, \"search-results\", {hash:{\n        \'content\': (\"view.searchContent\")\n      },hashTypes:{\'content\': \"ID\"},hashContexts:{\'content\': depth0},contexts:[depth0],types:[\"STRING\"],data:data})));\n      data.buffer.push(\"\\n\\n    \");\n      data.buffer.push(escapeExpression(helpers.view.call(depth0, \"scroll-bar\", {hash:{\n        \'trackLen\': (\"view.trackLen\"),\n        \'handlerLen\': (\"view.handlerLen\"),\n        \'handlerTop\': (\"view.handlerTop\")\n      },hashTypes:{\'trackLen\': \"ID\",\'handlerLen\': \"ID\",\'handlerTop\': \"ID\"},hashContexts:{\'trackLen\': depth0,\'handlerLen\': depth0,\'handlerTop\': depth0},contexts:[depth0],types:[\"STRING\"],data:data})));\n      data.buffer.push(\"\\n    </div>\\n  </div>\\n</div>\\n\");\n      return buffer;\n      \n    });\n  });//# sourceURL=web-desktop/templates/search-bar.js");
-
-;eval("define(\"web-desktop/templates/search-results-item\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n    __exports__[\"default\"] = Ember.Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {\n    this.compilerInfo = [4,\'>= 1.0.0\'];\n    helpers = this.merge(helpers, Ember.Handlebars.helpers); data = data || {};\n      var buffer = \'\', stack1, helper, options, escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing;\n\n\n      data.buffer.push(\"<div class=\\\"icon\\\">\\n  <img \");\n      data.buffer.push(escapeExpression(helpers[\'bind-attr\'].call(depth0, {hash:{\n        \'src\': (\"view.content.icon\")\n      },hashTypes:{\'src\': \"ID\"},hashContexts:{\'src\': depth0},contexts:[],types:[],data:data})));\n      data.buffer.push(\" />\\n</div>\\n<div class=\\\"detail\\\">\\n  <a class=\\\"name\\\">\");\n      stack1 = helpers._triageMustache.call(depth0, \"view.content.name\", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:[\"ID\"],data:data});\n      if(stack1 || stack1 === 0) { data.buffer.push(stack1); }\n      data.buffer.push(\"</a> \");\n      data.buffer.push(escapeExpression((helper = helpers[\'star-rating\'] || (depth0 && depth0[\'star-rating\']),options={hash:{\n        \'content\': (\"view.content.rating\")\n      },hashTypes:{\'content\': \"ID\"},hashContexts:{\'content\': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, \"star-rating\", options))));\n      data.buffer.push(\"\\n  <p>\");\n      stack1 = helpers._triageMustache.call(depth0, \"view.content.category\", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:[\"ID\"],data:data});\n      if(stack1 || stack1 === 0) { data.buffer.push(stack1); }\n      data.buffer.push(\"</p>\\n  <p>\");\n      stack1 = helpers._triageMustache.call(depth0, \"view.content.freeDay\", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:[\"ID\"],data:data});\n      if(stack1 || stack1 === 0) { data.buffer.push(stack1); }\n      data.buffer.push(\" days free trail, $\");\n      stack1 = helpers._triageMustache.call(depth0, \"view.content.price\", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:[\"ID\"],data:data});\n      if(stack1 || stack1 === 0) { data.buffer.push(stack1); }\n      data.buffer.push(\"/month</p>\\n</div>\\n<div \");\n      data.buffer.push(escapeExpression(helpers[\'bind-attr\'].call(depth0, {hash:{\n        \'class\': (\":action content.installed:open:get\")\n      },hashTypes:{\'class\': \"STRING\"},hashContexts:{\'class\': depth0},contexts:[],types:[],data:data})));\n      data.buffer.push(\">\\n  \");\n      stack1 = helpers._triageMustache.call(depth0, \"view.label\", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:[\"ID\"],data:data});\n      if(stack1 || stack1 === 0) { data.buffer.push(stack1); }\n      data.buffer.push(\"\\n<div>\\n\");\n      return buffer;\n      \n    });\n  });//# sourceURL=web-desktop/templates/search-results-item.js");
-
-;eval("define(\"web-desktop/templates/window\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n    __exports__[\"default\"] = Ember.Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {\n    this.compilerInfo = [4,\'>= 1.0.0\'];\n    helpers = this.merge(helpers, Ember.Handlebars.helpers); data = data || {};\n      var buffer = \'\', stack1, escapeExpression=this.escapeExpression;\n\n\n      data.buffer.push(\"<div class=\\\"header\\\">\\n  <span class=\\\"titleInside\\\">\");\n      stack1 = helpers._triageMustache.call(depth0, \"view.content.name\", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:[\"ID\"],data:data});\n      if(stack1 || stack1 === 0) { data.buffer.push(stack1); }\n      data.buffer.push(\"</span>\\n</div>\\n<nav class=\\\"control-window\\\">\\n  <a href=\\\"#\\\" class=\\\"minimize\\\" \");\n      data.buffer.push(escapeExpression(helpers.action.call(depth0, \"minimizeApp\", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:[\"STRING\"],data:data})));\n      data.buffer.push(\">&nbsp;</a>\\n  <a href=\\\"#\\\" class=\\\"maximize\\\" \");\n      data.buffer.push(escapeExpression(helpers.action.call(depth0, \"maximizeApp\", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:[\"STRING\"],data:data})));\n      data.buffer.push(\">maximize</a>\\n  <a href=\\\"#\\\" class=\\\"close\\\" \");\n      data.buffer.push(escapeExpression(helpers.action.call(depth0, \"closeApp\", \"view.content\", {hash:{\n        \'target\': (\"view.parentView\")\n      },hashTypes:{\'target\': \"ID\"},hashContexts:{\'target\': depth0},contexts:[depth0,depth0],types:[\"STRING\",\"ID\"],data:data})));\n      data.buffer.push(\">close</a>\\n</nav>\\n<div class=\\\"container\\\">\\n  \");\n      stack1 = helpers._triageMustache.call(depth0, \"yield\", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:[\"ID\"],data:data});\n      if(stack1 || stack1 === 0) { data.buffer.push(stack1); }\n      data.buffer.push(\"\\n</div>\\n\");\n      return buffer;\n      \n    });\n  });//# sourceURL=web-desktop/templates/window.js");
-
-;eval("define(\"web-desktop/tests/app.jshint\", \n  [],\n  function() {\n    \"use strict\";\n    module(\'JSHint - .\');\n    test(\'app.js should pass jshint\', function() { \n      ok(true, \'app.js should pass jshint.\'); \n    });\n  });//# sourceURL=web-desktop/tests/app.jshint.js");
-
-;eval("define(\"web-desktop/tests/components/star-rating.jshint\", \n  [],\n  function() {\n    \"use strict\";\n    module(\'JSHint - components\');\n    test(\'components/star-rating.js should pass jshint\', function() { \n      ok(true, \'components/star-rating.js should pass jshint.\'); \n    });\n  });//# sourceURL=web-desktop/tests/components/star-rating.jshint.js");
-
-;eval("define(\"web-desktop/tests/components/trash-can.jshint\", \n  [],\n  function() {\n    \"use strict\";\n    module(\'JSHint - components\');\n    test(\'components/trash-can.js should pass jshint\', function() { \n      ok(true, \'components/trash-can.js should pass jshint.\'); \n    });\n  });//# sourceURL=web-desktop/tests/components/trash-can.jshint.js");
-
-;eval("define(\"web-desktop/tests/controllers/applist-item.jshint\", \n  [],\n  function() {\n    \"use strict\";\n    module(\'JSHint - controllers\');\n    test(\'controllers/applist-item.js should pass jshint\', function() { \n      ok(true, \'controllers/applist-item.js should pass jshint.\'); \n    });\n  });//# sourceURL=web-desktop/tests/controllers/applist-item.jshint.js");
-
-;eval("define(\"web-desktop/tests/controllers/applist.jshint\", \n  [],\n  function() {\n    \"use strict\";\n    module(\'JSHint - controllers\');\n    test(\'controllers/applist.js should pass jshint\', function() { \n      ok(true, \'controllers/applist.js should pass jshint.\'); \n    });\n  });//# sourceURL=web-desktop/tests/controllers/applist.jshint.js");
-
-;eval("define(\"web-desktop/tests/controllers/header.jshint\", \n  [],\n  function() {\n    \"use strict\";\n    module(\'JSHint - controllers\');\n    test(\'controllers/header.js should pass jshint\', function() { \n      ok(true, \'controllers/header.js should pass jshint.\'); \n    });\n  });//# sourceURL=web-desktop/tests/controllers/header.jshint.js");
-
-;eval("define(\"web-desktop/tests/controllers/search-bar.jshint\", \n  [],\n  function() {\n    \"use strict\";\n    module(\'JSHint - controllers\');\n    test(\'controllers/search-bar.js should pass jshint\', function() { \n      ok(true, \'controllers/search-bar.js should pass jshint.\'); \n    });\n  });//# sourceURL=web-desktop/tests/controllers/search-bar.jshint.js");
-
-;eval("define(\"web-desktop/tests/helpers/resolver\", \n  [\"ember/resolver\",\"web-desktop/config/environment\",\"exports\"],\n  function(__dependency1__, __dependency2__, __exports__) {\n    \"use strict\";\n    var Resolver = __dependency1__[\"default\"];\n    var config = __dependency2__[\"default\"];\n\n    var resolver = Resolver.create();\n\n    resolver.namespace = {\n      modulePrefix: config.modulePrefix,\n      podModulePrefix: config.podModulePrefix\n    };\n\n    __exports__[\"default\"] = resolver;\n  });//# sourceURL=web-desktop/tests/helpers/resolver.js");
-
-;eval("define(\"web-desktop/tests/helpers/start-app\", \n  [\"ember\",\"web-desktop/app\",\"web-desktop/router\",\"web-desktop/config/environment\",\"exports\"],\n  function(__dependency1__, __dependency2__, __dependency3__, __dependency4__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n    var Application = __dependency2__[\"default\"];\n    var Router = __dependency3__[\"default\"];\n    var config = __dependency4__[\"default\"];\n\n    __exports__[\"default\"] = function startApp(attrs) {\n      var App;\n\n      var attributes = Ember.merge({}, config.APP);\n      attributes = Ember.merge(attributes, attrs); // use defaults, but you can override;\n\n      Router.reopen({\n        location: \'none\'\n      });\n\n      Ember.run(function() {\n        App = Application.create(attributes);\n        App.setupForTesting();\n        App.injectTestHelpers();\n      });\n\n      App.reset(); // this shouldn\'t be needed, i want to be able to \"start an app at a specific URL\"\n\n      return App;\n    }\n  });//# sourceURL=web-desktop/tests/helpers/start-app.js");
-
-;eval("define(\"web-desktop/tests/mixins/drag-n-drop-view.jshint\", \n  [],\n  function() {\n    \"use strict\";\n    module(\'JSHint - mixins\');\n    test(\'mixins/drag-n-drop-view.js should pass jshint\', function() { \n      ok(true, \'mixins/drag-n-drop-view.js should pass jshint.\'); \n    });\n  });//# sourceURL=web-desktop/tests/mixins/drag-n-drop-view.jshint.js");
-
-;eval("define(\"web-desktop/tests/mixins/window-view.jshint\", \n  [],\n  function() {\n    \"use strict\";\n    module(\'JSHint - mixins\');\n    test(\'mixins/window-view.js should pass jshint\', function() { \n      ok(true, \'mixins/window-view.js should pass jshint.\'); \n    });\n  });//# sourceURL=web-desktop/tests/mixins/window-view.jshint.js");
-
-;eval("define(\"web-desktop/tests/router.jshint\", \n  [],\n  function() {\n    \"use strict\";\n    module(\'JSHint - .\');\n    test(\'router.js should pass jshint\', function() { \n      ok(true, \'router.js should pass jshint.\'); \n    });\n  });//# sourceURL=web-desktop/tests/router.jshint.js");
-
-;eval("define(\"web-desktop/tests/routes/application.jshint\", \n  [],\n  function() {\n    \"use strict\";\n    module(\'JSHint - routes\');\n    test(\'routes/application.js should pass jshint\', function() { \n      ok(true, \'routes/application.js should pass jshint.\'); \n    });\n  });//# sourceURL=web-desktop/tests/routes/application.jshint.js");
-
-;eval("define(\"web-desktop/tests/test-helper\", \n  [\"web-desktop/tests/helpers/resolver\",\"ember-qunit\"],\n  function(__dependency1__, __dependency2__) {\n    \"use strict\";\n    var resolver = __dependency1__[\"default\"];\n    var setResolver = __dependency2__.setResolver;\n\n    setResolver(resolver);\n\n    document.write(\'<div id=\"ember-testing-container\"><div id=\"ember-testing\"></div></div>\');\n\n    QUnit.config.urlConfig.push({ id: \'nocontainer\', label: \'Hide container\'});\n    var containerVisibility = QUnit.urlParams.nocontainer ? \'hidden\' : \'visible\';\n    document.getElementById(\'ember-testing-container\').style.visibility = containerVisibility;\n  });//# sourceURL=web-desktop/tests/test-helper.js");
-
-;eval("define(\"web-desktop/tests/utils/keys.jshint\", \n  [],\n  function() {\n    \"use strict\";\n    module(\'JSHint - utils\');\n    test(\'utils/keys.js should pass jshint\', function() { \n      ok(true, \'utils/keys.js should pass jshint.\'); \n    });\n  });//# sourceURL=web-desktop/tests/utils/keys.jshint.js");
-
-;eval("define(\"web-desktop/tests/views/app/deliver-bid.jshint\", \n  [],\n  function() {\n    \"use strict\";\n    module(\'JSHint - views/app\');\n    test(\'views/app/deliver-bid.js should pass jshint\', function() { \n      ok(true, \'views/app/deliver-bid.js should pass jshint.\'); \n    });\n  });//# sourceURL=web-desktop/tests/views/app/deliver-bid.jshint.js");
-
-;eval("define(\"web-desktop/tests/views/app/einventory.jshint\", \n  [],\n  function() {\n    \"use strict\";\n    module(\'JSHint - views/app\');\n    test(\'views/app/einventory.js should pass jshint\', function() { \n      ok(true, \'views/app/einventory.js should pass jshint.\'); \n    });\n  });//# sourceURL=web-desktop/tests/views/app/einventory.jshint.js");
-
-;eval("define(\"web-desktop/tests/views/app/gausian-store.jshint\", \n  [],\n  function() {\n    \"use strict\";\n    module(\'JSHint - views/app\');\n    test(\'views/app/gausian-store.js should pass jshint\', function() { \n      ok(true, \'views/app/gausian-store.js should pass jshint.\'); \n    });\n  });//# sourceURL=web-desktop/tests/views/app/gausian-store.jshint.js");
-
-;eval("define(\"web-desktop/tests/views/app/vendor-match.jshint\", \n  [],\n  function() {\n    \"use strict\";\n    module(\'JSHint - views/app\');\n    test(\'views/app/vendor-match.js should pass jshint\', function() { \n      ok(true, \'views/app/vendor-match.js should pass jshint.\'); \n    });\n  });//# sourceURL=web-desktop/tests/views/app/vendor-match.jshint.js");
-
-;eval("define(\"web-desktop/tests/views/appicon.jshint\", \n  [],\n  function() {\n    \"use strict\";\n    module(\'JSHint - views\');\n    test(\'views/appicon.js should pass jshint\', function() { \n      ok(false, \'views/appicon.js should pass jshint.\\nviews/appicon.js: line 110, col 22, \\\'evt\\\' is defined but never used.\\n\\n1 error\'); \n    });\n  });//# sourceURL=web-desktop/tests/views/appicon.jshint.js");
-
-;eval("define(\"web-desktop/tests/views/application.jshint\", \n  [],\n  function() {\n    \"use strict\";\n    module(\'JSHint - views\');\n    test(\'views/application.js should pass jshint\', function() { \n      ok(true, \'views/application.js should pass jshint.\'); \n    });\n  });//# sourceURL=web-desktop/tests/views/application.jshint.js");
-
-;eval("define(\"web-desktop/tests/views/applist.jshint\", \n  [],\n  function() {\n    \"use strict\";\n    module(\'JSHint - views\');\n    test(\'views/applist.js should pass jshint\', function() { \n      ok(false, \'views/applist.js should pass jshint.\\nviews/applist.js: line 142, col 6, Missing semicolon.\\nviews/applist.js: line 4, col 5, \\\'KEYS\\\' is defined but never used.\\n\\n2 errors\'); \n    });\n  });//# sourceURL=web-desktop/tests/views/applist.jshint.js");
-
-;eval("define(\"web-desktop/tests/views/appscreen.jshint\", \n  [],\n  function() {\n    \"use strict\";\n    module(\'JSHint - views\');\n    test(\'views/appscreen.js should pass jshint\', function() { \n      ok(false, \'views/appscreen.js should pass jshint.\\nviews/appscreen.js: line 3, col 5, \\\'get\\\' is defined but never used.\\n\\n1 error\'); \n    });\n  });//# sourceURL=web-desktop/tests/views/appscreen.jshint.js");
-
-;eval("define(\"web-desktop/tests/views/backup.jshint\", \n  [],\n  function() {\n    \"use strict\";\n    module(\'JSHint - views\');\n    test(\'views/backup.js should pass jshint\', function() { \n      ok(true, \'views/backup.js should pass jshint.\'); \n    });\n  });//# sourceURL=web-desktop/tests/views/backup.jshint.js");
-
-;eval("define(\"web-desktop/tests/views/header.jshint\", \n  [],\n  function() {\n    \"use strict\";\n    module(\'JSHint - views\');\n    test(\'views/header.js should pass jshint\', function() { \n      ok(true, \'views/header.js should pass jshint.\'); \n    });\n  });//# sourceURL=web-desktop/tests/views/header.jshint.js");
-
-;eval("define(\"web-desktop/tests/views/scroll-bar-handler.jshint\", \n  [],\n  function() {\n    \"use strict\";\n    module(\'JSHint - views\');\n    test(\'views/scroll-bar-handler.js should pass jshint\', function() { \n      ok(true, \'views/scroll-bar-handler.js should pass jshint.\'); \n    });\n  });//# sourceURL=web-desktop/tests/views/scroll-bar-handler.jshint.js");
-
-;eval("define(\"web-desktop/tests/views/scroll-bar.jshint\", \n  [],\n  function() {\n    \"use strict\";\n    module(\'JSHint - views\');\n    test(\'views/scroll-bar.js should pass jshint\', function() { \n      ok(false, \'views/scroll-bar.js should pass jshint.\\nviews/scroll-bar.js: line 14, col 45, Missing semicolon.\\n\\n1 error\'); \n    });\n  });//# sourceURL=web-desktop/tests/views/scroll-bar.jshint.js");
-
-;eval("define(\"web-desktop/tests/views/search-bar.jshint\", \n  [],\n  function() {\n    \"use strict\";\n    module(\'JSHint - views\');\n    test(\'views/search-bar.js should pass jshint\', function() { \n      ok(true, \'views/search-bar.js should pass jshint.\'); \n    });\n  });//# sourceURL=web-desktop/tests/views/search-bar.jshint.js");
-
-;eval("define(\"web-desktop/tests/views/search-results-item.jshint\", \n  [],\n  function() {\n    \"use strict\";\n    module(\'JSHint - views\');\n    test(\'views/search-results-item.js should pass jshint\', function() { \n      ok(true, \'views/search-results-item.js should pass jshint.\'); \n    });\n  });//# sourceURL=web-desktop/tests/views/search-results-item.jshint.js");
-
-;eval("define(\"web-desktop/tests/views/search-results.jshint\", \n  [],\n  function() {\n    \"use strict\";\n    module(\'JSHint - views\');\n    test(\'views/search-results.js should pass jshint\', function() { \n      ok(false, \'views/search-results.js should pass jshint.\\nviews/search-results.js: line 7, col 40, \\\'key\\\' is defined but never used.\\nviews/search-results.js: line 7, col 35, \\\'obj\\\' is defined but never used.\\n\\n2 errors\'); \n    });\n  });//# sourceURL=web-desktop/tests/views/search-results.jshint.js");
-
-;eval("define(\"web-desktop/tests/views/window.jshint\", \n  [],\n  function() {\n    \"use strict\";\n    module(\'JSHint - views\');\n    test(\'views/window.js should pass jshint\', function() { \n      ok(false, \'views/window.js should pass jshint.\\nviews/window.js: line 19, col 11, \\\'offsetX\\\' is defined but never used.\\nviews/window.js: line 20, col 11, \\\'offsetY\\\' is defined but never used.\\n\\n2 errors\'); \n    });\n  });//# sourceURL=web-desktop/tests/views/window.jshint.js");
-
-;eval("define(\"web-desktop/tests/web-desktop/tests/helpers/resolver.jshint\", \n  [],\n  function() {\n    \"use strict\";\n    module(\'JSHint - web-desktop/tests/helpers\');\n    test(\'web-desktop/tests/helpers/resolver.js should pass jshint\', function() { \n      ok(true, \'web-desktop/tests/helpers/resolver.js should pass jshint.\'); \n    });\n  });//# sourceURL=web-desktop/tests/web-desktop/tests/helpers/resolver.jshint.js");
-
-;eval("define(\"web-desktop/tests/web-desktop/tests/helpers/start-app.jshint\", \n  [],\n  function() {\n    \"use strict\";\n    module(\'JSHint - web-desktop/tests/helpers\');\n    test(\'web-desktop/tests/helpers/start-app.js should pass jshint\', function() { \n      ok(true, \'web-desktop/tests/helpers/start-app.js should pass jshint.\'); \n    });\n  });//# sourceURL=web-desktop/tests/web-desktop/tests/helpers/start-app.jshint.js");
-
-;eval("define(\"web-desktop/tests/web-desktop/tests/test-helper.jshint\", \n  [],\n  function() {\n    \"use strict\";\n    module(\'JSHint - web-desktop/tests\');\n    test(\'web-desktop/tests/test-helper.js should pass jshint\', function() { \n      ok(true, \'web-desktop/tests/test-helper.js should pass jshint.\'); \n    });\n  });//# sourceURL=web-desktop/tests/web-desktop/tests/test-helper.jshint.js");
-
-;eval("define(\"web-desktop/utils/keys\", \n  [\"exports\"],\n  function(__exports__) {\n    \"use strict\";\n    /**\n    * Created by Jordan Hawker (hawkerj)\n    * Date: 9/9/2014\n    */\n\n    var keyUtils = {\n      KEYS: {\n        BACKSPACE: 8,\n        TAB: 9,\n        ENTER: 13,\n        SHIFT: 16,\n        CTRL: 17,\n        ALT: 18,\n        PAUSE: 19,\n        CAPS_LOCK: 20,\n        ESCAPE: 27,\n        UNIT_SEPARATOR: 31, // non-printable character\n        SPACE: 32,\n        PAGE_UP: 33,\n        PAGE_DOWN: 34,\n        END: 35,\n        HOME: 36,\n        LEFT_ARROW: 37,\n        UP_ARROW: 38,\n        RIGHT_ARROW: 39,\n        DOWN_ARROW: 40,\n        INSERT: 45,\n        DELETE: 46,\n        KEY_0: 48,\n        KEY_1: 49,\n        KEY_2: 50,\n        KEY_3: 51,\n        KEY_4: 52,\n        KEY_5: 53,\n        KEY_6: 54,\n        KEY_7: 55,\n        KEY_8: 56,\n        KEY_9: 57,\n        KEY_A: 65,\n        KEY_B: 66,\n        KEY_C: 67,\n        KEY_D: 68,\n        KEY_E: 69,\n        KEY_F: 70,\n        KEY_G: 71,\n        KEY_H: 72,\n        KEY_I: 73,\n        KEY_J: 74,\n        KEY_K: 75,\n        KEY_L: 76,\n        KEY_M: 77,\n        KEY_N: 78,\n        KEY_O: 79,\n        KEY_P: 80,\n        KEY_Q: 81,\n        KEY_R: 82,\n        KEY_S: 83,\n        KEY_T: 84,\n        KEY_U: 85,\n        KEY_V: 86,\n        KEY_W: 87,\n        KEY_X: 88,\n        KEY_Y: 89,\n        KEY_Z: 90,\n        LEFT_META: 91,\n        RIGHT_META: 92,\n        SELECT: 93,\n        NUMPAD_0: 96,\n        NUMPAD_1: 97,\n        NUMPAD_2: 98,\n        NUMPAD_3: 99,\n        NUMPAD_4: 100,\n        NUMPAD_5: 101,\n        NUMPAD_6: 102,\n        NUMPAD_7: 103,\n        NUMPAD_8: 104,\n        NUMPAD_9: 105,\n        MULTIPLY: 106,\n        ADD: 107,\n        SUBTRACT: 109,\n        DECIMAL: 110,\n        DIVIDE: 111,\n        F1: 112,\n        F2: 113,\n        F3: 114,\n        F4: 115,\n        F5: 116,\n        F6: 117,\n        F7: 118,\n        F8: 119,\n        F9: 120,\n        F10: 121,\n        F11: 122,\n        F12: 123,\n        NUM_LOCK: 144,\n        SCROLL_LOCK: 145,\n        SEMICOLON: 186,\n        EQUALS: 187,\n        COMMA: 188,\n        DASH: 189,\n        PERIOD: 190,\n        FORWARD_SLASH: 191,\n        GRAVE_ACCENT: 192,\n        OPEN_BRACKET: 219,\n        BACK_SLASH: 220,\n        CLOSE_BRACKET: 221,\n        SINGLE_QUOTE: 222\n      },\n\n      isNumberKey: function (keyCode) {\n        return (keyCode > 47 && keyCode < 58); // Number keys\n      }\n    };\n\n    if (Object.freeze) {\n      Object.freeze(keyUtils.KEYS);\n    }\n\n    __exports__[\"default\"] = keyUtils;\n  });//# sourceURL=web-desktop/utils/keys.js");
-
-;eval("define(\"web-desktop/views/app/deliver-bid\", \n  [\"ember\",\"web-desktop/mixins/window-view\",\"exports\"],\n  function(__dependency1__, __dependency2__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n    var WindowMixin = __dependency2__[\"default\"];\n\n    __exports__[\"default\"] = Ember.View.extend(WindowMixin, {\n\n      layoutName: \'window\',\n      templateName: \'app/deliver-bid\',\n      finalIndex: 5,\n\n      didInsertElement: function () {\n        this._super();\n        this.set(\'index\', 1);\n        this.$(\'img:first\').on(\'mousedown\', function () {\n          var index = this.get(\'index\');\n\n          index = index === this.get(\'finalIndex\') ? 1 : index + 1;\n\n          this.set(\'index\', index);\n        }.bind(this));\n      },\n\n      onImageChange: function () {\n        console.log(\'onImageChange\');\n\n        var index = this.get(\'index\');\n\n        this.set(\'logoUrl\', \'img/pictures_for_apps/DeliverBid_%@.jpg\'.fmt(index));\n        if (index === 1 || index === 4) {\n          this.$(\'img.spinner\').show();\n          Ember.run.later(function () {\n            this.set(\'index\', index + 1);\n            this.$(\'img.spinner\').hide();\n          }.bind(this), 600);\n        }\n\n      }.observes(\'index\')\n\n    });\n  });//# sourceURL=web-desktop/views/app/deliver-bid.js");
-
-;eval("define(\"web-desktop/views/app/einventory\", \n  [\"ember\",\"web-desktop/mixins/window-view\",\"exports\"],\n  function(__dependency1__, __dependency2__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n    var WindowMixin = __dependency2__[\"default\"];\n\n    __exports__[\"default\"] = Ember.View.extend(WindowMixin, {\n\n      layoutName: \'window\',\n      templateName: \'app/einventory\',\n      finalIndex: 3,\n\n      didInsertElement: function () {\n        this._super();\n        this.set(\'index\', 1);\n        this.$(\'img:first\').on(\'mousedown\', function () {\n          var index = this.get(\'index\');\n\n          index = index === this.get(\'finalIndex\') ? 1 : index + 1;\n\n          this.set(\'index\', index);\n        }.bind(this));\n      },\n\n      onImageChange: function () {\n        console.log(\'onImageChange\');\n\n        var index = this.get(\'index\');\n\n        this.set(\'logoUrl\', \'img/pictures_for_apps/VenderMatch_%@.jpg\'.fmt(index));\n        // if (index < this.get(\'finalIndex\')) {\n        //   this.$(\'img.spinner\').show();\n        //   Ember.run.later(function () {\n        //     this.set(\'index\', index + 1);\n        //     this.$(\'img.spinner\').hide();\n        //   }.bind(this), 600);\n        // }\n\n\n\n      }.observes(\'index\')\n\n    });\n  });//# sourceURL=web-desktop/views/app/einventory.js");
-
-;eval("define(\"web-desktop/views/app/gausian-store\", \n  [\"ember\",\"web-desktop/mixins/window-view\",\"exports\"],\n  function(__dependency1__, __dependency2__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n    var WindowMixin = __dependency2__[\"default\"];\n\n    __exports__[\"default\"] = Ember.View.extend(WindowMixin, {\n\n      layoutName: \'window\',\n      templateName: \'app/deliver-bid\',\n      finalIndex: 4,\n\n      didInsertElement: function () {\n        this._super();\n        this.set(\'index\', 1);\n        this.$(\'img:first\').on(\'mousedown\', function () {\n          var index = this.get(\'index\');\n\n          index = index === this.get(\'finalIndex\') ? 1 : index + 1;\n\n          this.set(\'index\', index);\n        }.bind(this));\n      },\n\n      onImageChange: function () {\n\n        var index = this.get(\'index\');\n\n        this.set(\'logoUrl\', \'img/pictures_for_apps/Gausian_Store_%@.jpg\'.fmt(index));\n        // if (index < this.get(\'finalIndex\')) {\n        //   this.$(\'img.spinner\').show();\n        //   Ember.run.later(function () {\n        //     this.set(\'index\', index + 1);\n        //     this.$(\'img.spinner\').hide();\n        //   }.bind(this), 600);\n        // }\n\n\n\n      }.observes(\'index\')\n\n    });\n  });//# sourceURL=web-desktop/views/app/gausian-store.js");
-
-;eval("define(\"web-desktop/views/app/vendor-match\", \n  [\"ember\",\"web-desktop/mixins/window-view\",\"exports\"],\n  function(__dependency1__, __dependency2__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n    var WindowMixin = __dependency2__[\"default\"];\n\n    __exports__[\"default\"] = Ember.View.extend(WindowMixin, {\n\n      layoutName: \'window\',\n      templateName: \'app/deliver-bid\',\n      finalIndex: 3,\n\n      didInsertElement: function () {\n        this._super();\n        this.set(\'index\', 1);\n        this.$(\'img:first\').on(\'mousedown\', function () {\n          var index = this.get(\'index\');\n\n          index = index === this.get(\'finalIndex\') ? 1 : index + 1;\n\n          this.set(\'index\', index);\n        }.bind(this));\n      },\n\n      onImageChange: function () {\n\n        var index = this.get(\'index\');\n\n        this.set(\'logoUrl\', \'img/pictures_for_apps/Einventory_%@.jpg\'.fmt(index));\n        // if (index < this.get(\'finalIndex\')) {\n        //   this.$(\'img.spinner\').show();\n        //   Ember.run.later(function () {\n        //     this.set(\'index\', index + 1);\n        //     this.$(\'img.spinner\').hide();\n        //   }.bind(this), 600);\n        // }\n\n\n\n      }.observes(\'index\')\n\n    });\n  });//# sourceURL=web-desktop/views/app/vendor-match.js");
-
-;eval("define(\"web-desktop/views/appicon\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n\n    __exports__[\"default\"] = Ember.View.extend({\n      tagName: \'li\',\n      templateName: \'appicon\',\n      attributeBindings : [ \'draggable\' ],\n      draggable         : \'true\',\n\n\n      row: function () {\n        return this.get(\'content.row\');\n      }.property(\'content.row\'),\n\n      col: function () {\n        return this.get(\'content.col\');\n      }.property(\'content.col\'),\n\n      scr: function () {\n        return this.get(\'content.screen\');\n      }.property(\'content.screen\'),\n\n      iconWidth: function () {\n        return this.get(\'parentView.iconWidth\');\n      }.property(\'parentView.iconWidth\'),\n\n\n      parentWidth: function () {\n        return this.get(\'parentView.screenWidth\');\n      }.property(\'parentView.screenWidth\'),\n\n      parentHeight: function () {\n        return this.get(\'parentView.screenHeight\');\n      }.property(\'parentView.screenHeight\'),\n\n      onIconSizeChange: function () {\n        this.handleSize();\n        this.position();\n      }.observes(\'iconWidth\', \'parentWidth\',\'parentHeight\'),\n\n      didInsertElement: function () {\n        this.$().draggable();\n        this.handleSize();\n        this.position();\n      },\n\n      handleSize: function () {\n        var iconWidth = this.get(\'iconWidth\');\n\n        this.$(\'span\').css({\n          \'top\': iconWidth + 5 * iconWidth / 60,\n          \'font-size\': 12 + Math.round(iconWidth / 60)\n        });\n\n        this.$().css({\n          \'height\': iconWidth,\n          \'width\':  iconWidth,\n          \'display\': \'inline-block\',\n          \'float\': \'left\'\n        });\n        this.$(\'.app-img\').css({\n          \'background\': \'url(img/\' + this.get(\'content.imgName\') + \'.png) no-repeat\',\n          \"background-size\": \"100%\"\n        });\n      },\n\n\n      position: function (row, col, scr, duration) {\n        row = !Ember.isEmpty(row) ? row : this.get(\'row\');\n        col = !Ember.isEmpty(col) ? col : this.get(\'col\');\n        scr = !Ember.isEmpty(scr) ? scr : this.get(\'scr\');\n        var iconWidth = this.get(\'iconWidth\');\n        var iconHeight = this.get(\'parentView.iconHeight\');\n        var offsetHeight = this.get(\'parentView.offsetHeight\');\n        var offsetWidth  = this.get(\'parentView.offsetWidth\');\n\n        var screnWidth = this.get(\'parentView.screenWidth\');\n        var widthOffset = this.get(\'parentView.widthOffset\');\n        var screenLeft = scr * (screnWidth + widthOffset + 10) + widthOffset;\n\n        var top  = (iconHeight + offsetHeight) * row + offsetHeight;\n        var left = (iconWidth + offsetWidth) * col + offsetWidth + screenLeft;\n\n        if (duration) {\n          this.$().animate({\n            \'top\': top,\n            \'left\': left\n          }, duration);\n        } else {\n          this.$().css({\n            \'top\': top,\n            \'left\': left\n          });\n        }\n        this.setProperties({\n          \'content.row\': row,\n          \'content.col\': col,\n          \'content.screen\': scr\n        });\n      },\n\n      mouseDown: function (event) {\n        var originEvt = event.originalEvent;\n        var offsetX = originEvt.offsetX ? originEvt.offsetX : originEvt.layerX;\n        var offsetY = originEvt.offsetY ? originEvt.offsetY : originEvt.layerY;\n\n        this.$().addClass(\'dragging\');\n        this.get(\'parentView\').onMouseDown(this, offsetX, offsetY);\n      },\n\n      mouseUp: function (evt) {\n        this.$().removeClass(\'dragging\');\n        return true;\n      }\n\n    });\n  });//# sourceURL=web-desktop/views/appicon.js");
-
-;eval("define(\"web-desktop/views/application\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n\n    __exports__[\"default\"] = Ember.View.extend({\n      classNames: [\'application\']\n    });\n  });//# sourceURL=web-desktop/views/application.js");
-
-;eval("define(\"web-desktop/views/applist\", \n  [\"ember\",\"web-desktop/utils/keys\",\"exports\"],\n  function(__dependency1__, __dependency2__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n    var keyUtils = __dependency2__[\"default\"];\n\n    var KEYS = keyUtils.KEYS;\n    var get = Ember.get;\n\n    __exports__[\"default\"] = Ember.View.extend({\n      templateName: \'applist\',\n      classNames: [\'applist\'],\n\n      height: 600,\n      width: 400,\n\n      left: 89,\n      top: 103,\n\n      init: function () {\n        this._super();\n        this.handleSize();\n        Ember.$(window).resize(function() {\n          this.handleSize();\n        }.bind(this));\n      },\n\n      didInsertElement: function () {\n        this.handleSize();\n      },\n\n      handleSize: function () {\n\n        var minWidthIcon = 48;\n        var minHeightWin = 600;\n        var minWidthWin = 800;\n        var winWidth  = Math.max(Ember.$(window).width(), minWidthWin);\n        var winHeight = Math.max(Ember.$(window).height()*0.85, minHeightWin);\n\n        var height = (winHeight) * 0.9;\n        var width = winWidth / 3 * 0.8 ;\n        var widthOffset = (winWidth - 3 * (width + 10)) / 4;\n\n        var iconWidth = Math.max(width/4 * 0.6, minWidthIcon);\n        var iconHeight = iconWidth * 4 / 3;\n\n        var offsetWidth  = (width - iconWidth * 4) / 5;\n        var offsetHeight = (height - iconHeight * 5) / 6;\n\n        this.setProperties({\n          screenWidth:  width,\n          screenHeight: height,\n          screenTop:    0,\n          widthOffset:  widthOffset,\n          iconWidth:    iconWidth,\n          iconHeight:   iconHeight,\n          offsetHeight: offsetHeight,\n          offsetWidth:  offsetWidth\n        });\n      },\n\n      getScreenRowCol: function (left, top) {\n        var offsetWidth = this.get(\'offsetWidth\');\n        var offsetHeight = this.get(\'offsetHeight\');\n        var screenWidth = this.get(\'screenWidth\');\n        var widthOffset = this.get(\'widthOffset\');\n        var screenLeft = screenWidth + widthOffset + 10;\n\n        var newScr = 0;\n        for (var i = 0 ; i < 3; i++) {\n          if (left >= screenLeft * i + widthOffset && left < screenLeft * (i + 1) + widthOffset) {\n            newScr = i;\n          }\n        }\n\n        var newCol = Math.round((left - offsetWidth/2 - newScr * screenLeft - widthOffset) * 4 / screenWidth);\n        var newRow = Math.round((top - offsetHeight/2) * 5 / this.get(\'screenHeight\'));\n\n        newCol = newCol < 0 ? 0: newCol;\n        newCol = newCol > 3 ? 3: newCol;\n        return {row: newRow, col: newCol, scr: newScr};\n      },\n\n      onMouseDown: function (app, offsetX, offsetY) { // this will be called by item\n        this.setProperties({\n          \'activeApp\': app,\n          \'offsetX\': offsetX,\n          \'offsetY\': offsetY\n        });\n\n        this.$(document).on(\'mousemove\', this.onMouseMove.bind(this));\n        this.on(\'mouseUp\', this.onMouseRelease);\n        //this.on(\'mouseLeave\', this.onMouseRelease);\n      },\n\n      onMouseMove: function (event) {console.log(\'onMouseMove\');\n        // this.set(\'parentView.appTouch\', true);\n        this.set(\'controller.appTouch\', true);\n\n        var node = this.get(\'activeApp\');\n        var originEvt = event.originalEvent;\n        var offset = node.$().parent().offset(); // TBD\n        var x = originEvt.clientX - this.get(\'offsetX\') - offset.left;\n        var y = originEvt.clientY - this.get(\'offsetY\') - offset.top;\n        node.$().css({ // image follow\n          \'top\': y,\n          \'left\': x,\n          \'z-index\': \'100\'\n        });\n        var rowCol = this.getScreenRowCol(x, y);\n        if (node.get(\'row\') !== rowCol.row ||\n            node.get(\'col\') !== rowCol.col ||\n            node.get(\'scr\') !== rowCol.scr) {\n          this.shuffle({\n            row: node.get(\'row\'),\n            col: node.get(\'col\'),\n            scr: node.get(\'scr\')\n          }, rowCol);\n        }\n      },\n\n      onMouseRelease: function () {\n        var node = this.get(\'activeApp\');\n        node.$().removeClass(\'dragging\');\n        this.$(document).off(\'mousemove\');\n        this.off(\'mouseUp\', this.onMouseRelease);\n        // this.off(\'mouseLeave\', this.onMouseRelease);\n        node.position(node.get(\'row\'), node.get(\'col\'), node.get(\'scr\'), 300);\n\n        node.$().css({\n          \'z-index\': 1\n        });\n        if (!this.get(\'controller.appTouch\')) {\n          this.get(\'controller\').send(\'openApp\', node.get(\'content\'));\n        }\n        this.set(\'controller.appTouch\', false);\n      },\n\n      shuffle: function (from, to) {  // TBD add screen constrain\n        console.log(JSON.stringify(from) + \' -> \' + JSON.stringify(to));\n        var isSamePosition = function (pos1, pos2) {\n          return get(pos1, \'col\') === get(pos2, \'col\') &&\n          get(pos1, \'row\') === get(pos2, \'row\') &&\n          get(pos1, \'scr\') === get(pos2, \'scr\');\n        }\n        this.get(\'childViews\').forEach(function (itemView) {\n          if (isSamePosition(itemView, to)) { // swap\n            console.log(from);\n            itemView.position(get(from, \'row\'), get(from, \'col\'), get(from, \'scr\'), 200);\n          } else if (isSamePosition(itemView, from)) { // target\n            itemView.setProperties({\n              col: get(to, \'col\'),\n              row: get(to, \'row\'),\n              scr: get(to, \'scr\')\n            });\n          }\n        });\n      },\n\n\n\n    });\n  });//# sourceURL=web-desktop/views/applist.js");
-
-;eval("define(\"web-desktop/views/appscreen\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n\n    var get = Ember.get;\n\n    __exports__[\"default\"] = Ember.View.extend({\n      // templateName: \'appscreen\',\n      classNames: [\'appscreen\', \'appscreen-set\', \'dropzone\'],\n      classNameBindings: [\'appTouch:background\', \'hasApp\'],\n      appTouch: false,\n\n      hasApp: false,\n\n      init: function () {\n        this._super();\n        Ember.$(window).resize(function() {\n          this.handleSize();\n        }.bind(this));\n      },\n\n      handleSize: function () {\n        var index = this.get(\'index\') || 0;\n        var width = this.get(\'parentView.screenWidth\');\n        var widthOffset = this.get(\'parentView.widthOffset\');\n        var left = index * (width + widthOffset + 10) + widthOffset;\n        this.$().css({\n          top: this.get(\'parentView.screenTop\'),\n          left: left,\n          width: width,\n          height: this.get(\'parentView.screenHeight\')\n        });\n      }.on(\'didInsertElement\')\n\n\n    });\n  });//# sourceURL=web-desktop/views/appscreen.js");
-
-;eval("define(\"web-desktop/views/backup\", \n  [\"ember\",\"web-desktop/utils/keys\",\"exports\"],\n  function(__dependency1__, __dependency2__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n    var keyUtils = __dependency2__[\"default\"];\n\n    var KEYS = keyUtils.KEYS;\n    var get = Ember.get;\n\n    __exports__[\"default\"] = Ember.CollectionView.extend({\n      // templateName: \'appscreen\',\n      classNames: [\'appscreen\', \'appscreen-set\', \'dropzone\'],\n      classNameBindings: [\'appTouch:background\'],\n      appTouch: false,\n      contentBinding: \'controller\',\n      tagName: \'ul\',\n      height: 600,\n      width: 400,\n\n      left: 89,\n      top: 103,\n\n      itemViewClass: \'appicon\',\n\n      activeApp: null,\n\n      init: function () {\n        this._super();\n        Ember.$(window).resize(function() {\n\n          this.handleSize();\n        }.bind(this));\n      },\n\n      didInsertElement: function () {\n        this.handleSize();\n        Ember.$(document).on(\'keyup.applist\', this.onKeyUp.bind(this));\n      },\n\n      onKeyUp: function (evt) {\n        // key event 27 is the escape key\n        if (evt.which === KEYS.LEFT_ARROW || evt.which === KEYS.RIGHT_ARROW) {\n          Ember.run(this, function () {\n            this.controller.send(\'moveImage\', evt.which);\n          });\n        }\n      },\n\n      handleSize: function () {\n\n        var minHeightIcon = 64;\n        var minWidthIcon = 48;\n        var minHeightScreen = minHeightIcon * 6;\n        var minWidthScreen = minWidthIcon * 4;\n        var minHeightWin = minHeightScreen + 60;\n        var minWidthWin = minWidthScreen * 4;\n        var winWidth  = Math.max(Ember.$(window).width(), minWidthWin);\n        var winHeight = Math.max(Ember.$(window).height(), minHeightWin);\n\n        var height = (winHeight - 60) * 0.9;\n        var width = winWidth / 3 * 0.9 ;\n\n        var top = (winHeight - 60 - height) / 2 + 45;\n        var left = (winWidth - width * 3) / 4;\n\n        var iconWidth = Math.max(width/4 * 0.6, minWidthIcon);\n        // var node = this.$();\n        // node.css({\n        //   width: width,\n        //   height: height,\n        //   left: left,\n        //   top: top\n        // });\n        // node.css({\n        //   width: \'100%\',\n        //   height: \'100%\'\n        // });\n        this.setProperties({\n          screenWidth: width,\n          screenHeight: height,\n          top: top,\n          left: left,\n          iconWidth: iconWidth\n        });\n      },\n\n\n      getScreenRowCol: function (left, top) { // TBD: refine accuracy\n        var newCol = Math.round(left * 4 / this.get(\'screenWidth\'));\n        var newRow = Math.round(top * 5 / this.get(\'screenHeight\'));\n        return {row: newRow, col: newCol};\n      },\n\n      onMouseMove: function (event) {\n        // this.set(\'parentView.appTouch\', true);\n        this.set(\'controller.appTouch\', true);\n\n        var node = this.get(\'activeApp\');\n        var originEvt = event.originalEvent;\n        var offset = node.$().parent().offset(); // TBD\n        var x = originEvt.clientX - this.get(\'offsetX\') - offset.left;\n        var y = originEvt.clientY - this.get(\'offsetY\') - offset.top;\n        node.$().css({ // image follow\n          \'top\': y,\n          \'left\': x,\n          \'z-index\': \'100\'\n        });\n        var rowCol = this.getScreenRowCol(x, y);\n        if (node.get(\'row\') !== rowCol.row || node.get(\'col\') !== rowCol.col) {\n          this.shuffle(\n          {row: node.get(\'row\'), col: node.get(\'col\')},\n          rowCol);\n        }\n      },\n\n      onMouseRelease: function () {\n        var node = this.get(\'activeApp\');\n        node.$().removeClass(\'dragging\');\n        this.$(document).off(\'mousemove\');\n        this.off(\'mouseUp\', this.onMouseRelease);\n        // this.off(\'mouseLeave\', this.onMouseRelease);\n        node.position(node.get(\'row\'), node.get(\'col\'), 300);\n\n        node.$().css({\n          \'z-index\': 1\n        });\n        if (!this.get(\'controller.appTouch\')) {\n          this.get(\'controller\').send(\'openApp\', node.get(\'content\'));\n        }\n        this.set(\'controller.appTouch\', false);\n      },\n\n      onMouseDown: function (app, offsetX, offsetY) { // this will be called by item\n        this.setProperties({\n          \'activeApp\': app,\n          \'offsetX\': offsetX,\n          \'offsetY\': offsetY\n        });\n\n        this.$(document).on(\'mousemove\', this.onMouseMove.bind(this));\n        this.on(\'mouseUp\', this.onMouseRelease);\n        //this.on(\'mouseLeave\', this.onMouseRelease);\n      },\n\n      shuffle: function (from, to) {  // TBD add screen constrain\n        console.log(JSON.stringify(from) + \' -> \' + JSON.stringify(to));\n        this.get(\'childViews\').forEach(function (itemView) {\n          var col = get(itemView, \'col\');\n          var row = get(itemView, \'row\');\n          if (col === get(to, \'col\') && row === get(to, \'row\') ) {\n            itemView.position(get(from, \'row\'), get(from, \'col\'), 200);\n          } else if (col === get(from, \'col\') && row === get(from, \'row\') ) {\n            itemView.setProperties({\n              col: get(to, \'col\'),\n              row: get(to, \'row\')\n            });\n          }\n        });\n      }\n\n\n    });\n  });//# sourceURL=web-desktop/views/backup.js");
-
-;eval("define(\"web-desktop/views/header\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n\n    __exports__[\"default\"] = Ember.View.extend({\n      classNames: [\'head\'],\n      templateName: \'header\',\n      width_dock_icon: 52,\n      width_dock_corner: 25,\n      width_sync: 66,\n\n      adjustSize: function () {\n        var total_dock = this.get(\'content.dock.length\');\n        var offset = total_dock ? total_dock * this.get(\'width_dock_icon\') + 2 * this.get(\'width_dock_corner\') : 0;\n        var width = (Ember.$( window ).width() - offset - this.get(\'width_sync\')) /2 ;\n        if (this.get(\'_state\') === \"inDOM\") {\n          this.$(\'.left\').width(width);\n          this.$(\'.right\').width(width);\n        }\n      }.observes(\'content.dock.length\'),\n\n      init: function() {\n        this._super();\n        Ember.$(window).bind(\'resize\', function () {\n          this.adjustSize();\n        }.bind(this));\n      },\n      didInsertElement: function () {\n        this.adjustSize();\n      },\n\n\n    });\n  });//# sourceURL=web-desktop/views/header.js");
-
-;eval("define(\"web-desktop/views/scroll-bar-handler\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n\n    __exports__[\"default\"] = Ember.View.extend({\n      classNames: [\'jspDrag\'],\n\n      onLenChange: function () {\n\n        var len = this.get(\'len\')||0;\n        var top = this.get(\'top\')||0;\n\n        this.$().css({\n          height: len + \'px\',\n          top: top +\'px\'\n        });\n      }.observes(\'len\', \'top\'),\n\n      mouseEnter: function () {\n        this.$().addClass(\'jspHover\');\n      },\n\n      mouseLeave: function () {\n        this.$().removeClass(\'jspHover\');\n      },\n\n      mouseDown: function (evt) {\n        this.$().addClass(\'jspActive\');\n        this.get(\'parentView\').jspActive(evt);\n      },\n\n      mouseUp: function () {\n        this.$().removeClass(\'jspActive\');\n        this.get(\'parentView\').jspDeactive();\n      },\n\n\n\n    });\n  });//# sourceURL=web-desktop/views/scroll-bar-handler.js");
-
-;eval("define(\"web-desktop/views/scroll-bar\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n\n\n    __exports__[\"default\"] = Ember.View.extend({\n      classNames: [\'jspVerticalBar\'],\n      templateName: \'scroll-bar\',\n\n      trackStyle: function () {\n        console.log(\'trackStyle\');\n        return \'height: %@px\'.fmt(this.get(\'trackLen\')||0);\n      }.property(\'trackLen\'),\n\n      jspActive: function (evt) {\n        var offsetY =  evt.originalEvent.offsetY\n        Ember.$(\'.overlay\').on(\'mousemove\', function (evt) { //TBD : better event handle\n          Ember.run.debounce(function () {\n            var offset = evt.originalEvent.clientY - offsetY - this.$().offset().top;\n            var slideLen = this.get(\'trackLen\') - this.get(\'handlerLen\');\n            if (offset > 0 && offset < slideLen) {\n              console.log(evt.clientY + \' - \' + evt.offsetY + \' - \' + offsetY + \' = \' + offset);\n\n              this.set(\'handlerTop\', offset);\n              var percent = offset / slideLen;\n              this.get(\'parentView\').scrollList(percent);\n            }\n          }.bind(this), 50);\n\n        }.bind(this));\n\n        Ember.$(\'.overlay\').on(\'mouseup\', function () {\n          this.jspDeactive();\n\n        }.bind(this));\n\n      },\n\n      jspDeactive: function () {\n        Ember.$(\'.overlay\').off(\'mousemove\');\n      },\n\n      // mouseMove: function (evt) {\n      //     if (this.get(\'active\')) {\n      //\n      //       var offset = evt.originalEvent.clientY - this.get(\'offsetY\') - 142;\n      //       if (offset > 0 && offset < this.get(\'trackLen\') - this.get(\'handlerLen\')) {\n      //         console.log(evt.clientY + \' - \' + evt.offsetY + \' - \' + this.get(\'offsetY\') + \' = \' + offset);\n      //\n      //         this.set(\'handlerTop\', offset);\n      //       }\n      //\n      //       // console.log(offset);\n      //     }\n      // }\n\n    });\n  });//# sourceURL=web-desktop/views/scroll-bar.js");
-
-;eval("define(\"web-desktop/views/search-bar\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n\n    var get = Ember.get;\n\n    __exports__[\"default\"] = Ember.View.extend({\n      templateName: \'search-bar\',\n      classNames: [\'search-bar\'],\n      query: \'\',\n\n      didInsertElement: function () {\n        this.$(\'.search\').on(\'click\', function () {\n          this.$(\'.overlay\').show();\n          this.$(\'.search\').hide();\n          this.$(\'.overlay input\').focus();\n        }.bind(this));\n\n        // this.$(\'.overlay\').on(\'click\', function () {\n        //   this.$(\'.search\').show();\n        //   this.$(\'.overlay\').hide();\n        //   this.$(\'.overlay\').off(\'mousemove\');\n        // }.bind(this));\n        // this.$(\'.modal\').on(\'click\', function (evt) {\n        //   evt.stopPropagation();\n        // });\n\n\n        this.$(\'.modal\').on(\'mousewheel\', function(event) {\n          var viewLen = this.$(\'.container\').height() - 20; // 20 is padding\n          var contentLen = this.get(\'controller.resultDivHeight\');\n          var top = parseInt(this.$(\'.container ul\').css(\'top\'), 10);\n          var range = contentLen - viewLen;\n          if (range > 0) {\n            top = top + event.deltaY;\n            top = Math.min(top, 0);\n            top = Math.max(top, -range);\n            this.$(\'.container ul\').css({top: top + \'px\'});\n            var handlerTop = -top/range * this.get(\'handlerLen\');\n            this.set(\'handlerTop\', handlerTop);\n          }\n        }.bind(this));\n      },\n\n      all: [\n        {\n          name: \'Check\',\n          rating: 5,\n          category: \'Inventory Management\',\n          price: 4,\n          freeDays: 30,\n          icon: \'img/icon_1.png\',\n          installed: false\n        }, {\n          name: \'Aplus\',\n          rating: 5,\n          category: \'Inventory Management\',\n          price: 8,\n          freeDays: 30,\n          icon: \'img/icon_1.png\',\n          installed: false\n        }, {\n          name: \'Docs\',\n          rating: 4,\n          category: \'Inventory Management\',\n          price: 6,\n          freeDays: 30,\n          icon: \'img/icon_3.png\',\n          installed: false\n        }, {\n          name: \'Report\',\n          rating: 4,\n          category: \'Inventory Management\',\n          price: 2,\n          freeDays: 30,\n          icon: \'img/icon_8.png\',\n          installed: false\n        }, {\n          name: \'Match\',\n          rating: 3,\n          category: \'Inventory Management\',\n          price: 8,\n          freeDays: 30,\n          icon: \'img/icon_4.png\',\n          installed: false\n        }, {\n          name: \'Scan\',\n          rating: 5,\n          category: \'Inventory Management\',\n          price: 4,\n          freeDays: 30,\n          icon: \'img/icon_5.png\',\n          installed: false\n        }\n      ],\n\n      searchContent: function () {\n        var array = [];\n        var query = this.get(\'query\');\n        if (query) {\n          query = query.toLowerCase();\n          array = this.get(\'all\').filter(function (item) {\n            return get(item, \'name\').toLowerCase().indexOf(query) !== -1 || get(item, \'category\').toLowerCase() === query;\n          });\n        }\n        return array;\n      }.property(\'query\'),\n\n      keyUp: function (evt) {\n        var query = this.get(\'query\');\n        if (evt.keyCode === 27) {\n          if (query) {\n            this.set(\'query\', \'\');\n          } else {\n            this.$(\'.search\').show();\n            this.$(\'.overlay\').hide();\n          }\n        }\n      },\n\n      updateHeight: function () {\n        if (this.get(\'_state\') === \'inDOM\') {\n          var viewLen = this.$(\'.container\').height() - 20; // 20 is padding\n          var contentLen = this.get(\'controller.resultDivHeight\');\n          var trackLen = viewLen;\n          var handlerLen = trackLen * viewLen / contentLen;\n\n          if (trackLen <= handlerLen) {\n            this.setProperties({\n              trackLen: 0,\n              handlerLen: 0\n            });\n          } else {\n            this.setProperties({\n              trackLen: trackLen,\n              handlerLen: handlerLen\n            });\n          }\n        }\n      }.observes(\'controller.resultDivHeight\'),\n\n      scrollList: function (percent) {\n        var viewLen = this.$(\'.container\').height() - 20; // 20 is padding\n        var contentLen = this.get(\'controller.resultDivHeight\');\n        var top = (viewLen - contentLen) * percent;\n        this.$(\'.container ul\').css({top: top + \'px\'});\n      },\n\n      actions: {\n        cancel: function () {\n          var query = this.get(\'query\');\n          if (query) {\n            this.set(\'query\', \'\');\n            this.$(\'.overlay input\').focus();\n          } else {\n            this.$(\'.search\').show();\n            this.$(\'.overlay\').hide();\n          }\n        }\n      }\n\n    });\n  });//# sourceURL=web-desktop/views/search-bar.js");
-
-;eval("define(\"web-desktop/views/search-results-item\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n\n    __exports__[\"default\"] = Ember.View.extend({\n      templateName: \'search-results-item\',\n      classNames: [\'search-results-item\'],\n      label: function () {\n        if (this.get(\'content.installed\')) {\n          return \'Open\';\n        } else {\n          return \'Get\';\n        }\n      }.property(\'content.installed\')\n    });\n  });//# sourceURL=web-desktop/views/search-results-item.js");
-
-;eval("define(\"web-desktop/views/search-results\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n\n    __exports__[\"default\"] = Ember.CollectionView.extend({\n      itemViewClass: \'search-results-item\',\n      tagName: \'ul\',\n      classNames: [\'search-results\'],\n      onChildViewsChanged : function( obj, key ){\n        var length = this.get( \'childViews.length\' );\n        if( length > 0 ){\n          Ember.run.scheduleOnce( \'afterRender\', this, \'childViewsDidRender\' );\n        }\n      }.observes(\'childViews\'),\n\n      childViewsDidRender : function(){\n        this.get(\'controller\').set(\'resultDivHeight\', this.$().height());\n      }\n    });\n  });//# sourceURL=web-desktop/views/search-results.js");
-
-;eval("define(\"web-desktop/views/window\", \n  [\"ember\",\"exports\"],\n  function(__dependency1__, __exports__) {\n    \"use strict\";\n    var Ember = __dependency1__[\"default\"];\n\n    __exports__[\"default\"] = Ember.View.extend({\n      templateName: \'window\',\n      classNames: [\'window\', \'share\',  \'windows-vis\'],\n\n      width: 800,\n      height: 600,\n\n      didInsertElement: function () {\n\n        this.$().css({\n          width: this.get(\'width\'),\n          height: this.get(\'height\')\n        });\n\n        this.$(\'.header\').on(\'mousedown\', function (event) {\n          var originEvt = event.originalEvent;\n          var offsetX = originEvt.offsetX ? originEvt.offsetX : originEvt.layerX;\n          var offsetY = originEvt.offsetY ? originEvt.offsetY : originEvt.layerY;\n\n        //   this.$(\'.header\').on(\'mousemove\', function (event) {\n        //     var originEvt = event.originalEvent;\n        //     var x = originEvt.clientX - offsetX;\n        //     var y = originEvt.clientY - offsetY;\n        //     this.$().css({ // image follow\n        //       \'top\': y,\n        //       \'left\': x,\n        //       \'z-index\': \'1000\'\n        //     });\n        //   }.bind(this));\n        //\n        }.bind(this));\n\n        this.$(\'.header\').on(\'mouseup\', function () {console.log(\'mouseup\');\n          Ember.$(this).off(\'mousemove\');\n        });\n\n      },\n\n      willDestroyElement: function () {\n        this.$(\'.header\').on(\'mousedown\');\n        this.$(\'.header\').on(\'mouseup\');\n      }\n\n    });\n  });//# sourceURL=web-desktop/views/window.js");
-
+define('web-desktop/app', ['exports', 'ember', 'ember/resolver', 'ember/load-initializers', 'web-desktop/config/environment'], function (exports, Ember, Resolver, loadInitializers, config) {
+
+  'use strict';
+
+  Ember['default'].MODEL_FACTORY_INJECTIONS = true;
+  
+  var App = Ember['default'].Application.extend({
+    modulePrefix: config['default'].modulePrefix,
+    podModulePrefix: config['default'].podModulePrefix,
+    Resolver: Resolver['default']
+  });
+  
+  loadInitializers['default'](App, config['default'].modulePrefix);
+  
+  exports['default'] = App;
+
+});
+define('web-desktop/components/star-rating', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].Component.extend({
+    tagName: 'span',
+    classNames: ['star-rating'],
+    stars: function () {
+      var rating = this.get('content') || 0;
+      var array = new Array(rating);
+      return array;
+    }.property('content')
+  
+  });
+
+});
+define('web-desktop/components/trash-can', ['exports', 'ember', 'web-desktop/mixins/drag-n-drop-view'], function (exports, Ember, DragDrop) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].Component.extend(DragDrop['default'].Droppable,{
+  
+    drop: function () {
+      console.log('drop');
+    }
+  
+  });
+
+});
+define('web-desktop/controllers/applist-item', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].ObjectController.extend({
+    
+  });
+
+});
+define('web-desktop/controllers/applist', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  var get = Ember['default'].get;
+  var set = Ember['default'].set;
+  
+  exports['default'] = Ember['default'].Controller.extend({
+    // itemController: 'applist-item',
+    screenNum: 3,
+    screens: [{ id: 0, hasApp: false},
+    { id: 1, hasApp: false},
+    { id: 2, hasApp: false}],
+  
+    appTouch: false,
+  
+    openApps: [],
+  
+    init: function () {
+      this._super.apply(this, arguments);
+      // this.setupOperator();
+    },
+  
+    // setupOperator: function () {
+    //   var i = 0;
+    //   for (i = 0; i <= this.get('screenNum'); i++) {
+    //     var name = 'screen_' + i;
+    //     Ember.defineProperty(this, name, Ember.computed.filterBy('@this', 'screen', i));
+    //   }
+    // },
+  
+    appScreenChange: function () {
+      var apps = this.get('content');
+      var screens = this.get('screens');
+      screens.forEach(function (scr) {
+        var index = get(scr, 'id');
+        var hasApp = apps.any(function (app) {
+  
+          return get(app, 'screen') === index;
+        });
+        set(scr, 'hasApp', hasApp);
+      });
+    }.observes('content.@each.screen'),
+  
+    actions: {
+      showTrash: function (show) {
+        this.set('appTouch', show);
+      },
+      openApp: function (item) { console.log('openApp');
+        var name = get(item, 'name');
+  
+        var find = this.get('openApps').any(function (it) {
+          return get(it, 'name') === name;
+        });
+  
+        if (!find) {
+          var viewType = 'app.' + get(item, 'viewName');
+          var klass = this.container.lookupFactory('view:' + viewType);
+          var length = this.get('openApps').length;
+          var top = 150 + 20 * length;
+          var left = 350 + 20 * length;
+          var instant = klass.create({
+            top: top,
+            left: left,
+            content:    item,
+            parentView: this,
+            container:  this.container
+          }).appendTo('body');
+          this.get('openApps').pushObject({name: name, instant: instant});
+        }
+      },
+  
+      closeApp: function (item) {
+        var name = get(item, 'name');
+        var obj = this.get('openApps').filter(function (it) {
+          return get(it, 'name') === name;
+        });
+        //
+        var instant = get(obj[0], 'instant');
+        if (instant) {
+          this.get('openApps').removeObject(obj[0]);
+          instant.destroy();
+        }
+  
+        var mostTopApp = null;
+        var mostTopZindex = -1;
+        this.get('openApps').forEach(function (app) {
+          var instant = app.instant;
+          var zindex = parseInt(Ember['default'].$(instant.get('element')).css("z-index"));
+          if (zindex > mostTopZindex) {
+            mostTopZindex = zindex;
+            mostTopApp = instant;
+          }
+        });
+        if (mostTopApp) {
+          mostTopApp.changeZindex();
+        }
+      },
+  
+      addApp: function () { // TBD
+        console.log('addApp');
+      },
+  
+      deleteApp: function (/*item*/) { // TBD
+        console.log('deleteApp');
+      },
+  
+      moveImage: function (key) {
+  
+        console.log('moveImage' + key);
+      },
+  
+      activateWindow: function (/*content*/) {
+        console.log('activateWindow');
+      }
+  
+    }
+  });
+
+});
+define('web-desktop/controllers/header', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].Controller.extend({
+    dock: []
+  });
+
+});
+define('web-desktop/controllers/search-bar', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].Controller.extend({
+    resultDivHeight: 0
+  });
+
+});
+define('web-desktop/initializers/export-application-global', ['exports', 'ember', 'web-desktop/config/environment'], function (exports, Ember, config) {
+
+  'use strict';
+
+  exports.initialize = initialize;
+
+  function initialize(container, application) {
+    var classifiedName = Ember['default'].String.classify(config['default'].modulePrefix);
+
+    if (config['default'].exportApplicationGlobal) {
+      window[classifiedName] = application;
+    }
+  };
+
+  exports['default'] = {
+    name: 'export-application-global',
+
+    initialize: initialize
+  };
+
+});
+define('web-desktop/mixins/drag-n-drop-view', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  var Drag = Ember['default'].Namespace.create({});
+  
+  Drag.cancel = function (event) {
+    event.preventDefault();
+    return false;
+  };
+  
+  Drag.Draggable = Ember['default'].Mixin.create({
+    attributeBindings: 'draggable',
+    draggable: 'true',
+    dragStart: function (evt) {
+      /* firefox will only allow dragStart if it has data */
+      evt.originalEvent.dataTransfer.setData('text/plain', 'DRAGGABLE');
+    }
+  });
+  
+  Drag.Droppable = Ember['default'].Mixin.create({
+    placeholder: null,
+    dragEnter: Drag.cancel,
+  //  dragOver: Drag.cancel,
+    drop: function (event) {
+      event.preventDefault();
+      return false;
+    }
+  });
+  
+  exports['default'] = Drag;
+
+});
+define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].Mixin.create({
+    classNames: ['window', 'windows-vis'],
+    classNameBindings: ['active'],
+    active: true,
+    width: 800,
+    height: 500,
+    left: 0,
+    top: 0,
+  
+    changeZindex: function () {
+      var zindex = -1;
+      Ember['default'].$('.window').each(function () {
+        var z = parseInt(Ember['default'].$(this).css('z-index'));
+        if (z > zindex) {
+          zindex = z;
+        }
+        Ember['default'].$(this).removeClass('active');
+      });
+  
+      this.$().css('z-index', zindex + 1);
+      this.$().addClass('active');
+    },
+  
+    mouseDown: function () {
+      this.changeZindex();
+    },
+  
+    // click: function () {
+    //   this.get('parentView').send('activateWindow', this.get('content'));
+    // },
+  
+    didInsertElement: function () {
+      this.changeZindex();
+      this.$().css({
+        width: this.get('width'),
+        height: this.get('height'),
+        left: this.get('left'),
+        top: this.get('top')
+      });
+  
+      this.$('.header').on('mousedown', function (event) {
+        if (event.which !== 1) { return ;}
+        var originEvt = event.originalEvent;
+        var offsetX = originEvt.offsetX ? originEvt.offsetX : originEvt.layerX;
+        var offsetY = originEvt.offsetY ? originEvt.offsetY : originEvt.layerY;
+  
+        this.$(document).on('mousemove', function (event) {
+          var originEvt = event.originalEvent;
+          var x = originEvt.clientX - offsetX;
+          var y = originEvt.clientY - offsetY;
+          this.$().css({ // image follow
+            'top': y,
+            'left': x
+          });
+        }.bind(this));
+  
+      }.bind(this));
+  
+      this.$('.header').on('mouseup', function () {console.log('mixin -  mouseup');
+        this.$(document).off('mousemove');
+      }.bind(this));
+  
+    },
+  
+    willDestroyElement: function () {
+      this.$('.header').off('mousedown');
+      this.$('.header').off('mouseup');
+    }
+  
+  });
+
+});
+define('web-desktop/router', ['exports', 'ember', 'web-desktop/config/environment'], function (exports, Ember, config) {
+
+  'use strict';
+
+  var Router = Ember['default'].Router.extend({
+    location: config['default'].locationType
+  });
+  
+  Router.map(function() {
+    this.route('application', { path: '/' });
+  });
+  
+  Router.reopen({
+    rootURL: '/'
+  });
+  
+  exports['default'] = Router;
+
+});
+define('web-desktop/routes/application', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  var get = Ember['default'].get;
+  exports['default'] = Ember['default'].Route.extend({
+  
+    model: function () {
+      return {
+        applist:[
+  {name: "Deliver Bid",
+  imgName: "DeliverBid_logo",
+  viewName: 'deliverBid',
+  screen: 0, col: 0, row: 0},
+  {name: "E-Inventory",
+  imgName: "Einventory_logo",
+  viewName: 'Einventory',
+  screen: 0, col: 0, row: 2},
+  {name: "Vender Match",
+  imgName: "VenderMatch_logo",
+  viewName: 'vendorMatch',
+  screen: 0, col: 0, row: 1},
+  {name: "Gausian Store",
+  imgName: "icon_17",
+  viewName: 'gausianStore',
+  screen: 0, col: 0, row: 3},
+  //
+  //       {name: "icon_11", imgName: "icon_11", screen: 0, col: 1, row: 2},
+  //       {name: "icon_12", imgName: "icon_12", screen: 0, col: 2, row: 2},
+  //       {name: "icon_13", imgName: "icon_13", screen: 0, col: 3, row: 2},
+  //       {name: "icon_14", imgName: "icon_14", screen: 0, col: 1, row: 3},
+  //       {name: "icon_15", imgName: "icon_15", screen: 0, col: 2, row: 3},
+  //       {name: "icon_16", imgName: "icon_16", screen: 0, col: 3, row: 3},
+  //       {name: "icon_13", imgName: "icon_13", screen: 0, col: 3, row: 4},
+  //       {name: "icon_14", imgName: "icon_14", screen: 0, col: 2, row: 4},
+  //       {name: "icon_15", imgName: "icon_15", screen: 0, col: 1, row: 4},
+  //       {name: "icon_16", imgName: "icon_16", screen: 0, col: 0, row: 4},
+        // {name: "icon_21", imgName: "icon_1", screen: 1, col: 11, row: 0},
+        // {name: "icon_22", imgName: "icon_2", screen: 1, col: 12, row: 0},
+        // {name: "icon_23", imgName: "icon_3", screen: 1, col: 13, row: 0},
+        // {name: "icon_24", imgName: "icon_4", screen: 1, col: 14, row: 0},
+        // {name: "icon_25", imgName: "icon_5", screen: 1, col: 15, row: 1},
+        // {name: "icon_27", imgName: "icon_7", screen: 1, col: 16, row: 1},
+        // {name: "icon_28", imgName: "icon_8", screen: 1, col: 11, row: 1},
+        // {name: "icon_29", imgName: "icon_9", screen: 1, col: 12, row: 2},
+        // {name: "icon_211", imgName: "icon_11", screen: 1, col: 13, row: 2},
+        // {name: "icon_212", imgName: "icon_12", screen: 1, col: 14, row: 2},
+        // {name: "icon_213", imgName: "icon_13", screen: 1, col: 15, row: 2},
+        // {name: "icon_214", imgName: "icon_14", screen: 1, col: 16, row: 2},
+        // {name: "icon_215", imgName: "icon_15", screen: 1, col: 1, row: 3},
+        {name: "icon_216", imgName: "icon_16", screen: 1, col: 3, row: 3},
+        // {name: "icon_31", imgName: "icon_1", screen: 2, col: 0, row: 1},
+        // {name: "icon_32", imgName: "icon_2", screen: 2, col: 1, row: 1},
+        // {name: "icon_33", imgName: "icon_3", screen: 2, col: 2, row: 1},
+        // {name: "icon_34", imgName: "icon_4", screen: 2, col: 3, row: 1},
+        // {name: "icon_35", imgName: "icon_5", screen: 2, col: 0, row: 0},
+        // {name: "icon_36", imgName: "icon_6", screen: 2, col: 1, row: 0},
+        // {name: "icon_38", imgName: "icon_8", screen: 2, col: 3, row: 0},
+        // {name: "icon_39", imgName: "icon_9", screen: 2, col: 0, row: 2},
+        // {name: "icon_311", imgName: "icon_11", screen: 2, col: 1, row: 2},
+        // {name: "icon_312", imgName: "icon_12", screen: 2, col: 2, row: 2},
+        // {name: "icon_313", imgName: "icon_13", screen: 2, col: 3, row: 2},
+        {name: "icon_317", imgName: "icon_17", screen: 2, col: 0, row: 3},
+        ]
+      };
+    },
+  
+    setupController: function (controller, model) {
+      this.controllerFor('applist').set('model', get(model, 'applist'));
+    },
+  
+    renderTemplate: function() {
+      this.render();
+      this.render('header', {
+        outlet: 'header',
+        into: 'application'
+      });
+      this.render('applist', {
+        outlet: 'applist',
+        into: 'application'
+      });
+    }
+  });
+
+});
+define('web-desktop/templates/app/deliver-bid', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+  helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
+    var buffer = '', escapeExpression=this.escapeExpression;
+
+
+    data.buffer.push("<img ");
+    data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
+      'src': ("view.logoUrl")
+    },hashTypes:{'src': "ID"},hashContexts:{'src': depth0},contexts:[],types:[],data:data})));
+    data.buffer.push(" width=\"100%\" height=\"100%\">\r\n<img src=\"img/spinnerSmall.gif\" class='spinner' style=\"top:270px; left:37px\">\r\n");
+    return buffer;
+    
+  });
+
+});
+define('web-desktop/templates/app/einventory', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+  helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
+    var buffer = '', escapeExpression=this.escapeExpression;
+
+
+    data.buffer.push("<img ");
+    data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
+      'src': ("view.logoUrl")
+    },hashTypes:{'src': "ID"},hashContexts:{'src': depth0},contexts:[],types:[],data:data})));
+    data.buffer.push(" width=\"100%\" height=\"100%\">\r\n<img src=\"img/spinnerSmall.gif\" class='spinner' style=\"top:270px; left:37px\">\r\n");
+    return buffer;
+    
+  });
+
+});
+define('web-desktop/templates/app/vendor-match', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+  helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
+    var buffer = '', escapeExpression=this.escapeExpression;
+
+
+    data.buffer.push("<img ");
+    data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
+      'src': ("view.logoUrl")
+    },hashTypes:{'src': "ID"},hashContexts:{'src': depth0},contexts:[],types:[],data:data})));
+    data.buffer.push(" width=\"100%\" height=\"100%\">\r\n<img src=\"img/spinnerSmall.gif\" class='spinner' style=\"top:270px; left:37px\">\r\n");
+    return buffer;
+    
+  });
+
+});
+define('web-desktop/templates/appicon', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+  helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
+    var buffer = '', escapeExpression=this.escapeExpression;
+
+
+    data.buffer.push("<div class=\"effect\"></div>\r\n<div class=\"app-img\">\r\n  <span>");
+    data.buffer.push(escapeExpression(helpers.unbound.call(depth0, "view.content.name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data})));
+    data.buffer.push("</span>\r\n</div>\r\n");
+    return buffer;
+    
+  });
+
+});
+define('web-desktop/templates/application', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+  helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
+    var buffer = '', helper, options, helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
+
+
+    data.buffer.push("<!-- DESKTOP -->\r\n\r\n\r\n");
+    data.buffer.push(escapeExpression((helper = helpers.outlet || (depth0 && depth0.outlet),options={hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data},helper ? helper.call(depth0, "header", options) : helperMissing.call(depth0, "outlet", "header", options))));
+    data.buffer.push("\r\n\r\n");
+    data.buffer.push(escapeExpression((helper = helpers.render || (depth0 && depth0.render),options={hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data},helper ? helper.call(depth0, "searchBar", options) : helperMissing.call(depth0, "render", "searchBar", options))));
+    data.buffer.push("\r\n\r\n");
+    data.buffer.push(escapeExpression((helper = helpers.outlet || (depth0 && depth0.outlet),options={hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data},helper ? helper.call(depth0, "applist", options) : helperMissing.call(depth0, "outlet", "applist", options))));
+    data.buffer.push("\r\n\r\n<div class=\"top-corner-logo\">\r\n  <img src=\"assets/img/GAUSIAN_logo.png\" >\r\n</div>\r\n\r\n<svg version=\"1.1\" xmlns='http://www.w3.org/2000/svg'>\r\n  <filter id='blur'>\r\n    <feGaussianBlur stdDeviation='6' />\r\n  </filter>\r\n</svg>\r\n");
+    return buffer;
+    
+  });
+
+});
+define('web-desktop/templates/applist', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+  helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
+    var buffer = '', stack1, escapeExpression=this.escapeExpression, self=this;
+
+  function program1(depth0,data) {
+    
+    var buffer = '';
+    data.buffer.push("\r\n  ");
+    data.buffer.push(escapeExpression(helpers.view.call(depth0, "appscreen", {hash:{
+      'index': ("id"),
+      'hasApp': ("hasApp")
+    },hashTypes:{'index': "ID",'hasApp': "ID"},hashContexts:{'index': depth0,'hasApp': depth0},contexts:[depth0],types:["STRING"],data:data})));
+    data.buffer.push("\r\n  ");
+    return buffer;
+    }
+
+  function program3(depth0,data) {
+    
+    var buffer = '';
+    data.buffer.push("\r\n    ");
+    data.buffer.push(escapeExpression(helpers.view.call(depth0, "appicon", {hash:{
+      'content': ("app")
+    },hashTypes:{'content': "ID"},hashContexts:{'content': depth0},contexts:[depth0],types:["STRING"],data:data})));
+    data.buffer.push("\r\n    ");
+    return buffer;
+    }
+
+  function program5(depth0,data) {
+    
+    var buffer = '', stack1;
+    data.buffer.push("\r\n  ");
+    stack1 = helpers._triageMustache.call(depth0, "trash-can", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+    data.buffer.push("\r\n");
+    return buffer;
+    }
+
+    data.buffer.push("\r\n\r\n\r\n  ");
+    stack1 = helpers.each.call(depth0, "view.controller.screens", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],data:data});
+    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+    data.buffer.push("\r\n\r\n  <ul>\r\n    ");
+    stack1 = helpers.each.call(depth0, "app", "in", "view.controller.model", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(3, program3, data),contexts:[depth0,depth0,depth0],types:["ID","ID","ID"],data:data});
+    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+    data.buffer.push("\r\n  </ul>\r\n");
+    stack1 = helpers['if'].call(depth0, "controller.appTouch", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(5, program5, data),contexts:[depth0],types:["ID"],data:data});
+    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+    data.buffer.push("\r\n");
+    return buffer;
+    
+  });
+
+});
+define('web-desktop/templates/appscreen', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+  helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
+    
+
+
+    data.buffer.push("\r\n");
+    
+  });
+
+});
+define('web-desktop/templates/components/star-rating', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+  helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
+    var buffer = '', stack1, self=this;
+
+  function program1(depth0,data) {
+    
+    
+    data.buffer.push("\r\n  <i class=\"fa fa-star\"></i>\r\n");
+    }
+
+    stack1 = helpers.each.call(depth0, "stars", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],data:data});
+    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+    data.buffer.push("\r\n");
+    return buffer;
+    
+  });
+
+});
+define('web-desktop/templates/components/trash-can', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+  helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
+    
+
+
+    data.buffer.push("\r\n<div class=\"trash\">Delete</div>\r\n");
+    
+  });
+
+});
+define('web-desktop/templates/header', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+  helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
+    
+
+
+    data.buffer.push("<ul class=\"nav\">\r\n  <li class=\"logo\">\r\n    <span>GAUSIAN Enterprise Desktop</h3>\r\n  </li>\r\n  <li class=\"dock\">\r\n\r\n  </li>\r\n  <li class=\"login\">\r\n    <span>\r\n      <a>Sign Up</a> / <a>Log In</a>\r\n    </span>\r\n  </li>\r\n</ul>\r\n");
+    
+  });
+
+});
+define('web-desktop/templates/scroll-bar-handler', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+  helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
+    var buffer = '', escapeExpression=this.escapeExpression;
+
+
+    data.buffer.push("<div class=\"jspDrag\" ");
+    data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
+      'style': ("view.style")
+    },hashTypes:{'style': "STRING"},hashContexts:{'style': depth0},contexts:[],types:[],data:data})));
+    data.buffer.push(">\r\n  <div class=\"jspDragTop\"></div>\r\n  <div class=\"jspDragBottom\"></div>\r\n</div>\r\n");
+    return buffer;
+    
+  });
+
+});
+define('web-desktop/templates/scroll-bar', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+  helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
+    var buffer = '', escapeExpression=this.escapeExpression;
+
+
+    data.buffer.push("<div class=\"jspCap jspCapTop\"></div>\r\n<div class=\"jspTrack\" ");
+    data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
+      'style': ("view.trackStyle")
+    },hashTypes:{'style': "STRING"},hashContexts:{'style': depth0},contexts:[],types:[],data:data})));
+    data.buffer.push(">\r\n  ");
+    data.buffer.push(escapeExpression(helpers.view.call(depth0, "scroll-bar-handler", {hash:{
+      'len': ("view.handlerLen"),
+      'top': ("view.handlerTop")
+    },hashTypes:{'len': "ID",'top': "ID"},hashContexts:{'len': depth0,'top': depth0},contexts:[depth0],types:["STRING"],data:data})));
+    data.buffer.push("\r\n</div>\r\n<div class=\"jspCap jspCapBottom\"></div>\r\n");
+    return buffer;
+    
+  });
+
+});
+define('web-desktop/templates/search-bar', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+  helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
+    var buffer = '', helper, options, helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
+
+
+    data.buffer.push("<div class=\"search\">\r\n  <div class=\"search-icon\"></div>\r\n  ");
+    data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
+      'type': ("text"),
+      'placeholder': ("Search APPs"),
+      'disabled': (true)
+    },hashTypes:{'type': "STRING",'placeholder': "STRING",'disabled': "BOOLEAN"},hashContexts:{'type': depth0,'placeholder': depth0,'disabled': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
+    data.buffer.push("\r\n</div>\r\n\r\n<div class=\"overlay\">\r\n  <div class=\"modal\">\r\n    ");
+    data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
+      'type': ("text"),
+      'value': ("view.query")
+    },hashTypes:{'type': "STRING",'value': "ID"},hashContexts:{'type': depth0,'value': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
+    data.buffer.push("\r\n    <a class=\"cancel_search\" ");
+    data.buffer.push(escapeExpression(helpers.action.call(depth0, "cancel", {hash:{
+      'target': ("view")
+    },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
+    data.buffer.push(">Cancel</a>\r\n    <div class=\"container\">\r\n    ");
+    data.buffer.push(escapeExpression(helpers.view.call(depth0, "search-results", {hash:{
+      'content': ("view.searchContent")
+    },hashTypes:{'content': "ID"},hashContexts:{'content': depth0},contexts:[depth0],types:["STRING"],data:data})));
+    data.buffer.push("\r\n\r\n    ");
+    data.buffer.push(escapeExpression(helpers.view.call(depth0, "scroll-bar", {hash:{
+      'trackLen': ("view.trackLen"),
+      'handlerLen': ("view.handlerLen"),
+      'handlerTop': ("view.handlerTop")
+    },hashTypes:{'trackLen': "ID",'handlerLen': "ID",'handlerTop': "ID"},hashContexts:{'trackLen': depth0,'handlerLen': depth0,'handlerTop': depth0},contexts:[depth0],types:["STRING"],data:data})));
+    data.buffer.push("\r\n    </div>\r\n  </div>\r\n</div>\r\n");
+    return buffer;
+    
+  });
+
+});
+define('web-desktop/templates/search-results-item', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+  helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
+    var buffer = '', stack1, helper, options, escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing;
+
+
+    data.buffer.push("<div class=\"icon\">\r\n  <img ");
+    data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
+      'src': ("view.content.icon")
+    },hashTypes:{'src': "ID"},hashContexts:{'src': depth0},contexts:[],types:[],data:data})));
+    data.buffer.push(" />\r\n</div>\r\n<div class=\"detail\">\r\n  <a class=\"name\">");
+    stack1 = helpers._triageMustache.call(depth0, "view.content.name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+    data.buffer.push("</a> ");
+    data.buffer.push(escapeExpression((helper = helpers['star-rating'] || (depth0 && depth0['star-rating']),options={hash:{
+      'content': ("view.content.rating")
+    },hashTypes:{'content': "ID"},hashContexts:{'content': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "star-rating", options))));
+    data.buffer.push("\r\n  <p>");
+    stack1 = helpers._triageMustache.call(depth0, "view.content.category", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+    data.buffer.push("</p>\r\n  <p>");
+    stack1 = helpers._triageMustache.call(depth0, "view.content.freeDay", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+    data.buffer.push(" days free trail, $");
+    stack1 = helpers._triageMustache.call(depth0, "view.content.price", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+    data.buffer.push("/month</p>\r\n</div>\r\n<div ");
+    data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
+      'class': (":action content.installed:open:get")
+    },hashTypes:{'class': "STRING"},hashContexts:{'class': depth0},contexts:[],types:[],data:data})));
+    data.buffer.push(">\r\n  ");
+    stack1 = helpers._triageMustache.call(depth0, "view.label", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+    data.buffer.push("\r\n<div>\r\n");
+    return buffer;
+    
+  });
+
+});
+define('web-desktop/templates/window', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+  helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
+    var buffer = '', stack1, escapeExpression=this.escapeExpression;
+
+
+    data.buffer.push("<div class=\"header\">\r\n  <span class=\"titleInside\">");
+    stack1 = helpers._triageMustache.call(depth0, "view.content.name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+    data.buffer.push("</span>\r\n</div>\r\n<nav class=\"control-window\">\r\n  <a href=\"#\" class=\"minimize\" ");
+    data.buffer.push(escapeExpression(helpers.action.call(depth0, "minimizeApp", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
+    data.buffer.push(">&nbsp;</a>\r\n  <a href=\"#\" class=\"maximize\" ");
+    data.buffer.push(escapeExpression(helpers.action.call(depth0, "maximizeApp", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
+    data.buffer.push(">maximize</a>\r\n  <a href=\"#\" class=\"close\" ");
+    data.buffer.push(escapeExpression(helpers.action.call(depth0, "closeApp", "view.content", {hash:{
+      'target': ("view.parentView")
+    },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0,depth0],types:["STRING","ID"],data:data})));
+    data.buffer.push(">close</a>\r\n</nav>\r\n<div class=\"container\">\r\n  ");
+    stack1 = helpers._triageMustache.call(depth0, "yield", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+    data.buffer.push("\r\n</div>\r\n");
+    return buffer;
+    
+  });
+
+});
+define('web-desktop/tests/helpers/resolver', ['exports', 'ember/resolver', 'web-desktop/config/environment'], function (exports, Resolver, config) {
+
+  'use strict';
+
+  var resolver = Resolver['default'].create();
+  
+  resolver.namespace = {
+    modulePrefix: config['default'].modulePrefix,
+    podModulePrefix: config['default'].podModulePrefix
+  };
+  
+  exports['default'] = resolver;
+
+});
+define('web-desktop/tests/helpers/start-app', ['exports', 'ember', 'web-desktop/app', 'web-desktop/router', 'web-desktop/config/environment'], function (exports, Ember, Application, Router, config) {
+
+  'use strict';
+
+  function startApp(attrs) {
+    var App;
+  
+    var attributes = Ember['default'].merge({}, config['default'].APP);
+    attributes = Ember['default'].merge(attributes, attrs); // use defaults, but you can override;
+  
+    Router['default'].reopen({
+      location: 'none'
+    });
+  
+    Ember['default'].run(function() {
+      App = Application['default'].create(attributes);
+      App.setupForTesting();
+      App.injectTestHelpers();
+    });
+  
+    App.reset(); // this shouldn't be needed, i want to be able to "start an app at a specific URL"
+  
+    return App;
+  }
+  exports['default'] = startApp;
+
+});
+define('web-desktop/tests/test-helper', ['web-desktop/tests/helpers/resolver', 'ember-qunit'], function (resolver, ember_qunit) {
+
+  'use strict';
+
+  ember_qunit.setResolver(resolver['default']);
+  
+  document.write('<div id="ember-testing-container"><div id="ember-testing"></div></div>');
+  
+  QUnit.config.urlConfig.push({ id: 'nocontainer', label: 'Hide container'});
+  var containerVisibility = QUnit.urlParams.nocontainer ? 'hidden' : 'visible';
+  document.getElementById('ember-testing-container').style.visibility = containerVisibility;
+
+});
+define('web-desktop/utils/keys', ['exports'], function (exports) {
+
+  'use strict';
+
+  /**
+  * Created by Jordan Hawker (hawkerj)
+  * Date: 9/9/2014
+  */
+  
+  var keyUtils = {
+    KEYS: {
+      BACKSPACE: 8,
+      TAB: 9,
+      ENTER: 13,
+      SHIFT: 16,
+      CTRL: 17,
+      ALT: 18,
+      PAUSE: 19,
+      CAPS_LOCK: 20,
+      ESCAPE: 27,
+      UNIT_SEPARATOR: 31, // non-printable character
+      SPACE: 32,
+      PAGE_UP: 33,
+      PAGE_DOWN: 34,
+      END: 35,
+      HOME: 36,
+      LEFT_ARROW: 37,
+      UP_ARROW: 38,
+      RIGHT_ARROW: 39,
+      DOWN_ARROW: 40,
+      INSERT: 45,
+      DELETE: 46,
+      KEY_0: 48,
+      KEY_1: 49,
+      KEY_2: 50,
+      KEY_3: 51,
+      KEY_4: 52,
+      KEY_5: 53,
+      KEY_6: 54,
+      KEY_7: 55,
+      KEY_8: 56,
+      KEY_9: 57,
+      KEY_A: 65,
+      KEY_B: 66,
+      KEY_C: 67,
+      KEY_D: 68,
+      KEY_E: 69,
+      KEY_F: 70,
+      KEY_G: 71,
+      KEY_H: 72,
+      KEY_I: 73,
+      KEY_J: 74,
+      KEY_K: 75,
+      KEY_L: 76,
+      KEY_M: 77,
+      KEY_N: 78,
+      KEY_O: 79,
+      KEY_P: 80,
+      KEY_Q: 81,
+      KEY_R: 82,
+      KEY_S: 83,
+      KEY_T: 84,
+      KEY_U: 85,
+      KEY_V: 86,
+      KEY_W: 87,
+      KEY_X: 88,
+      KEY_Y: 89,
+      KEY_Z: 90,
+      LEFT_META: 91,
+      RIGHT_META: 92,
+      SELECT: 93,
+      NUMPAD_0: 96,
+      NUMPAD_1: 97,
+      NUMPAD_2: 98,
+      NUMPAD_3: 99,
+      NUMPAD_4: 100,
+      NUMPAD_5: 101,
+      NUMPAD_6: 102,
+      NUMPAD_7: 103,
+      NUMPAD_8: 104,
+      NUMPAD_9: 105,
+      MULTIPLY: 106,
+      ADD: 107,
+      SUBTRACT: 109,
+      DECIMAL: 110,
+      DIVIDE: 111,
+      F1: 112,
+      F2: 113,
+      F3: 114,
+      F4: 115,
+      F5: 116,
+      F6: 117,
+      F7: 118,
+      F8: 119,
+      F9: 120,
+      F10: 121,
+      F11: 122,
+      F12: 123,
+      NUM_LOCK: 144,
+      SCROLL_LOCK: 145,
+      SEMICOLON: 186,
+      EQUALS: 187,
+      COMMA: 188,
+      DASH: 189,
+      PERIOD: 190,
+      FORWARD_SLASH: 191,
+      GRAVE_ACCENT: 192,
+      OPEN_BRACKET: 219,
+      BACK_SLASH: 220,
+      CLOSE_BRACKET: 221,
+      SINGLE_QUOTE: 222
+    },
+  
+    isNumberKey: function (keyCode) {
+      return (keyCode > 47 && keyCode < 58); // Number keys
+    }
+  };
+  
+  if (Object.freeze) {
+    Object.freeze(keyUtils.KEYS);
+  }
+  
+  exports['default'] = keyUtils;
+
+});
+define('web-desktop/views/app/deliver-bid', ['exports', 'ember', 'web-desktop/mixins/window-view'], function (exports, Ember, WindowMixin) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].View.extend(WindowMixin['default'], {
+  
+    layoutName: 'window',
+    templateName: 'app/deliver-bid',
+    finalIndex: 5,
+  
+    didInsertElement: function () {
+      this._super();
+      this.set('index', 1);
+      this.$('img:first').on('mousedown', function () {
+        var index = this.get('index');
+  
+        index = index === this.get('finalIndex') ? 1 : index + 1;
+  
+        this.set('index', index);
+      }.bind(this));
+    },
+  
+    onImageChange: function () {
+      console.log('onImageChange');
+  
+      var index = this.get('index');
+  
+      this.set('logoUrl', 'img/pictures_for_apps/DeliverBid_%@.jpg'.fmt(index));
+      if (index === 1 || index === 4) {
+        this.$('img.spinner').show();
+        Ember['default'].run.later(function () {
+          this.set('index', index + 1);
+          this.$('img.spinner').hide();
+        }.bind(this), 600);
+      }
+  
+    }.observes('index')
+  
+  });
+
+});
+define('web-desktop/views/app/einventory', ['exports', 'ember', 'web-desktop/mixins/window-view'], function (exports, Ember, WindowMixin) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].View.extend(WindowMixin['default'], {
+  
+    layoutName: 'window',
+    templateName: 'app/einventory',
+    finalIndex: 3,
+  
+    didInsertElement: function () {
+      this._super();
+      this.set('index', 1);
+      this.$('img:first').on('mousedown', function () {
+        var index = this.get('index');
+  
+        index = index === this.get('finalIndex') ? 1 : index + 1;
+  
+        this.set('index', index);
+      }.bind(this));
+    },
+  
+    onImageChange: function () {
+      console.log('onImageChange');
+  
+      var index = this.get('index');
+  
+      this.set('logoUrl', 'img/pictures_for_apps/VenderMatch_%@.jpg'.fmt(index));
+      // if (index < this.get('finalIndex')) {
+      //   this.$('img.spinner').show();
+      //   Ember.run.later(function () {
+      //     this.set('index', index + 1);
+      //     this.$('img.spinner').hide();
+      //   }.bind(this), 600);
+      // }
+  
+  
+  
+    }.observes('index')
+  
+  });
+
+});
+define('web-desktop/views/app/gausian-store', ['exports', 'ember', 'web-desktop/mixins/window-view'], function (exports, Ember, WindowMixin) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].View.extend(WindowMixin['default'], {
+  
+    layoutName: 'window',
+    templateName: 'app/deliver-bid',
+    finalIndex: 4,
+  
+    didInsertElement: function () {
+      this._super();
+      this.set('index', 1);
+      this.$('img:first').on('mousedown', function () {
+        var index = this.get('index');
+  
+        index = index === this.get('finalIndex') ? 1 : index + 1;
+  
+        this.set('index', index);
+      }.bind(this));
+    },
+  
+    onImageChange: function () {
+  
+      var index = this.get('index');
+  
+      this.set('logoUrl', 'img/pictures_for_apps/Gausian_Store_%@.jpg'.fmt(index));
+      // if (index < this.get('finalIndex')) {
+      //   this.$('img.spinner').show();
+      //   Ember.run.later(function () {
+      //     this.set('index', index + 1);
+      //     this.$('img.spinner').hide();
+      //   }.bind(this), 600);
+      // }
+  
+  
+  
+    }.observes('index')
+  
+  });
+
+});
+define('web-desktop/views/app/vendor-match', ['exports', 'ember', 'web-desktop/mixins/window-view'], function (exports, Ember, WindowMixin) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].View.extend(WindowMixin['default'], {
+  
+    layoutName: 'window',
+    templateName: 'app/deliver-bid',
+    finalIndex: 3,
+  
+    didInsertElement: function () {
+      this._super();
+      this.set('index', 1);
+      this.$('img:first').on('mousedown', function () {
+        var index = this.get('index');
+  
+        index = index === this.get('finalIndex') ? 1 : index + 1;
+  
+        this.set('index', index);
+      }.bind(this));
+    },
+  
+    onImageChange: function () {
+  
+      var index = this.get('index');
+  
+      this.set('logoUrl', 'img/pictures_for_apps/Einventory_%@.jpg'.fmt(index));
+      // if (index < this.get('finalIndex')) {
+      //   this.$('img.spinner').show();
+      //   Ember.run.later(function () {
+      //     this.set('index', index + 1);
+      //     this.$('img.spinner').hide();
+      //   }.bind(this), 600);
+      // }
+  
+  
+  
+    }.observes('index')
+  
+  });
+
+});
+define('web-desktop/views/appicon', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].View.extend({
+    tagName: 'li',
+    templateName: 'appicon',
+    attributeBindings : [ 'draggable' ],
+    draggable         : 'true',
+  
+  
+    row: function () {
+      return this.get('content.row');
+    }.property('content.row'),
+  
+    col: function () {
+      return this.get('content.col');
+    }.property('content.col'),
+  
+    scr: function () {
+      return this.get('content.screen');
+    }.property('content.screen'),
+  
+    iconWidth: function () {
+      return this.get('parentView.iconWidth');
+    }.property('parentView.iconWidth'),
+  
+  
+    parentWidth: function () {
+      return this.get('parentView.screenWidth');
+    }.property('parentView.screenWidth'),
+  
+    parentHeight: function () {
+      return this.get('parentView.screenHeight');
+    }.property('parentView.screenHeight'),
+  
+    onIconSizeChange: function () {
+      this.handleSize();
+      this.position();
+    }.observes('iconWidth', 'parentWidth','parentHeight'),
+  
+    didInsertElement: function () {
+      this.$().draggable();
+      this.handleSize();
+      this.position();
+    },
+  
+    handleSize: function () {
+      var iconWidth = this.get('iconWidth');
+  
+      this.$('span').css({
+        'top': iconWidth + 5 * iconWidth / 60,
+        'font-size': 12 + Math.round(iconWidth / 60)
+      });
+  
+      this.$().css({
+        'height': iconWidth,
+        'width':  iconWidth,
+        'display': 'inline-block',
+        'float': 'left'
+      });
+      this.$('.app-img').css({
+        'background': 'url(img/' + this.get('content.imgName') + '.png) no-repeat',
+        "background-size": "100%"
+      });
+    },
+  
+  
+    position: function (row, col, scr, duration) {
+      row = !Ember['default'].isEmpty(row) ? row : this.get('row');
+      col = !Ember['default'].isEmpty(col) ? col : this.get('col');
+      scr = !Ember['default'].isEmpty(scr) ? scr : this.get('scr');
+      var iconWidth = this.get('iconWidth');
+      var iconHeight = this.get('parentView.iconHeight');
+      var offsetHeight = this.get('parentView.offsetHeight');
+      var offsetWidth  = this.get('parentView.offsetWidth');
+  
+      var screnWidth = this.get('parentView.screenWidth');
+      var widthOffset = this.get('parentView.widthOffset');
+      var screenLeft = scr * (screnWidth + widthOffset + 10) + widthOffset;
+  
+      var top  = (iconHeight + offsetHeight) * row + offsetHeight;
+      var left = (iconWidth + offsetWidth) * col + offsetWidth + screenLeft;
+  
+      if (duration) {
+        this.$().animate({
+          'top': top,
+          'left': left
+        }, duration);
+      } else {
+        this.$().css({
+          'top': top,
+          'left': left
+        });
+      }
+      this.setProperties({
+        'content.row': row,
+        'content.col': col,
+        'content.screen': scr
+      });
+    },
+  
+    mouseDown: function (event) {
+      var originEvt = event.originalEvent;
+      var offsetX = originEvt.offsetX ? originEvt.offsetX : originEvt.layerX;
+      var offsetY = originEvt.offsetY ? originEvt.offsetY : originEvt.layerY;
+  
+      this.$().addClass('dragging');
+      this.get('parentView').onMouseDown(this, offsetX, offsetY);
+    },
+  
+    mouseUp: function (evt) {
+      this.$().removeClass('dragging');
+      return true;
+    }
+  
+  });
+
+});
+define('web-desktop/views/application', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].View.extend({
+    classNames: ['application']
+  });
+
+});
+define('web-desktop/views/applist', ['exports', 'ember', 'web-desktop/utils/keys'], function (exports, Ember, keyUtils) {
+
+  'use strict';
+
+  var KEYS = keyUtils['default'].KEYS;
+  var get = Ember['default'].get;
+  
+  exports['default'] = Ember['default'].View.extend({
+    templateName: 'applist',
+    classNames: ['applist'],
+  
+    height: 600,
+    width: 400,
+  
+    left: 89,
+    top: 103,
+  
+    init: function () {
+      this._super();
+      this.handleSize();
+      Ember['default'].$(window).resize(function() {
+        this.handleSize();
+      }.bind(this));
+    },
+  
+    didInsertElement: function () {
+      this.handleSize();
+    },
+  
+    handleSize: function () {
+  
+      var minWidthIcon = 48;
+      var minHeightWin = 600;
+      var minWidthWin = 800;
+      var winWidth  = Math.max(Ember['default'].$(window).width(), minWidthWin);
+      var winHeight = Math.max(Ember['default'].$(window).height()*0.85, minHeightWin);
+  
+      var height = (winHeight) * 0.9;
+      var width = winWidth / 3 * 0.8 ;
+      var widthOffset = (winWidth - 3 * (width + 10)) / 4;
+  
+      var iconWidth = Math.max(width/4 * 0.6, minWidthIcon);
+      var iconHeight = iconWidth * 4 / 3;
+  
+      var offsetWidth  = (width - iconWidth * 4) / 5;
+      var offsetHeight = (height - iconHeight * 5) / 6;
+  
+      this.setProperties({
+        screenWidth:  width,
+        screenHeight: height,
+        screenTop:    0,
+        widthOffset:  widthOffset,
+        iconWidth:    iconWidth,
+        iconHeight:   iconHeight,
+        offsetHeight: offsetHeight,
+        offsetWidth:  offsetWidth
+      });
+    },
+  
+    getScreenRowCol: function (left, top) {
+      var offsetWidth = this.get('offsetWidth');
+      var offsetHeight = this.get('offsetHeight');
+      var screenWidth = this.get('screenWidth');
+      var widthOffset = this.get('widthOffset');
+      var screenLeft = screenWidth + widthOffset + 10;
+  
+      var newScr = 0;
+      for (var i = 0 ; i < 3; i++) {
+        if (left >= screenLeft * i + widthOffset && left < screenLeft * (i + 1) + widthOffset) {
+          newScr = i;
+        }
+      }
+  
+      var newCol = Math.round((left - offsetWidth/2 - newScr * screenLeft - widthOffset) * 4 / screenWidth);
+      var newRow = Math.round((top - offsetHeight/2) * 5 / this.get('screenHeight'));
+  
+      newCol = newCol < 0 ? 0: newCol;
+      newCol = newCol > 3 ? 3: newCol;
+      return {row: newRow, col: newCol, scr: newScr};
+    },
+  
+    onMouseDown: function (app, offsetX, offsetY) { // this will be called by item
+      this.setProperties({
+        'activeApp': app,
+        'offsetX': offsetX,
+        'offsetY': offsetY
+      });
+  
+      this.$(document).on('mousemove', this.onMouseMove.bind(this));
+      this.on('mouseUp', this.onMouseRelease);
+      //this.on('mouseLeave', this.onMouseRelease);
+    },
+  
+    onMouseMove: function (event) {console.log('onMouseMove');
+      // this.set('parentView.appTouch', true);
+      this.set('controller.appTouch', true);
+  
+      var node = this.get('activeApp');
+      var originEvt = event.originalEvent;
+      var offset = node.$().parent().offset(); // TBD
+      var x = originEvt.clientX - this.get('offsetX') - offset.left;
+      var y = originEvt.clientY - this.get('offsetY') - offset.top;
+      node.$().css({ // image follow
+        'top': y,
+        'left': x,
+        'z-index': '100'
+      });
+      var rowCol = this.getScreenRowCol(x, y);
+      if (node.get('row') !== rowCol.row ||
+          node.get('col') !== rowCol.col ||
+          node.get('scr') !== rowCol.scr) {
+        this.shuffle({
+          row: node.get('row'),
+          col: node.get('col'),
+          scr: node.get('scr')
+        }, rowCol);
+      }
+    },
+  
+    onMouseRelease: function () {
+      var node = this.get('activeApp');
+      node.$().removeClass('dragging');
+      this.$(document).off('mousemove');
+      this.off('mouseUp', this.onMouseRelease);
+      // this.off('mouseLeave', this.onMouseRelease);
+      node.position(node.get('row'), node.get('col'), node.get('scr'), 300);
+  
+      node.$().css({
+        'z-index': 1
+      });
+      if (!this.get('controller.appTouch')) {
+        this.get('controller').send('openApp', node.get('content'));
+      }
+      this.set('controller.appTouch', false);
+    },
+  
+    shuffle: function (from, to) {  // TBD add screen constrain
+      console.log(JSON.stringify(from) + ' -> ' + JSON.stringify(to));
+      var isSamePosition = function (pos1, pos2) {
+        return get(pos1, 'col') === get(pos2, 'col') &&
+        get(pos1, 'row') === get(pos2, 'row') &&
+        get(pos1, 'scr') === get(pos2, 'scr');
+      }
+      this.get('childViews').forEach(function (itemView) {
+        if (isSamePosition(itemView, to)) { // swap
+          console.log(from);
+          itemView.position(get(from, 'row'), get(from, 'col'), get(from, 'scr'), 200);
+        } else if (isSamePosition(itemView, from)) { // target
+          itemView.setProperties({
+            col: get(to, 'col'),
+            row: get(to, 'row'),
+            scr: get(to, 'scr')
+          });
+        }
+      });
+    },
+  
+  
+  
+  });
+
+});
+define('web-desktop/views/appscreen', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  var get = Ember['default'].get;
+  
+  exports['default'] = Ember['default'].View.extend({
+    // templateName: 'appscreen',
+    classNames: ['appscreen', 'appscreen-set', 'dropzone'],
+    classNameBindings: ['appTouch:background', 'hasApp'],
+    appTouch: false,
+  
+    hasApp: false,
+  
+    init: function () {
+      this._super();
+      Ember['default'].$(window).resize(function() {
+        this.handleSize();
+      }.bind(this));
+    },
+  
+    handleSize: function () {
+      var index = this.get('index') || 0;
+      var width = this.get('parentView.screenWidth');
+      var widthOffset = this.get('parentView.widthOffset');
+      var left = index * (width + widthOffset + 10) + widthOffset;
+      this.$().css({
+        top: this.get('parentView.screenTop'),
+        left: left,
+        width: width,
+        height: this.get('parentView.screenHeight')
+      });
+    }.on('didInsertElement')
+  
+  
+  });
+
+});
+define('web-desktop/views/backup', ['exports', 'ember', 'web-desktop/utils/keys'], function (exports, Ember, keyUtils) {
+
+  'use strict';
+
+  var KEYS = keyUtils['default'].KEYS;
+  var get = Ember['default'].get;
+  
+  exports['default'] = Ember['default'].CollectionView.extend({
+    // templateName: 'appscreen',
+    classNames: ['appscreen', 'appscreen-set', 'dropzone'],
+    classNameBindings: ['appTouch:background'],
+    appTouch: false,
+    contentBinding: 'controller',
+    tagName: 'ul',
+    height: 600,
+    width: 400,
+  
+    left: 89,
+    top: 103,
+  
+    itemViewClass: 'appicon',
+  
+    activeApp: null,
+  
+    init: function () {
+      this._super();
+      Ember['default'].$(window).resize(function() {
+  
+        this.handleSize();
+      }.bind(this));
+    },
+  
+    didInsertElement: function () {
+      this.handleSize();
+      Ember['default'].$(document).on('keyup.applist', this.onKeyUp.bind(this));
+    },
+  
+    onKeyUp: function (evt) {
+      // key event 27 is the escape key
+      if (evt.which === KEYS.LEFT_ARROW || evt.which === KEYS.RIGHT_ARROW) {
+        Ember['default'].run(this, function () {
+          this.controller.send('moveImage', evt.which);
+        });
+      }
+    },
+  
+    handleSize: function () {
+  
+      var minHeightIcon = 64;
+      var minWidthIcon = 48;
+      var minHeightScreen = minHeightIcon * 6;
+      var minWidthScreen = minWidthIcon * 4;
+      var minHeightWin = minHeightScreen + 60;
+      var minWidthWin = minWidthScreen * 4;
+      var winWidth  = Math.max(Ember['default'].$(window).width(), minWidthWin);
+      var winHeight = Math.max(Ember['default'].$(window).height(), minHeightWin);
+  
+      var height = (winHeight - 60) * 0.9;
+      var width = winWidth / 3 * 0.9 ;
+  
+      var top = (winHeight - 60 - height) / 2 + 45;
+      var left = (winWidth - width * 3) / 4;
+  
+      var iconWidth = Math.max(width/4 * 0.6, minWidthIcon);
+      // var node = this.$();
+      // node.css({
+      //   width: width,
+      //   height: height,
+      //   left: left,
+      //   top: top
+      // });
+      // node.css({
+      //   width: '100%',
+      //   height: '100%'
+      // });
+      this.setProperties({
+        screenWidth: width,
+        screenHeight: height,
+        top: top,
+        left: left,
+        iconWidth: iconWidth
+      });
+    },
+  
+  
+    getScreenRowCol: function (left, top) { // TBD: refine accuracy
+      var newCol = Math.round(left * 4 / this.get('screenWidth'));
+      var newRow = Math.round(top * 5 / this.get('screenHeight'));
+      return {row: newRow, col: newCol};
+    },
+  
+    onMouseMove: function (event) {
+      // this.set('parentView.appTouch', true);
+      this.set('controller.appTouch', true);
+  
+      var node = this.get('activeApp');
+      var originEvt = event.originalEvent;
+      var offset = node.$().parent().offset(); // TBD
+      var x = originEvt.clientX - this.get('offsetX') - offset.left;
+      var y = originEvt.clientY - this.get('offsetY') - offset.top;
+      node.$().css({ // image follow
+        'top': y,
+        'left': x,
+        'z-index': '100'
+      });
+      var rowCol = this.getScreenRowCol(x, y);
+      if (node.get('row') !== rowCol.row || node.get('col') !== rowCol.col) {
+        this.shuffle(
+        {row: node.get('row'), col: node.get('col')},
+        rowCol);
+      }
+    },
+  
+    onMouseRelease: function () {
+      var node = this.get('activeApp');
+      node.$().removeClass('dragging');
+      this.$(document).off('mousemove');
+      this.off('mouseUp', this.onMouseRelease);
+      // this.off('mouseLeave', this.onMouseRelease);
+      node.position(node.get('row'), node.get('col'), 300);
+  
+      node.$().css({
+        'z-index': 1
+      });
+      if (!this.get('controller.appTouch')) {
+        this.get('controller').send('openApp', node.get('content'));
+      }
+      this.set('controller.appTouch', false);
+    },
+  
+    onMouseDown: function (app, offsetX, offsetY) { // this will be called by item
+      this.setProperties({
+        'activeApp': app,
+        'offsetX': offsetX,
+        'offsetY': offsetY
+      });
+  
+      this.$(document).on('mousemove', this.onMouseMove.bind(this));
+      this.on('mouseUp', this.onMouseRelease);
+      //this.on('mouseLeave', this.onMouseRelease);
+    },
+  
+    shuffle: function (from, to) {  // TBD add screen constrain
+      console.log(JSON.stringify(from) + ' -> ' + JSON.stringify(to));
+      this.get('childViews').forEach(function (itemView) {
+        var col = get(itemView, 'col');
+        var row = get(itemView, 'row');
+        if (col === get(to, 'col') && row === get(to, 'row') ) {
+          itemView.position(get(from, 'row'), get(from, 'col'), 200);
+        } else if (col === get(from, 'col') && row === get(from, 'row') ) {
+          itemView.setProperties({
+            col: get(to, 'col'),
+            row: get(to, 'row')
+          });
+        }
+      });
+    }
+  
+  
+  });
+
+});
+define('web-desktop/views/header', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].View.extend({
+    classNames: ['head'],
+    templateName: 'header',
+    width_dock_icon: 52,
+    width_dock_corner: 25,
+    width_sync: 66,
+  
+    adjustSize: function () {
+      var total_dock = this.get('content.dock.length');
+      var offset = total_dock ? total_dock * this.get('width_dock_icon') + 2 * this.get('width_dock_corner') : 0;
+      var width = (Ember['default'].$( window ).width() - offset - this.get('width_sync')) /2 ;
+      if (this.get('_state') === "inDOM") {
+        this.$('.left').width(width);
+        this.$('.right').width(width);
+      }
+    }.observes('content.dock.length'),
+  
+    init: function() {
+      this._super();
+      Ember['default'].$(window).bind('resize', function () {
+        this.adjustSize();
+      }.bind(this));
+    },
+    didInsertElement: function () {
+      this.adjustSize();
+    },
+  
+  
+  });
+
+});
+define('web-desktop/views/scroll-bar-handler', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].View.extend({
+    classNames: ['jspDrag'],
+  
+    onLenChange: function () {
+  
+      var len = this.get('len')||0;
+      var top = this.get('top')||0;
+  
+      this.$().css({
+        height: len + 'px',
+        top: top +'px'
+      });
+    }.observes('len', 'top'),
+  
+    mouseEnter: function () {
+      this.$().addClass('jspHover');
+    },
+  
+    mouseLeave: function () {
+      this.$().removeClass('jspHover');
+    },
+  
+    mouseDown: function (evt) {
+      this.$().addClass('jspActive');
+      this.get('parentView').jspActive(evt);
+    },
+  
+    mouseUp: function () {
+      this.$().removeClass('jspActive');
+      this.get('parentView').jspDeactive();
+    },
+  
+  
+  
+  });
+
+});
+define('web-desktop/views/scroll-bar', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].View.extend({
+    classNames: ['jspVerticalBar'],
+    templateName: 'scroll-bar',
+  
+    trackStyle: function () {
+      console.log('trackStyle');
+      return 'height: %@px'.fmt(this.get('trackLen')||0);
+    }.property('trackLen'),
+  
+    jspActive: function (evt) {
+      var offsetY =  evt.originalEvent.offsetY
+      Ember['default'].$('.overlay').on('mousemove', function (evt) { //TBD : better event handle
+        Ember['default'].run.debounce(function () {
+          var offset = evt.originalEvent.clientY - offsetY - this.$().offset().top;
+          var slideLen = this.get('trackLen') - this.get('handlerLen');
+          if (offset > 0 && offset < slideLen) {
+            console.log(evt.clientY + ' - ' + evt.offsetY + ' - ' + offsetY + ' = ' + offset);
+  
+            this.set('handlerTop', offset);
+            var percent = offset / slideLen;
+            this.get('parentView').scrollList(percent);
+          }
+        }.bind(this), 50);
+  
+      }.bind(this));
+  
+      Ember['default'].$('.overlay').on('mouseup', function () {
+        this.jspDeactive();
+  
+      }.bind(this));
+  
+    },
+  
+    jspDeactive: function () {
+      Ember['default'].$('.overlay').off('mousemove');
+    },
+  
+    // mouseMove: function (evt) {
+    //     if (this.get('active')) {
+    //
+    //       var offset = evt.originalEvent.clientY - this.get('offsetY') - 142;
+    //       if (offset > 0 && offset < this.get('trackLen') - this.get('handlerLen')) {
+    //         console.log(evt.clientY + ' - ' + evt.offsetY + ' - ' + this.get('offsetY') + ' = ' + offset);
+    //
+    //         this.set('handlerTop', offset);
+    //       }
+    //
+    //       // console.log(offset);
+    //     }
+    // }
+  
+  });
+
+});
+define('web-desktop/views/search-bar', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  var get = Ember['default'].get;
+  
+  exports['default'] = Ember['default'].View.extend({
+    templateName: 'search-bar',
+    classNames: ['search-bar'],
+    query: '',
+  
+    didInsertElement: function () {
+      this.$('.search').on('click', function () {
+        this.$('.overlay').show();
+        this.$('.search').hide();
+        this.$('.overlay input').focus();
+      }.bind(this));
+  
+      // this.$('.overlay').on('click', function () {
+      //   this.$('.search').show();
+      //   this.$('.overlay').hide();
+      //   this.$('.overlay').off('mousemove');
+      // }.bind(this));
+      // this.$('.modal').on('click', function (evt) {
+      //   evt.stopPropagation();
+      // });
+  
+  
+      this.$('.modal').on('mousewheel', function(event) {
+        var viewLen = this.$('.container').height() - 20; // 20 is padding
+        var contentLen = this.get('controller.resultDivHeight');
+        var top = parseInt(this.$('.container ul').css('top'), 10);
+        var range = contentLen - viewLen;
+        if (range > 0) {
+          top = top + event.deltaY;
+          top = Math.min(top, 0);
+          top = Math.max(top, -range);
+          this.$('.container ul').css({top: top + 'px'});
+          var handlerTop = -top/range * this.get('handlerLen');
+          this.set('handlerTop', handlerTop);
+        }
+      }.bind(this));
+    },
+  
+    all: [
+      {
+        name: 'Check',
+        rating: 5,
+        category: 'Inventory Management',
+        price: 4,
+        freeDays: 30,
+        icon: 'img/icon_1.png',
+        installed: false
+      }, {
+        name: 'Aplus',
+        rating: 5,
+        category: 'Inventory Management',
+        price: 8,
+        freeDays: 30,
+        icon: 'img/icon_1.png',
+        installed: false
+      }, {
+        name: 'Docs',
+        rating: 4,
+        category: 'Inventory Management',
+        price: 6,
+        freeDays: 30,
+        icon: 'img/icon_3.png',
+        installed: false
+      }, {
+        name: 'Report',
+        rating: 4,
+        category: 'Inventory Management',
+        price: 2,
+        freeDays: 30,
+        icon: 'img/icon_8.png',
+        installed: false
+      }, {
+        name: 'Match',
+        rating: 3,
+        category: 'Inventory Management',
+        price: 8,
+        freeDays: 30,
+        icon: 'img/icon_4.png',
+        installed: false
+      }, {
+        name: 'Scan',
+        rating: 5,
+        category: 'Inventory Management',
+        price: 4,
+        freeDays: 30,
+        icon: 'img/icon_5.png',
+        installed: false
+      }
+    ],
+  
+    searchContent: function () {
+      var array = [];
+      var query = this.get('query');
+      if (query) {
+        query = query.toLowerCase();
+        array = this.get('all').filter(function (item) {
+          return get(item, 'name').toLowerCase().indexOf(query) !== -1 || get(item, 'category').toLowerCase() === query;
+        });
+      }
+      return array;
+    }.property('query'),
+  
+    keyUp: function (evt) {
+      var query = this.get('query');
+      if (evt.keyCode === 27) {
+        if (query) {
+          this.set('query', '');
+        } else {
+          this.$('.search').show();
+          this.$('.overlay').hide();
+        }
+      }
+    },
+  
+    updateHeight: function () {
+      if (this.get('_state') === 'inDOM') {
+        var viewLen = this.$('.container').height() - 20; // 20 is padding
+        var contentLen = this.get('controller.resultDivHeight');
+        var trackLen = viewLen;
+        var handlerLen = trackLen * viewLen / contentLen;
+  
+        if (trackLen <= handlerLen) {
+          this.setProperties({
+            trackLen: 0,
+            handlerLen: 0
+          });
+        } else {
+          this.setProperties({
+            trackLen: trackLen,
+            handlerLen: handlerLen
+          });
+        }
+      }
+    }.observes('controller.resultDivHeight'),
+  
+    scrollList: function (percent) {
+      var viewLen = this.$('.container').height() - 20; // 20 is padding
+      var contentLen = this.get('controller.resultDivHeight');
+      var top = (viewLen - contentLen) * percent;
+      this.$('.container ul').css({top: top + 'px'});
+    },
+  
+    actions: {
+      cancel: function () {
+        var query = this.get('query');
+        if (query) {
+          this.set('query', '');
+          this.$('.overlay input').focus();
+        } else {
+          this.$('.search').show();
+          this.$('.overlay').hide();
+        }
+      }
+    }
+  
+  });
+
+});
+define('web-desktop/views/search-results-item', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].View.extend({
+    templateName: 'search-results-item',
+    classNames: ['search-results-item'],
+    label: function () {
+      if (this.get('content.installed')) {
+        return 'Open';
+      } else {
+        return 'Get';
+      }
+    }.property('content.installed')
+  });
+
+});
+define('web-desktop/views/search-results', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].CollectionView.extend({
+    itemViewClass: 'search-results-item',
+    tagName: 'ul',
+    classNames: ['search-results'],
+    onChildViewsChanged : function( obj, key ){
+      var length = this.get( 'childViews.length' );
+      if( length > 0 ){
+        Ember['default'].run.scheduleOnce( 'afterRender', this, 'childViewsDidRender' );
+      }
+    }.observes('childViews'),
+  
+    childViewsDidRender : function(){
+      this.get('controller').set('resultDivHeight', this.$().height());
+    }
+  });
+
+});
+define('web-desktop/views/window', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].View.extend({
+    templateName: 'window',
+    classNames: ['window', 'share',  'windows-vis'],
+  
+    width: 800,
+    height: 600,
+  
+    didInsertElement: function () {
+  
+      this.$().css({
+        width: this.get('width'),
+        height: this.get('height')
+      });
+  
+      this.$('.header').on('mousedown', function (event) {
+        var originEvt = event.originalEvent;
+        var offsetX = originEvt.offsetX ? originEvt.offsetX : originEvt.layerX;
+        var offsetY = originEvt.offsetY ? originEvt.offsetY : originEvt.layerY;
+  
+      //   this.$('.header').on('mousemove', function (event) {
+      //     var originEvt = event.originalEvent;
+      //     var x = originEvt.clientX - offsetX;
+      //     var y = originEvt.clientY - offsetY;
+      //     this.$().css({ // image follow
+      //       'top': y,
+      //       'left': x,
+      //       'z-index': '1000'
+      //     });
+      //   }.bind(this));
+      //
+      }.bind(this));
+  
+      this.$('.header').on('mouseup', function () {console.log('mouseup');
+        Ember['default'].$(this).off('mousemove');
+      });
+  
+    },
+  
+    willDestroyElement: function () {
+      this.$('.header').on('mousedown');
+      this.$('.header').on('mouseup');
+    }
+  
+  });
+
+});
 /* jshint ignore:start */
 
 define('web-desktop/config/environment', ['ember'], function(Ember) {
@@ -175,7 +2051,6 @@ catch(err) {
 
 /* jshint ignore:end */
 
-
 });
 
 if (runningTests) {
@@ -184,5 +2059,5 @@ if (runningTests) {
   require("web-desktop/app")["default"].create({"LOG_ACTIVE_GENERATION":true,"LOG_VIEW_LOOKUPS":true});
 }
 
-
 /* jshint ignore:end */
+//# sourceMappingURL=web-desktop.map
