@@ -97,8 +97,50 @@ export default Ember.Controller.extend({
       }
     },
 
-    addApp: function () { // TBD
-      console.log('addApp');
+    addApp: function (content) {
+      var screen = 0;
+      var col = 0;
+      var row = 0;
+
+      var tmp = [];
+      var tmp1 = [];
+
+      var apps  = this.get('model');
+      var screenFilter = function (app) {
+        return get(app, 'screen') === screen;
+      };
+      var colFilter = function (app) {
+        return get(app, 'col') === col;
+      };
+      var rowFilter = function (app) {
+        return get(app, 'row') === row;
+      };
+
+      for (screen = 0; screen < 3; screen ++) {
+        tmp = apps.filter(screenFilter);
+        if (tmp.length < 20) {
+          break;
+        }
+      }
+      for (col = 0; col < 4; col ++) {
+        tmp1 = tmp.filter(colFilter);
+        if (tmp1.length < 5) {
+          break;
+        }
+      }
+      for (row = 0; row < 5; row ++) {
+        var find = tmp1.any(rowFilter);
+        if (!find) {
+          break;
+        }
+      }
+
+      apps.pushObject(
+        Ember.$.extend({
+          screen: screen,
+          col: col,
+          row: row
+        }, content));
     },
 
     deleteApp: function (/*item*/) { // TBD

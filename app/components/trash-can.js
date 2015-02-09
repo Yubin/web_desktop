@@ -6,6 +6,9 @@ export default Ember.Component.extend(DragDrop.Droppable,{
 
   drop: function () {
     console.log('drop');
+  },
+  mouseEnter: function () {
+    console.log('mouseEnter');
   }
 
 });

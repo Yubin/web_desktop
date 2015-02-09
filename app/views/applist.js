@@ -127,9 +127,9 @@ export default Ember.View.extend({
       'z-index': 1
     });
     if (!this.get('appTouch')) {
-      this.set('appTouch', false);
       this.get('controller').send('openApp', node.get('content'));
     }
+    this.set('appTouch', false);
     this.get('controller').send('appStop');
   },
 
