@@ -1,10 +1,10 @@
-<div class="search">
+<div class="search fadeIn fadeIn-50ms fadeIn-Delay-50ms">
   <div class="search-icon"></div>
   {{input type="text" placeholder="Search APP or Content" disabled=true}}
 </div>
 
 <div class="overlay">
-  <div class="modal">
+  <div class="modal fadeIn fadeIn-50ms">
     {{input type="text" value=view.query}}
     <a class="cancel_search" {{action 'cancel' target=view}}>Cancel</a>
     <div class="container">

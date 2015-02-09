@@ -631,7 +631,7 @@ define('web-desktop/templates/appicon', ['exports', 'ember'], function (exports,
     var buffer = '', escapeExpression=this.escapeExpression;
 
 
-    data.buffer.push("<div class=\"effect\"></div>\r\n<div class=\"app-edge\"></div>\r\n<div class=\"app-img\"></div>\r\n<div class=\"app-text\">");
+    data.buffer.push("<div class=\"effect fadeIn fadeIn-50ms fadeIn-Delay-100ms\"></div>\r\n<div class=\"app-edge fadeIn fadeIn-50ms fadeIn-Delay-100ms\"></div>\r\n<div class=\"app-img fadeIn fadeIn-50ms fadeIn-Delay-100ms\"></div>\r\n<div class=\"app-text fadeIn fadeIn-50ms fadeIn-Delay-100ms\">");
     data.buffer.push(escapeExpression(helpers.unbound.call(depth0, "view.content.name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data})));
     data.buffer.push("</div>");
     return buffer;
@@ -790,7 +790,7 @@ define('web-desktop/templates/header', ['exports', 'ember'], function (exports, 
     
 
 
-    data.buffer.push("<ul class=\"nav\">\r\n  <li class=\"logo\">\r\n    <span>Your Enterprise Name Here</span>\r\n  </li>\r\n  <li class=\"dock\">\r\n\r\n  </li>\r\n  <li class=\"login\">\r\n    <span>\r\n      <a>Sign up</a> / <a>Log in</a>\r\n    </span>\r\n  </li>\r\n</ul>\r\n");
+    data.buffer.push("<ul class=\"nav fadeIn fadeIn-50ms\">\r\n  <li class=\"logo fadeIn fadeIn-50ms\">\r\n    <span>Your Enterprise Name Here</span>\r\n  </li>\r\n  <li class=\"dock fadeIn fadeIn-50ms\">\r\n\r\n  </li>\r\n  <li class=\"login fadeIn fadeIn-50ms\">\r\n    <span>\r\n      <a>Sign up</a> / <a>Log in</a>\r\n    </span>\r\n  </li>\r\n</ul>\r\n");
     
   });
 
@@ -850,13 +850,13 @@ define('web-desktop/templates/search-bar', ['exports', 'ember'], function (expor
     var buffer = '', helper, options, helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
 
 
-    data.buffer.push("<div class=\"search\">\r\n  <div class=\"search-icon\"></div>\r\n  ");
+    data.buffer.push("<div class=\"search fadeIn fadeIn-50ms fadeIn-Delay-50ms\">\r\n  <div class=\"search-icon\"></div>\r\n  ");
     data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
       'type': ("text"),
       'placeholder': ("Search APP or Content"),
       'disabled': (true)
     },hashTypes:{'type': "STRING",'placeholder': "STRING",'disabled': "BOOLEAN"},hashContexts:{'type': depth0,'placeholder': depth0,'disabled': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
-    data.buffer.push("\r\n</div>\r\n\r\n<div class=\"overlay\">\r\n  <div class=\"modal\">\r\n    ");
+    data.buffer.push("\r\n</div>\r\n\r\n<div class=\"overlay\">\r\n  <div class=\"modal fadeIn fadeIn-50ms\">\r\n    ");
     data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
       'type': ("text"),
       'value': ("view.query")
@@ -1633,10 +1633,9 @@ define('web-desktop/views/appscreen', ['exports', 'ember'], function (exports, E
   
   exports['default'] = Ember['default'].View.extend({
     // templateName: 'appscreen',
-    classNames: ['appscreen', 'appscreen-set', 'dropzone'],
+    classNames: ['appscreen', 'appscreen-set', 'dropzone', 'fadeIn', 'fadeIn-50ms','fadeIn-Delay-50ms'],
     classNameBindings: ['appTouch:background', 'hasApp'],
     appTouch: false,
-  
     hasApp: false,
   
     init: function () {

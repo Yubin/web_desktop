@@ -4,10 +4,9 @@ var get = Ember.get;
 
 export default Ember.View.extend({
   // templateName: 'appscreen',
-  classNames: ['appscreen', 'appscreen-set', 'dropzone'],
+  classNames: ['appscreen', 'appscreen-set', 'dropzone', 'fadeIn', 'fadeIn-50ms','fadeIn-Delay-50ms'],
   classNameBindings: ['appTouch:background', 'hasApp'],
   appTouch: false,
-
   hasApp: false,
 
   init: function () {
