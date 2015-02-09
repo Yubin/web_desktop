@@ -39,6 +39,9 @@ define('web-desktop/components/trash-can', ['exports', 'ember', 'web-desktop/mix
   
     drop: function () {
       console.log('drop');
+    },
+    mouseEnter: function () {
+      console.log('mouseEnter');
     }
   
   });
@@ -110,7 +113,7 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
       showTrash: function (show) {
         this.set('appTouch', show);
       },
-      openApp: function (item) { console.log('openApp');
+      openApp: function (item) { console.log(item);
         var name = get(item, 'name');
   
         var find = this.get('openApps').any(function (it) {
@@ -163,8 +166,50 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
         }
       },
   
-      addApp: function () { // TBD
-        console.log('addApp');
+      addApp: function (content) {
+        var screen = 0;
+        var col = 0;
+        var row = 0;
+  
+        var tmp = [];
+        var tmp1 = [];
+  
+        var apps  = this.get('model');
+        var screenFilter = function (app) {
+          return get(app, 'screen') === screen;
+        };
+        var colFilter = function (app) {
+          return get(app, 'col') === col;
+        };
+        var rowFilter = function (app) {
+          return get(app, 'row') === row;
+        };
+  
+        for (screen = 0; screen < 3; screen ++) {
+          tmp = apps.filter(screenFilter);
+          if (tmp.length < 20) {
+            break;
+          }
+        }
+        for (col = 0; col < 4; col ++) {
+          tmp1 = tmp.filter(colFilter);
+          if (tmp1.length < 5) {
+            break;
+          }
+        }
+        for (row = 0; row < 5; row ++) {
+          var find = tmp1.any(rowFilter);
+          if (!find) {
+            break;
+          }
+        }
+  
+        apps.pushObject(
+          Ember['default'].$.extend({
+            screen: screen,
+            col: col,
+            row: row
+          }, content));
       },
   
       deleteApp: function (/*item*/) { // TBD
@@ -269,6 +314,7 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
     left: 0,
     top: 0,
     layoutName: 'window',
+    isFullSize: false,
   
     changeZindex: function () {
       var zindex = -1;
@@ -315,8 +361,14 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
             'top': y,
             'left': x
           });
+          this.setProperties({
+            top: y,
+            left: x
+          });
         }.bind(this));
   
+      }.bind(this)).on('dblclick', function () {
+        this._actions['maximizeApp'].apply(this);
       }.bind(this));
   
       this.$('.header').on('mouseup', function () {console.log('mixin -  mouseup');
@@ -326,8 +378,33 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
     },
   
     willDestroyElement: function () {
-      this.$('.header').off('mousedown');
+      this.$('.header').off('mousedown').off('dblclick');
       this.$('.header').off('mouseup');
+    },
+  
+    actions: {
+      maximizeApp: function () {
+        if (this.get('isFullSize')) {
+          this.$().animate({ // image follow
+            'top': this.get('top'),
+            'left': this.get('left'),
+            'width': this.get('width'),
+            'height': this.get('height')
+          });
+        } else {
+          this.$().animate({ // image follow
+            'top': 45,
+            'left': 0,
+            'width': '100%',
+            'height': '100%'
+          });
+        }
+        this.toggleProperty('isFullSize');
+      },
+  
+      minimizeApp: function () {
+        //TBD
+      }
     }
   
   });
@@ -453,50 +530,10 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
         this.set('controller.appMoving', false);
       },
       installApp: function (content) {
-  
-        var screen = 0;
-        var col = 0;
-        var row = 0;
-  
-        var tmp = [];
-        var tmp1 = [];
-  
-        var apps  = this.controllerFor('applist').get('model');
-        var screenFilter = function (app) {
-          return get(app, 'screen') === screen;
-        };
-        var colFilter = function (app) {
-          return get(app, 'col') === col;
-        };
-        var rowFilter = function (app) {
-          return get(app, 'row') === row;
-        };
-  
-        for (screen = 0; screen < 3; screen ++) {
-          tmp = apps.filter(screenFilter);
-          if (tmp.length < 20) {
-            break;
-          }
-        }
-        for (col = 0; col < 4; col ++) {
-          tmp1 = tmp.filter(colFilter);
-          if (tmp1.length < 5) {
-            break;
-          }
-        }
-        for (row = 0; row < 5; row ++) {
-          var find = tmp1.any(rowFilter);
-          if (!find) {
-            break;
-          }
-        }
-  
-        this.controllerFor('applist').get('model').pushObject(
-          Ember['default'].$.extend({
-            screen: screen,
-            col: col,
-            row: row
-          }, content));
+        this.controllerFor('applist')._actions['addApp'].apply(ctrl, arguments);
+      },
+      openApp: function (content) {
+        this.controllerFor('applist')._actions['openApp'].apply(ctrl, arguments);
       }
     }
   });
@@ -855,7 +892,9 @@ define('web-desktop/templates/search-results-item', ['exports', 'ember'], functi
     
     var buffer = '', stack1;
     data.buffer.push("\r\n<a class=\"action open\" ");
-    data.buffer.push(escapeExpression(helpers.action.call(depth0, "openApp", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
+    data.buffer.push(escapeExpression(helpers.action.call(depth0, "openApp", {hash:{
+      'target': ("view")
+    },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
     data.buffer.push(">\r\n  ");
     stack1 = helpers._triageMustache.call(depth0, "view.label", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
@@ -867,9 +906,9 @@ define('web-desktop/templates/search-results-item', ['exports', 'ember'], functi
     
     var buffer = '', stack1;
     data.buffer.push("\r\n<a class=\"action get\" ");
-    data.buffer.push(escapeExpression(helpers.action.call(depth0, "installApp", "view.content", {hash:{
+    data.buffer.push(escapeExpression(helpers.action.call(depth0, "installApp", {hash:{
       'target': ("view")
-    },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0,depth0],types:["STRING","ID"],data:data})));
+    },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
     data.buffer.push(">\r\n  ");
     stack1 = helpers._triageMustache.call(depth0, "view.label", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
@@ -922,7 +961,9 @@ define('web-desktop/templates/window', ['exports', 'ember'], function (exports, 
     data.buffer.push("</span>\r\n</div>\r\n<nav class=\"control-window\">\r\n  <a href=\"#\" class=\"minimize\" ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "minimizeApp", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
     data.buffer.push(">&nbsp;</a>\r\n  <a href=\"#\" class=\"maximize\" ");
-    data.buffer.push(escapeExpression(helpers.action.call(depth0, "maximizeApp", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
+    data.buffer.push(escapeExpression(helpers.action.call(depth0, "maximizeApp", {hash:{
+      'target': ("view")
+    },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
     data.buffer.push(">maximize</a>\r\n  <a href=\"#\" class=\"close\" ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "closeApp", "view.content", {hash:{
       'target': ("view.parentView")
@@ -1550,9 +1591,9 @@ define('web-desktop/views/applist', ['exports', 'ember', 'web-desktop/utils/keys
         'z-index': 1
       });
       if (!this.get('appTouch')) {
-        this.set('appTouch', false);
         this.get('controller').send('openApp', node.get('content'));
       }
+      this.set('appTouch', false);
       this.get('controller').send('appStop');
     },
   
@@ -2112,6 +2153,10 @@ define('web-desktop/views/search-results-item', ['exports', 'ember'], function (
       installApp: function () {
         this.set('content.installed', true);
         this.get('controller').send('installApp', this.get('content'));
+      },
+  
+      openApp: function () {
+        this.get('controller').send('openApp', this.get('content'));
       }
     }
   });
