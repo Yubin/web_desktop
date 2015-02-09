@@ -1,7 +1,7 @@
 import Ember from 'ember';
 
 export default Ember.Mixin.create({
-  classNames: ['window', 'windows-vis'],
+  classNames: ['window', 'windows-vis', 'fadeIn', 'fadeIn-20ms'],
   classNameBindings: ['active'],
   active: true,
   width: 950,

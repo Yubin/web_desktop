@@ -306,7 +306,7 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
   'use strict';
 
   exports['default'] = Ember['default'].Mixin.create({
-    classNames: ['window', 'windows-vis'],
+    classNames: ['window', 'windows-vis', 'fadeIn', 'fadeIn-20ms'],
     classNameBindings: ['active'],
     active: true,
     width: 950,
@@ -775,7 +775,7 @@ define('web-desktop/templates/components/trash-can', ['exports', 'ember'], funct
     
 
 
-    data.buffer.push("\r\n<div class=\"trash\">Delete this APP</div>\r\n");
+    data.buffer.push("\r\n<div class=\"trash fadeIn fadeIn-50ms fadeIn-Delay-150ms\">Delete this APP</div>\r\n");
     
   });
 

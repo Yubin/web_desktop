@@ -17,6 +17,9 @@
     border-radius: 40px;
     background: rgba(50, 50, 50, 0.3);
     box-shadow: 0 0 12px #FFFFFF;
+    &:hover {
+        background: rgba(51, 176, 240, 0.3);
+      }
 
     .search-icon {
       display: inline-block;
@@ -149,6 +152,7 @@
         margin-bottom: 1vh;
 
           .search-results-item {
+            background: transparent;            
             &:hover {
             background: #666666; /* Old browsers */
             background: -moz-linear-gradient(top,  #666666 0%, #161616 100%, #1d1d1d 100%); /* FF3.6+ */
@@ -160,6 +164,7 @@
             filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#666666', endColorstr='#1d1d1d',GradientType=0 ); /* IE6-9 */
             box-shadow: inset 0 0 1px black;
             }
+
             &:first-child {
               margin-top: 2.5vh;
             }
