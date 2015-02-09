@@ -790,7 +790,7 @@ define('web-desktop/templates/header', ['exports', 'ember'], function (exports, 
     
 
 
-    data.buffer.push("<ul class=\"nav fadeIn fadeIn-50ms\">\r\n  <li class=\"logo fadeIn fadeIn-50ms\">\r\n    <span>Your Enterprise Name Here</span>\r\n  </li>\r\n  <li class=\"dock fadeIn fadeIn-50ms\">\r\n\r\n  </li>\r\n  <li class=\"login fadeIn fadeIn-50ms\">\r\n    <span>\r\n      <a>Sign up</a> / <a>Log in</a>\r\n    </span>\r\n  </li>\r\n</ul>\r\n");
+    data.buffer.push("<ul class=\"nav fadeIn fadeIn-50ms fadeOut fadeOut-50ms\">\r\n  <li class=\"logo fadeIn fadeIn-50ms\">\r\n    <span>Your Enterprise Name Here</span>\r\n  </li>\r\n  <li class=\"dock fadeIn fadeIn-50ms\">\r\n\r\n  </li>\r\n  <li class=\"login fadeIn fadeIn-50ms\">\r\n    <span>\r\n      <a>Sign up</a> / <a>Log in</a>\r\n    </span>\r\n  </li>\r\n</ul>\r\n");
     
   });
 
@@ -1414,7 +1414,7 @@ define('web-desktop/views/appicon', ['exports', 'ember'], function (exports, Emb
   
       var screnWidth = this.get('parentView.screenWidth');
       var widthOffset = this.get('parentView.widthOffset');
-      var screenLeft = scr * (screnWidth + widthOffset + 10) + widthOffset;
+      var screenLeft = scr * (screnWidth + widthOffset) + widthOffset;
   
       var top  = (iconHeight + offsetHeight) * row + offsetHeight;
       var left = (iconWidth + offsetWidth) * col + offsetWidth + screenLeft;

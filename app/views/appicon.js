@@ -75,7 +75,7 @@ export default Ember.View.extend({
 
     var screnWidth = this.get('parentView.screenWidth');
     var widthOffset = this.get('parentView.widthOffset');
-    var screenLeft = scr * (screnWidth + widthOffset + 10) + widthOffset;
+    var screenLeft = scr * (screnWidth + widthOffset) + widthOffset;
 
     var top  = (iconHeight + offsetHeight) * row + offsetHeight;
     var left = (iconWidth + offsetWidth) * col + offsetWidth + screenLeft;
