@@ -8,11 +8,11 @@
   <a class="price">{{view.content.freeDay}} days free trail, ${{view.content.price}} /month</a>
 </div>
 {{#if view.content.installed}}
-<a class="action open" {{action "openApp"}}>
+<a class="action open" {{action "openApp" target=view}}>
   {{view.label}}
 </a>
 {{else}}
-<a class="action get" {{action "installApp" view.content target=view}}>
+<a class="action get" {{action "installApp" target=view}}>
   {{view.label}}
 </a>
 {{/if}}
