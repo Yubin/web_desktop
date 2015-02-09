@@ -97,10 +97,12 @@ export default Ember.Route.extend({
       this.set('controller.appMoving', false);
     },
     installApp: function (content) {
-      this.controllerFor('applist')._actions['addApp'].apply(ctrl, arguments);
+      var ctrl = this.controllerFor('applist');
+      ctrl._actions['addApp'].apply(ctrl, arguments);
     },
     openApp: function (content) {
-      this.controllerFor('applist')._actions['openApp'].apply(ctrl, arguments);
+      var ctrl = this.controllerFor('applist');
+      ctrl._actions['openApp'].apply(ctrl, arguments);
     }
   }
 });
