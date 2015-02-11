@@ -62,7 +62,18 @@ export default Ember.View.extend({
       viewName: 'customer',
       installed: false,
       url: 'http://pixlr.com/editor/?loc=zh-cn'
-    }
+    },
+    {
+      name: 'HipChat',
+      rating: 5,
+      category: 'Collaboration',
+      price: 4,
+      freeDays: 15,
+      icon: 'img/hipchat.jpg',
+      viewName: 'customer',
+      installed: false,
+      url: 'https://gausian.hipchat.com/chat'
+    },
     // {
     //   name: 'Check',
     //   rating: 5,
