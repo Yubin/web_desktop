@@ -347,29 +347,33 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
         top: this.get('top')
       });
       this.$().resizable();
-      this.$('.header').on('mousedown', function (event) {
-        if (event.which !== 1) { return ;}
-        var originEvt = event.originalEvent;
-        var offsetX = originEvt.offsetX ? originEvt.offsetX : originEvt.layerX;
-        var offsetY = originEvt.offsetY ? originEvt.offsetY : originEvt.layerY;
-
-        this.$(document).on('mousemove', function (event) {
-          var originEvt = event.originalEvent;
-          var x = originEvt.clientX - offsetX;
-          var y = originEvt.clientY - offsetY;
-          this.$().css({ // image follow
-            'top': y,
-            'left': x
-          });
-          this.setProperties({
-            top: y,
-            left: x
-          });
+        this.$().draggable();
+        this.$('.header').on('dblclick', function () {
+          this._actions['maximizeApp'].apply(this);
         }.bind(this));
-
-      }.bind(this)).on('dblclick', function () {
-        this._actions['maximizeApp'].apply(this);
-      }.bind(this));
+      // this.$('.header').on('mousedown', function (event) {
+      //   if (event.which !== 1) { return ;}
+      //   var originEvt = event.originalEvent;
+      //   var offsetX = originEvt.offsetX ? originEvt.offsetX : originEvt.layerX;
+      //   var offsetY = originEvt.offsetY ? originEvt.offsetY : originEvt.layerY;
+      //
+      //   this.$(document).on('mousemove', function (event) {
+      //     var originEvt = event.originalEvent;
+      //     var x = originEvt.clientX - offsetX;
+      //     var y = originEvt.clientY - offsetY;
+      //     this.$().css({ // image follow
+      //       'top': y,
+      //       'left': x
+      //     });
+      //     this.setProperties({
+      //       top: y,
+      //       left: x
+      //     });
+      //   }.bind(this));
+      //
+      // }.bind(this)).on('dblclick', function () {
+      //   this._actions['maximizeApp'].apply(this);
+      // }.bind(this));
 
       this.$('.header').on('mouseup', function () {console.log('mixin -  mouseup');
         this.$(document).off('mousemove');
@@ -378,8 +382,7 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
     },
 
     willDestroyElement: function () {
-      this.$('.header').off('mousedown').off('dblclick');
-      this.$('.header').off('mouseup');
+      this.$('.header').off('dblclick');
     },
 
     actions: {
