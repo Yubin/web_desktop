@@ -139,7 +139,7 @@ export default Ember.View.extend({
       return get(pos1, 'col') === get(pos2, 'col') &&
       get(pos1, 'row') === get(pos2, 'row') &&
       get(pos1, 'scr') === get(pos2, 'scr');
-    }
+    };
     this.get('childViews').forEach(function (itemView) {
       if (isSamePosition(itemView, to)) { // swap
         console.log(from);

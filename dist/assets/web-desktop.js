@@ -1,3 +1,7 @@
+/* jshint ignore:start */
+
+/* jshint ignore:end */
+
 define('web-desktop/app', ['exports', 'ember', 'ember/resolver', 'ember/load-initializers', 'web-desktop/config/environment'], function (exports, Ember, Resolver, loadInitializers, config) {
 
   'use strict';
@@ -49,11 +53,24 @@ define('web-desktop/components/trash-can', ['exports', 'ember', 'web-desktop/mix
 });
 define('web-desktop/controllers/application', ['exports', 'ember'], function (exports, Ember) {
 
-	'use strict';
+  'use strict';
 
-	exports['default'] = Ember['default'].Controller.extend({
-
-	});
+  exports['default'] = Ember['default'].Controller.extend({
+    // queryParams: ['applist'],
+    // applist: null,
+    // installApp: function() {
+    //   var applist = this.get('applist');
+    //   var userApps = this.get('model');
+    //
+    //   if (applist) {
+    //     console.log(applist);
+    //     // userApps.filter
+    //
+    //   } else {
+    //     return [];
+    //   }
+    // }.property('applist', 'model')
+  });
 
 });
 define('web-desktop/controllers/applist-item', ['exports', 'ember'], function (exports, Ember) {
@@ -108,6 +125,50 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
         set(scr, 'hasApp', hasApp);
       });
     }.observes('content.@each.screen'),
+
+    _getContentById: function (id) {
+      return {
+        id: id,
+        name: 'App_' + id,
+        rating: 5,
+        category: 'Base',
+        price: 4,
+        freeDays: 30,
+        icon: 'http://asa.static.gausian.com/user_app/Customers/icon.png',
+        viewName: 'customer',
+        installed: false,
+        url: 'http://gausian-developers.github.io/user-app-template5/app/'
+      };
+    },
+
+    observeAppinstall: function () {
+      var appinstall = this.get('appinstall');
+      var applist = this.get('model');
+
+      if (appinstall) {
+        var ids = appinstall.split(',');
+        var needOpen = ids.length === 1 ? true : false;
+        ids.forEach(function (id) {
+          console.log(id);
+          var found = applist.any(function (app) {
+            return get(app, 'id') === id;
+          });
+          if (!found) {
+            // TBD: search from server to get content
+            var content = this._getContentById(id);
+            if (content) {
+              this._actions['addApp'].apply(this, [content]);
+              if (needOpen) {
+                Ember['default'].run.later(function () {
+                  this._actions['openApp'].apply(this, [content]);
+                }.bind(this), 2000);
+              }
+            }
+          }
+        }.bind(this));
+      }
+
+    }.observes('appinstall'),
 
     actions: {
       showTrash: function (show) {
@@ -167,6 +228,8 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
       },
 
       addApp: function (content) {
+              console.log(content);
+
         var screen = 0;
         var col = 0;
         var row = 0;
@@ -256,7 +319,7 @@ define('web-desktop/initializers/export-application-global', ['exports', 'ember'
   function initialize(container, application) {
     var classifiedName = Ember['default'].String.classify(config['default'].modulePrefix);
 
-    if (config['default'].exportApplicationGlobal) {
+    if (config['default'].exportApplicationGlobal && !window[classifiedName]) {
       window[classifiedName] = application;
     }
   };
@@ -422,7 +485,6 @@ define('web-desktop/router', ['exports', 'ember', 'web-desktop/config/environmen
   });
 
   Router.map(function() {
-    this.route('application', { path: '/' });
   });
 
   Router.reopen({
@@ -439,7 +501,10 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
   var get = Ember['default'].get;
   exports['default'] = Ember['default'].Route.extend({
 
-    model: function () {
+    beforeModel: function (params) {
+      this.set('appinstall', get(params, 'queryParams.appinstall'))
+    },
+    model: function (params) {
       return {
         applist:[
   // {
@@ -514,7 +579,9 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
     },
 
     setupController: function (controller, model) {
-      this.controllerFor('applist').set('model', get(model, 'applist'));
+      var ctl = this.controllerFor('applist');
+      ctl.set('model', get(model, 'applist'));
+      ctl.set('appinstall', this.get('appinstall'));
     },
 
     renderTemplate: function() {
@@ -982,6 +1049,86 @@ define('web-desktop/templates/window', ['exports', 'ember'], function (exports, 
   });
 
 });
+define('web-desktop/tests/app.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - .');
+  test('app.js should pass jshint', function() { 
+    ok(true, 'app.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/components/star-rating.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - components');
+  test('components/star-rating.js should pass jshint', function() { 
+    ok(true, 'components/star-rating.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/components/trash-can.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - components');
+  test('components/trash-can.js should pass jshint', function() { 
+    ok(true, 'components/trash-can.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/controllers/application.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - controllers');
+  test('controllers/application.js should pass jshint', function() { 
+    ok(true, 'controllers/application.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/controllers/applist-item.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - controllers');
+  test('controllers/applist-item.js should pass jshint', function() { 
+    ok(true, 'controllers/applist-item.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/controllers/applist.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - controllers');
+  test('controllers/applist.js should pass jshint', function() { 
+    ok(true, 'controllers/applist.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/controllers/header.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - controllers');
+  test('controllers/header.js should pass jshint', function() { 
+    ok(true, 'controllers/header.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/controllers/search-bar.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - controllers');
+  test('controllers/search-bar.js should pass jshint', function() { 
+    ok(true, 'controllers/search-bar.js should pass jshint.'); 
+  });
+
+});
 define('web-desktop/tests/helpers/resolver', ['exports', 'ember/resolver', 'web-desktop/config/environment'], function (exports, Resolver, config) {
 
   'use strict';
@@ -994,6 +1141,16 @@ define('web-desktop/tests/helpers/resolver', ['exports', 'ember/resolver', 'web-
   };
 
   exports['default'] = resolver;
+
+});
+define('web-desktop/tests/helpers/resolver.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - helpers');
+  test('helpers/resolver.js should pass jshint', function() { 
+    ok(true, 'helpers/resolver.js should pass jshint.'); 
+  });
 
 });
 define('web-desktop/tests/helpers/start-app', ['exports', 'ember', 'web-desktop/app', 'web-desktop/router', 'web-desktop/config/environment'], function (exports, Ember, Application, Router, config) {
@@ -1023,6 +1180,56 @@ define('web-desktop/tests/helpers/start-app', ['exports', 'ember', 'web-desktop/
   exports['default'] = startApp;
 
 });
+define('web-desktop/tests/helpers/start-app.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - helpers');
+  test('helpers/start-app.js should pass jshint', function() { 
+    ok(true, 'helpers/start-app.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/mixins/drag-n-drop-view.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - mixins');
+  test('mixins/drag-n-drop-view.js should pass jshint', function() { 
+    ok(true, 'mixins/drag-n-drop-view.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/mixins/window-view.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - mixins');
+  test('mixins/window-view.js should pass jshint', function() { 
+    ok(true, 'mixins/window-view.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/router.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - .');
+  test('router.js should pass jshint', function() { 
+    ok(true, 'router.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/routes/application.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - routes');
+  test('routes/application.js should pass jshint', function() { 
+    ok(false, 'routes/application.js should pass jshint.\nroutes/application.js: line 7, col 66, Missing semicolon.\nroutes/application.js: line 9, col 20, \'params\' is defined but never used.\nroutes/application.js: line 104, col 27, \'content\' is defined but never used.\nroutes/application.js: line 108, col 24, \'content\' is defined but never used.\n\n4 errors'); 
+  });
+
+});
 define('web-desktop/tests/test-helper', ['web-desktop/tests/helpers/resolver', 'ember-qunit'], function (resolver, ember_qunit) {
 
   'use strict';
@@ -1034,6 +1241,196 @@ define('web-desktop/tests/test-helper', ['web-desktop/tests/helpers/resolver', '
   QUnit.config.urlConfig.push({ id: 'nocontainer', label: 'Hide container'});
   var containerVisibility = QUnit.urlParams.nocontainer ? 'hidden' : 'visible';
   document.getElementById('ember-testing-container').style.visibility = containerVisibility;
+
+});
+define('web-desktop/tests/test-helper.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - .');
+  test('test-helper.js should pass jshint', function() { 
+    ok(true, 'test-helper.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/utils/keys.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - utils');
+  test('utils/keys.js should pass jshint', function() { 
+    ok(true, 'utils/keys.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/views/app/customer.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - views/app');
+  test('views/app/customer.js should pass jshint', function() { 
+    ok(true, 'views/app/customer.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/views/app/deliver-bid.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - views/app');
+  test('views/app/deliver-bid.js should pass jshint', function() { 
+    ok(true, 'views/app/deliver-bid.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/views/app/einventory.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - views/app');
+  test('views/app/einventory.js should pass jshint', function() { 
+    ok(true, 'views/app/einventory.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/views/app/gausian-store.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - views/app');
+  test('views/app/gausian-store.js should pass jshint', function() { 
+    ok(true, 'views/app/gausian-store.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/views/app/vendor-match.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - views/app');
+  test('views/app/vendor-match.js should pass jshint', function() { 
+    ok(true, 'views/app/vendor-match.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/views/appicon.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - views');
+  test('views/appicon.js should pass jshint', function() { 
+    ok(false, 'views/appicon.js should pass jshint.\nviews/appicon.js: line 110, col 22, \'evt\' is defined but never used.\n\n1 error'); 
+  });
+
+});
+define('web-desktop/tests/views/application.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - views');
+  test('views/application.js should pass jshint', function() { 
+    ok(true, 'views/application.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/views/applist.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - views');
+  test('views/applist.js should pass jshint', function() { 
+    ok(false, 'views/applist.js should pass jshint.\nviews/applist.js: line 4, col 5, \'KEYS\' is defined but never used.\n\n1 error'); 
+  });
+
+});
+define('web-desktop/tests/views/appscreen.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - views');
+  test('views/appscreen.js should pass jshint', function() { 
+    ok(false, 'views/appscreen.js should pass jshint.\nviews/appscreen.js: line 3, col 5, \'get\' is defined but never used.\n\n1 error'); 
+  });
+
+});
+define('web-desktop/tests/views/backup.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - views');
+  test('views/backup.js should pass jshint', function() { 
+    ok(true, 'views/backup.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/views/header.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - views');
+  test('views/header.js should pass jshint', function() { 
+    ok(true, 'views/header.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/views/scroll-bar-handler.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - views');
+  test('views/scroll-bar-handler.js should pass jshint', function() { 
+    ok(true, 'views/scroll-bar-handler.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/views/scroll-bar.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - views');
+  test('views/scroll-bar.js should pass jshint', function() { 
+    ok(true, 'views/scroll-bar.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/views/search-bar.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - views');
+  test('views/search-bar.js should pass jshint', function() { 
+    ok(true, 'views/search-bar.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/views/search-results-item.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - views');
+  test('views/search-results-item.js should pass jshint', function() { 
+    ok(true, 'views/search-results-item.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/views/search-results.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - views');
+  test('views/search-results.js should pass jshint', function() { 
+    ok(false, 'views/search-results.js should pass jshint.\nviews/search-results.js: line 7, col 40, \'key\' is defined but never used.\nviews/search-results.js: line 7, col 35, \'obj\' is defined but never used.\n\n2 errors'); 
+  });
+
+});
+define('web-desktop/tests/views/window.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - views');
+  test('views/window.js should pass jshint', function() { 
+    ok(false, 'views/window.js should pass jshint.\nviews/window.js: line 19, col 11, \'offsetX\' is defined but never used.\nviews/window.js: line 20, col 11, \'offsetY\' is defined but never used.\n\n2 errors'); 
+  });
 
 });
 define('web-desktop/utils/keys', ['exports'], function (exports) {
@@ -1608,7 +2005,7 @@ define('web-desktop/views/applist', ['exports', 'ember', 'web-desktop/utils/keys
         return get(pos1, 'col') === get(pos2, 'col') &&
         get(pos1, 'row') === get(pos2, 'row') &&
         get(pos1, 'scr') === get(pos2, 'scr');
-      }
+      };
       this.get('childViews').forEach(function (itemView) {
         if (isSamePosition(itemView, to)) { // swap
           console.log(from);
@@ -1917,7 +2314,7 @@ define('web-desktop/views/scroll-bar', ['exports', 'ember'], function (exports, 
     }.property('trackLen'),
 
     jspActive: function (evt) {
-      var offsetY =  evt.originalEvent.offsetY
+      var offsetY =  evt.originalEvent.offsetY;
       Ember['default'].$('.overlay').on('mousemove', function (evt) { //TBD : better event handle
         Ember['default'].run.debounce(function () {
           var offset = evt.originalEvent.clientY - offsetY - this.$().offset().top;
@@ -2012,7 +2409,7 @@ define('web-desktop/views/search-bar', ['exports', 'ember'], function (exports, 
         category: 'Base',
         price: 4,
         freeDays: 30,
-        icon: 'img/icon_15.png',
+        icon: 'http://asa.static.gausian.com/user_app/Customers/icon.png',
         viewName: 'customer',
         installed: false,
         url: 'http://gausian-developers.github.io/user-app-template5/app/'
@@ -2039,15 +2436,18 @@ define('web-desktop/views/search-bar', ['exports', 'ember'], function (exports, 
         installed: false,
         url: 'https://gausian.hipchat.com/chat'
       },
+      {
+        name: 'Test',
+        rating: 5,
+        category: 'Inventory Management',
+        price: 4,
+        freeDays: 30,
+        icon: 'http://asa.static.gausian.com/user_app/Customers/icon.png',
+        viewName: 'customer',
+        url: 'http://127.0.0.1/',
+        installed: false
+      },
       // {
-      //   name: 'Check',
-      //   rating: 5,
-      //   category: 'Inventory Management',
-      //   price: 4,
-      //   freeDays: 30,
-      //   icon: 'img/icon_1.png',
-      //   installed: false
-      // }, {
       //   name: 'Aplus',
       //   rating: 5,
       //   category: 'Inventory Management',
@@ -2248,6 +2648,10 @@ define('web-desktop/views/window', ['exports', 'ember'], function (exports, Embe
   });
 
 });
+/* jshint ignore:start */
+
+/* jshint ignore:end */
+
 /* jshint ignore:start */
 
 define('web-desktop/config/environment', ['ember'], function(Ember) {

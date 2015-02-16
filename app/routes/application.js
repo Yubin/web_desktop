@@ -3,7 +3,10 @@ import Ember from 'ember';
 var get = Ember.get;
 export default Ember.Route.extend({
 
-  model: function () {
+  beforeModel: function (params) {
+    this.set('appinstall', get(params, 'queryParams.appinstall'))
+  },
+  model: function (params) {
     return {
       applist:[
 // {
@@ -78,7 +81,9 @@ export default Ember.Route.extend({
   },
 
   setupController: function (controller, model) {
-    this.controllerFor('applist').set('model', get(model, 'applist'));
+    var ctl = this.controllerFor('applist');
+    ctl.set('model', get(model, 'applist'));
+    ctl.set('appinstall', this.get('appinstall'));
   },
 
   renderTemplate: function() {

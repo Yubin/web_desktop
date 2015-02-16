@@ -40,6 +40,50 @@ export default Ember.Controller.extend({
     });
   }.observes('content.@each.screen'),
 
+  _getContentById: function (id) {
+    return {
+      id: id,
+      name: 'App_' + id,
+      rating: 5,
+      category: 'Base',
+      price: 4,
+      freeDays: 30,
+      icon: 'http://asa.static.gausian.com/user_app/Customers/icon.png',
+      viewName: 'customer',
+      installed: false,
+      url: 'http://gausian-developers.github.io/user-app-template5/app/'
+    };
+  },
+
+  observeAppinstall: function () {
+    var appinstall = this.get('appinstall');
+    var applist = this.get('model');
+
+    if (appinstall) {
+      var ids = appinstall.split(',');
+      var needOpen = ids.length === 1 ? true : false;
+      ids.forEach(function (id) {
+        console.log(id);
+        var found = applist.any(function (app) {
+          return get(app, 'id') === id;
+        });
+        if (!found) {
+          // TBD: search from server to get content
+          var content = this._getContentById(id);
+          if (content) {
+            this._actions['addApp'].apply(this, [content]);
+            if (needOpen) {
+              Ember.run.later(function () {
+                this._actions['openApp'].apply(this, [content]);
+              }.bind(this), 2000);
+            }
+          }
+        }
+      }.bind(this));
+    }
+
+  }.observes('appinstall'),
+
   actions: {
     showTrash: function (show) {
       this.set('appTouch', show);
@@ -98,6 +142,8 @@ export default Ember.Controller.extend({
     },
 
     addApp: function (content) {
+            console.log(content);
+
       var screen = 0;
       var col = 0;
       var row = 0;

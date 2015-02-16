@@ -11,7 +11,7 @@ export default Ember.View.extend({
   }.property('trackLen'),
 
   jspActive: function (evt) {
-    var offsetY =  evt.originalEvent.offsetY
+    var offsetY =  evt.originalEvent.offsetY;
     Ember.$('.overlay').on('mousemove', function (evt) { //TBD : better event handle
       Ember.run.debounce(function () {
         var offset = evt.originalEvent.clientY - offsetY - this.$().offset().top;

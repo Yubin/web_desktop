@@ -47,7 +47,7 @@ export default Ember.View.extend({
       category: 'Base',
       price: 4,
       freeDays: 30,
-      icon: 'img/icon_15.png',
+      icon: 'http://asa.static.gausian.com/user_app/Customers/icon.png',
       viewName: 'customer',
       installed: false,
       url: 'http://gausian-developers.github.io/user-app-template5/app/'
@@ -74,15 +74,18 @@ export default Ember.View.extend({
       installed: false,
       url: 'https://gausian.hipchat.com/chat'
     },
+    {
+      name: 'Test',
+      rating: 5,
+      category: 'Inventory Management',
+      price: 4,
+      freeDays: 30,
+      icon: 'http://asa.static.gausian.com/user_app/Customers/icon.png',
+      viewName: 'customer',
+      url: 'http://127.0.0.1/',
+      installed: false
+    },
     // {
-    //   name: 'Check',
-    //   rating: 5,
-    //   category: 'Inventory Management',
-    //   price: 4,
-    //   freeDays: 30,
-    //   icon: 'img/icon_1.png',
-    //   installed: false
-    // }, {
     //   name: 'Aplus',
     //   rating: 5,
     //   category: 'Inventory Management',
