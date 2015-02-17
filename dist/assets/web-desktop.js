@@ -485,6 +485,7 @@ define('web-desktop/router', ['exports', 'ember', 'web-desktop/config/environmen
   });
 
   Router.map(function() {
+    this.route('login');
   });
 
   Router.reopen({
@@ -606,6 +607,18 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
       openApp: function (content) {
         var ctrl = this.controllerFor('applist');
         ctrl._actions['openApp'].apply(ctrl, arguments);
+      },
+      loginShow: function () {
+        this.render('login', {
+          outlet: 'login',
+          into: 'application'
+        });
+      },
+      loginClose: function () {
+        this.disconnectOutlet({
+          outlet: 'login',
+          parentView: 'app'
+        });
       }
     }
   });
@@ -747,6 +760,8 @@ define('web-desktop/templates/application', ['exports', 'ember'], function (expo
     data.buffer.push("\n\n");
     stack1 = helpers['if'].call(depth0, "controller.appMoving", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(3, program3, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+    data.buffer.push("\n\n");
+    data.buffer.push(escapeExpression((helper = helpers.outlet || (depth0 && depth0.outlet),options={hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data},helper ? helper.call(depth0, "login", options) : helperMissing.call(depth0, "outlet", "login", options))));
     data.buffer.push("\n\n<div class=\"top-corner-logo\">\n  <img src=\"assets/img/GAUSIAN_logo.png\" >\n</div>\n\n<svg version=\"1.1\" xmlns='http://www.w3.org/2000/svg'>\n  <filter id='blur'>\n    <feGaussianBlur stdDeviation='6' />\n  </filter>\n</svg>\n");
     return buffer;
     
@@ -857,10 +872,28 @@ define('web-desktop/templates/header', ['exports', 'ember'], function (exports, 
   exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
+    var buffer = '', escapeExpression=this.escapeExpression;
+
+
+    data.buffer.push("<ul class=\"nav fadeIn fadeIn-50ms fadeOut fadeOut-50ms\">\n  <li class=\"logo fadeIn fadeIn-50ms\">\n    <span>Your Enterprise Name Here</span>\n  </li>\n  <li class=\"dock fadeIn fadeIn-50ms\">\n\n  </li>\n  <li class=\"login fadeIn fadeIn-50ms\">\n    <span>\n      <a ");
+    data.buffer.push(escapeExpression(helpers.action.call(depth0, "loginShow", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
+    data.buffer.push(">Sign up / Log in</a>\n    </span>\n  </li>\n</ul>\n");
+    return buffer;
+    
+  });
+
+});
+define('web-desktop/templates/login', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+  helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     
 
 
-    data.buffer.push("<ul class=\"nav fadeIn fadeIn-50ms fadeOut fadeOut-50ms\">\n  <li class=\"logo fadeIn fadeIn-50ms\">\n    <span>Your Enterprise Name Here</span>\n  </li>\n  <li class=\"dock fadeIn fadeIn-50ms\">\n\n  </li>\n  <li class=\"login fadeIn fadeIn-50ms\">\n    <span>\n      <a>Sign up</a> / <a>Log in</a>\n    </span>\n  </li>\n</ul>\n");
+    data.buffer.push("<div class=\"overlay\">\n  <div class=\"modal fadeIn fadeIn-50ms\">\n    <div class=\"background-image\"></div>\n    <div class=\"flip-container fadeIn fadeIn-100ms\">\n      <div id=\"flipper\" class=\"\">\n        <div class=\"front\">\n          <div class=\"badge_band_right\"></div>\n          <div class=\"badge_band_left\"></div>\n          <div class=\"badge_band_left_shadow\"></div>\n          <div class=\"badge_band_end\"></div>\n          <a href=\"http://www.gausian.com\">\n            <div class=\"badge_buckle\">\n              <img class=\"logo_img\" src=\"assets/img/GAUSIAN_logo.png\">\n            </div>\n          </a>\n          <div class=\"badge_buckle_shadow\"></div>\n          <div id=\"badge_container\">\n            <div class=\"up_container\">\n              <img class=\"up_img\" src=\"assets/img/einstein.png\" onclick=\"\n                flipper.classList.toggle('flipped');\n                document.getElementById('visitor_container').style.opacity=0;\n                document.getElementById('sign_container').style.opacity=0;\n                document.getElementById('portrait_container').style.opacity=1;\n                \">\n              <div id=\"up_hole\"></div>\n            </div>\n            <div class=\"down_container\">\n              <div class=\"company_name\">\n                Your Company Name\n              </div>\n              <input class=\"email_input\" type=\"text\" name=\"Email\" placeholder=\"Email\" autofocus=\"\">\n              <input class=\"pw_input\" type=\"text\" name=\"Password\" placeholder=\"Password\">\n              <a href=\"http://yubin.github.io/web_desktop\">\n                <div class=\"login_bn\">Login</div>\n              </a>\n              <div class=\"sign_bn fadeIn fadeIn-100ms fadeIn-Delay-50ms\" onclick=\"\n                flipper.classList.toggle('flipped');\n                document.getElementById('visitor_container').style.opacity=0;\n                document.getElementById('sign_container').style.opacity=1;\n                document.getElementById('portrait_container').style.opacity=0;\n                \">\n                Sign up\n              </div>\n              <div class=\"visitor_bn fadeIn fadeIn-100ms fadeIn-Delay-50ms\" onclick=\"\n                flipper.classList.toggle('flipped');\n                document.getElementById('visitor_container').style.opacity=1;\n                document.getElementById('sign_container').style.opacity=0;\n                document.getElementById('portrait_container').style.opacity=0;\n                \">\n                I'm a Visitor\n              </div>\n            </div>\n          </div>\n        </div>\n        <div class=\"back\">\n          <div class=\"badge_band_right\"></div>\n          <div class=\"badge_band_left\"></div>\n          <div class=\"badge_band_left_shadow\"></div>\n          <div class=\"badge_band_end\"></div>\n          <div class=\"badge_buckle\"></div>\n          <div class=\"badge_buckle_back\"></div>\n          <div class=\"badge_buckle_shadow\"></div>\n          <div id=\"badge_container\">\n            <div class=\"up_container\">\n              <img class=\"up_img\" src=\"assets/img/empty.png\">\n              <div id=\"up_hole\"></div>\n            </div>\n            <img class=\"return_icon\" src=\"assets/img/return.png\" onclick=\"flipper.classList.toggle('flipped');\">\n            <div class=\"down_container\"></div>\n            <div id=\"sign_container\" style=\"opacity: 0;\">\n              <div class=\"back_container_header\">Sign up</div>\n              <input class=\"back_container_input_first\" type=\"text\" placeholder=\"First\">\n              <input class=\"back_container_input_last\" type=\"text\" placeholder=\"Last\">\n              <input class=\"back_container_input_email\" type=\"text\" placeholder=\"Email\">\n              <input class=\"back_container_input_company\" type=\"text\" placeholder=\"Full Company Name\">\n              <input class=\"back_container_input_pw\" type=\"password\" placeholder=\"Password\">\n              <a href=\"http://yubin.github.io/web_desktop\">\n                <div class=\"back_container_sign\">Sign</div>\n              </a>\n              <div class=\"back_container_invite\">Invite</div>\n            </div>\n            <div id=\"visitor_container\" style=\"opacity: 0;\">\n              <div class=\"back_container_header\">Visitor to</div>\n              <div class=\"back_container_visitor_company_name\">You Company Name</div>\n              <input class=\"back_container_visitor_first\" type=\"text\" placeholder=\"First\">\n              <input class=\"back_container_visitor_last\" type=\"text\" placeholder=\"Last\">\n              <input class=\"back_container_visitor_email\" type=\"text\" placeholder=\"Email\">\n              <input class=\"back_container_visitor_security\" type=\"text\" placeholder=\"Invitation Code\">\n              <a href=\"http://yubin.github.io/web_desktop\">\n                <div class=\"back_container_enter\">Enter</div>\n              </a>\n            </div>\n            <div id=\"portrait_container\" style=\"opacity: 1;\">\n              <div class=\"back_container_header\">Change Portrait</div>\n              <div class=\"portrait_container\">\n                <img class=\"portrait_img\" src=\"assets/img/einstein_5.png\">\n              </div>\n              <input class=\"portrait_email\" type=\"text\" placeholder=\"Email\">\n              <input class=\"portrait_pw\" type=\"password\" placeholder=\"Password\">\n              <div class=\"portrait_apply\">Apply New Portrait</div>\n            </div>\n          </div>\n        </div>\n      </div>\n    </div>\n  </div>\n</div>\n");
     
   });
 
@@ -1370,6 +1403,16 @@ define('web-desktop/tests/views/header.jshint', function () {
   module('JSHint - views');
   test('views/header.js should pass jshint', function() { 
     ok(true, 'views/header.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/views/login.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - views');
+  test('views/login.js should pass jshint', function() { 
+    ok(true, 'views/login.js should pass jshint.'); 
   });
 
 });
@@ -2256,6 +2299,16 @@ define('web-desktop/views/header', ['exports', 'ember'], function (exports, Embe
     },
 
 
+  });
+
+});
+define('web-desktop/views/login', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].View.extend({
+    templateName: 'login',
+    classNames: ['login-badge']
   });
 
 });

@@ -108,6 +108,18 @@ export default Ember.Route.extend({
     openApp: function (content) {
       var ctrl = this.controllerFor('applist');
       ctrl._actions['openApp'].apply(ctrl, arguments);
+    },
+    loginShow: function () {
+      this.render('login', {
+        outlet: 'login',
+        into: 'application'
+      });
+    },
+    loginClose: function () {
+      this.disconnectOutlet({
+        outlet: 'login',
+        parentView: 'app'
+      });
     }
   }
 });
