@@ -9,6 +9,21 @@
     height: 100%;
     z-index: 10;
     background-color: rgba(0, 0, 0, 0.5);
+    .modal-close {
+      color: white;
+      font-size: 20px;
+      position: absolute;
+      right: 20px;
+      top: 20px;
+      cursor: pointer;
+      z-index: 9999;
+      &:before {
+        font-family: Tahoma,Arial,sans-serif;
+        font-weight: 30;
+        font-style: normal;
+        content: 'X';
+      }
+    }
     .modal {
       width: 40%;
       padding-top: 2.2%;

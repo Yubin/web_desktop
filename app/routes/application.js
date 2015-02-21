@@ -4,7 +4,7 @@ var get = Ember.get;
 export default Ember.Route.extend({
 
   beforeModel: function (params) {
-    this.set('appinstall', get(params, 'queryParams.appinstall'))
+    this.set('appinstall', get(params, 'queryParams.appinstall'));
   },
   model: function (params) {
     return {
@@ -116,10 +116,12 @@ export default Ember.Route.extend({
       });
     },
     loginClose: function () {
-      this.disconnectOutlet({
-        outlet: 'login',
-        parentView: 'app'
-      });
+      Ember.$('.login-badge > .overlay').fadeOut( "slow", function() {
+        this.disconnectOutlet({
+          outlet: 'login',
+          parentView: 'application'
+        });
+      }.bind(this));
     }
   }
 });
