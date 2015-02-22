@@ -69,6 +69,8 @@
         perspective: 3000;
         -webkit-transform-origin: right center;
 
+        /* Mixing shake animation with shake class */
+
         /* flip the pane when hovered */
         .flipped {
           /*transform*/
@@ -273,7 +275,7 @@
           border-radius: 5.4vh;
           z-index: 20;
         }
-        #badge_container {
+        .badge_container {
           position: absolute;
           top: 18vh;
           left: 50%;
@@ -283,9 +285,17 @@
           border-radius: 2.5vh;
           transform: translateX(-50%);
           box-shadow: 0 0 1.5vh 0.2vh rgb(200, 200, 200);
+          &:hover {
+            box-shadow: 0 0 3vh 0.2vh rgb(200, 200, 200);
+          }
         }
-        #badge_container:hover {
-          box-shadow: 0 0 3vh 0.2vh rgb(200, 200, 200);
+        .badge_container.shake{
+          .animation(shake);
+        }
+        .badge_container.has-error{
+          input {
+            box-shadow: 0 0 1vh 0.2vh #a94442;
+          }
         }
         .up_container {
           position: absolute;
@@ -854,4 +864,39 @@
       }
     }
   }
+}
+
+
+/* Transform translate mixin */
+.translateX(@x) {
+  -webkit-transform: translateX(@x);
+     -moz-transform: translateX(@x);
+      -ms-transform: translateX(@x);
+       -o-transform: translateX(@x);
+          transform: translateX(@x);
+}
+
+/* Animation frames mixin */
+.animationFrames(@offset){
+  0% { .translateX(-50%) }
+  25% { .translateX(-52%) }
+  50% { .translateX(-49%) }
+  75% { .translateX(-52%) }
+  100% { .translateX(-50%) }
+}
+
+/* Shake animations, we cannot write mixin for theese prefixes due to LESS restrictions */
+@-webkit-keyframes shake { .animationFrames(5px); }
+@-moz-keyframes shake { .animationFrames(5px); }
+@-ms-keyframes shake { .animationFrames(5px); }
+@-o-keyframes shake { .animationFrames(5px); }
+@keyframes shake { .animationFrames(5px); }
+
+/* Animation mixin */
+.animation(@name, @time:0.3s){
+  -webkit-animation: @name @time;
+     -moz-animation: @name @time;
+      -ms-animation: @name @time;
+       -o-animation: @name @time;
+          animation: @name @time;
 }

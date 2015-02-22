@@ -144,7 +144,7 @@ export default Ember.Route.extend({
         var responseBody = res._data.response;
         var responseCode = res._data.response_code;
         if (res._data.response_code !== 1) {
-          alert(res._data.response.error_message);
+          this.get('controller').set('loginFail', true);
         } else {
 
           var user = {

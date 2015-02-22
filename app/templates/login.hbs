@@ -15,7 +15,7 @@
             </div>
           </a>
           <div class="badge_buckle_shadow"></div>
-          <div id="badge_container">
+          <div {{bind-attr class=":badge_container loginFail:has-error loginFail"}}>
             <div class="up_container">
               <img class="up_img" src="assets/img/einstein.png" onclick="
                 flipper.classList.toggle('flipped');
@@ -26,9 +26,7 @@
               <div id="up_hole"></div>
             </div>
             <div class="down_container">
-              <div class="company_name">
-                Your Company Name
-              </div>
+              <div class="company_name"> Your Company Name </div>
               {{input type="text" value=view.emailAddr class="email_input visitor_input" placeholder="Email"}}
               {{input type="password" value=view.password class="pw_input" placeholder="Password"}}
               <button {{action "login" target=view}} class="login_bn">Login</button>
@@ -60,7 +58,7 @@
           <div class="badge_buckle"></div>
           <div class="badge_buckle_back"></div>
           <div class="badge_buckle_shadow"></div>
-          <div id="badge_container">
+          <div class="badge_container">
             <div class="up_container">
               <img class="up_img" src="assets/img/empty.png">
               <div id="up_hole"></div>
