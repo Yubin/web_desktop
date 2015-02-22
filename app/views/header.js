@@ -27,5 +27,10 @@ export default Ember.View.extend({
     this.adjustSize();
   },
 
+  actions: {
+    profile: function () {
+      // TBD: show user profile
+    }
+  }
 
 });

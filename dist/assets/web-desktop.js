@@ -2,6 +2,65 @@
 
 /* jshint ignore:end */
 
+define('web-desktop/adapters/login', ['exports', 'ember-data', 'web-desktop/serializers/login'], function (exports, DS, Serializer) {
+
+  'use strict';
+
+  exports['default'] = DS['default'].RESTAdapter.extend({
+    serializer: Serializer['default'].create(),
+    buildURL: function (/*type, id*/) {
+      return 'http://asa.gausian.com/';
+    },
+
+    findQuery: function (store, type, query) {
+      var url = this.buildURL();
+      return this.ajax(url, 'POST', { data: query });
+    },
+
+
+    ajax: function (rawUrl, type, rawHash) {
+      var adapter = this, data;
+
+      return new Ember.RSVP.Promise(function (resolve, reject) {
+        var hash = {},
+          url = rawUrl;
+        hash.type = type;
+        hash.dataType = 'json';
+
+        hash.context = adapter;
+        hash.data = 'user_app_id=app_id&service_app_name=Login&request_string=' +
+          JSON.stringify(rawHash.data.login);
+
+        hash.beforeSend = function (xhr) {
+          if (adapter.headers !== undefined) {
+            var headers = adapter.headers;
+            Ember.keys(headers).forEach(function (key) {
+              xhr.setRequestHeader(key, headers[key]);
+            });
+          }
+        };
+
+        hash.success = function (json/*, textStatus, jqXHR*/) {
+          Ember.run(null, resolve, json);
+        };
+
+        hash.error = function (jqXHR/*, textStatus, errorThrown*/) {
+          Ember.run(null, reject, adapter.ajaxError(jqXHR, surpressError));
+        };
+
+        hash.url = url.toLowerCase();
+        // hash.crossDomain = true;
+
+        // CORS: This enables cookies to be sent with the request
+        // hash.xhrFields = { withCredentials: true };
+
+        Ember.$.ajax(hash);
+      }.bind(this), 'DS: AudienceAdapter#ajax ' + type + ' to ' + rawUrl);
+    }
+
+  });
+
+});
 define('web-desktop/app', ['exports', 'ember', 'ember/resolver', 'ember/load-initializers', 'web-desktop/config/environment'], function (exports, Ember, Resolver, loadInitializers, config) {
 
   'use strict';
@@ -102,16 +161,20 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
 
     init: function () {
       this._super.apply(this, arguments);
-      // this.setupOperator();
     },
 
-    // setupOperator: function () {
-    //   var i = 0;
-    //   for (i = 0; i <= this.get('screenNum'); i++) {
-    //     var name = 'screen_' + i;
-    //     Ember.defineProperty(this, name, Ember.computed.filterBy('@this', 'screen', i));
-    //   }
-    // },
+    reset: function () {
+
+      // close all open apps
+      this.get('openApps').forEach(function (app) {
+        this._actions['closeApp'].apply(this, [app]);
+      }.bind(this));
+
+      // clear properties
+      this.setProperties({
+        openApps: []
+      });
+    },
 
     appScreenChange: function () {
       var apps = this.get('content');
@@ -476,6 +539,16 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
   });
 
 });
+define('web-desktop/models/login', ['exports', 'ember-data'], function (exports, DS) {
+
+  'use strict';
+
+  exports['default'] = DS['default'].Model.extend({
+    user_name: DS['default'].attr('string'),
+    pwd: DS['default'].attr('string')
+  });
+
+});
 define('web-desktop/router', ['exports', 'ember', 'web-desktop/config/environment'], function (exports, Ember, config) {
 
   'use strict';
@@ -580,9 +653,19 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
     },
 
     setupController: function (controller, model) {
+      console.log('setupController');
       var ctl = this.controllerFor('applist');
+      ctl.reset();
       ctl.set('model', get(model, 'applist'));
       ctl.set('appinstall', this.get('appinstall'));
+
+      var user = {};
+      try {
+        user = JSON.parse(localStorage.getItem('gausian-user'));
+      } catch (e) {
+        console.error(e);
+      }
+      this.get('controller').set('user', user);
     },
 
     renderTemplate: function() {
@@ -621,8 +704,104 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
             parentView: 'application'
           });
         }.bind(this));
+      },
+
+      loginUser: function (content) {
+
+        this.store.createRecord('login', {
+          user_name: get(content, 'emailAddr'),
+          pwd: get(content, 'password')
+        }).save().then(function (res) {
+          console.log(res);
+          var responseBody = res._data.response;
+          var responseCode = res._data.response_code;
+          if (res._data.response_code !== 1) {
+            alert(res._data.response.error_message);
+          } else {
+
+            var user = {
+              firstName: get(responseBody, 'user.first'),
+              lastName: get(responseBody, 'user.last'),
+              emailAddr: get(content, 'emailAddr'),
+              isLogin: true,
+              loginType: 1,
+              signUpDate: get(res, 'signup_date'),
+              token: 'asdfasdfasdf'
+            };
+            this.get('controller').set('user', user);
+            localStorage.setItem('gausian-user', JSON.stringify(user));
+            Ember['default'].$('.login-badge > .overlay').fadeOut( "slow", function() {
+              this.disconnectOutlet({
+                outlet: 'login',
+                parentView: 'application'
+              });
+            }.bind(this));
+          }
+        }.bind(this));
+      },
+
+      loginVisitor: function (content) {
+
+        var user = {
+          firstName: get(content, 'firstName'),
+          lastName: get(content, 'lastName'),
+          emailAddr: get(content, 'emailAddr'),
+          invCode: get(content, 'invCode'),
+          isLogin: true,
+          loginType: 2,
+          token: 'asdfasdfasdf'
+        };
+        this.get('controller').set('user', user);
+        localStorage.setItem('gausian-user', JSON.stringify(user));
+
+        Ember['default'].$('.login-badge > .overlay').fadeOut( "slow", function() {
+          this.disconnectOutlet({
+            outlet: 'login',
+            parentView: 'application'
+          });
+        }.bind(this));
+
+
+      },
+      SignOut: function () {
+        this.get('controller').setProperties({
+          isLogin: false,
+          loginType: 0
+        });
+        this.refresh();
+        localStorage.setItem('gausian-user', null);
       }
     }
+  });
+
+});
+define('web-desktop/serializers/login', ['exports', 'ember', 'ember-data'], function (exports, Ember, DS) {
+
+  'use strict';
+
+  exports['default'] = DS['default'].RESTSerializer.extend({
+
+
+    extract: function (store, type, payload/*, id, requestType*/) {
+      var response = Ember['default'].get(payload, 'response');
+
+      var obj = {};
+      if (response) {
+        obj = JSON.parse(response);
+      }
+
+      // var companies = Ember.get(obj, 'companies');
+      // var res = Ember.get(obj, 'user');
+      Ember['default'].set(payload, 'response', obj);
+      return payload;
+    }
+    // serializeIntoHash: function (hash, type, record, options) {
+    //   var oldHash = this.serialize(record, options);
+    //   oldHash.seatId = parseInt(record.get('seatId.id'), 10);
+    //   oldHash.id = parseInt(record.get('id'), 10);
+    //
+    //   Ember.merge(hash, oldHash);
+    // }
   });
 
 });
@@ -731,13 +910,13 @@ define('web-desktop/templates/application', ['exports', 'ember'], function (expo
   exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
-    var buffer = '', stack1, helper, options, helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, self=this;
+    var buffer = '', stack1, helper, options, escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing, self=this;
 
   function program1(depth0,data) {
     
     var buffer = '', helper, options;
     data.buffer.push("\n");
-    data.buffer.push(escapeExpression((helper = helpers.render || (depth0 && depth0.render),options={hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data},helper ? helper.call(depth0, "header", options) : helperMissing.call(depth0, "render", "header", options))));
+    data.buffer.push(escapeExpression(helpers.view.call(depth0, "header", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
     data.buffer.push("\n\n");
     data.buffer.push(escapeExpression((helper = helpers.render || (depth0 && depth0.render),options={hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data},helper ? helper.call(depth0, "searchBar", options) : helperMissing.call(depth0, "render", "searchBar", options))));
     data.buffer.push("\n");
@@ -874,12 +1053,40 @@ define('web-desktop/templates/header', ['exports', 'ember'], function (exports, 
   exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
-    var buffer = '', escapeExpression=this.escapeExpression;
+    var buffer = '', stack1, escapeExpression=this.escapeExpression, self=this;
 
+  function program1(depth0,data) {
+    
+    var buffer = '', stack1;
+    data.buffer.push("\n      <a ");
+    data.buffer.push(escapeExpression(helpers.action.call(depth0, "profile", {hash:{
+      'target': ("view")
+    },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
+    data.buffer.push(">");
+    stack1 = helpers._triageMustache.call(depth0, "user.firstName", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+    data.buffer.push(" ");
+    stack1 = helpers._triageMustache.call(depth0, "user.lastName", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+    data.buffer.push("</a>\n      <a ");
+    data.buffer.push(escapeExpression(helpers.action.call(depth0, "SignOut", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
+    data.buffer.push(">Sign Out</a>\n      ");
+    return buffer;
+    }
 
-    data.buffer.push("<ul class=\"nav fadeIn fadeIn-50ms fadeOut fadeOut-50ms\">\n  <li class=\"logo fadeIn fadeIn-50ms\">\n    <span>Your Enterprise Name Here</span>\n  </li>\n  <li class=\"dock fadeIn fadeIn-50ms\">\n\n  </li>\n  <li class=\"login fadeIn fadeIn-50ms\">\n    <span>\n      <a ");
+  function program3(depth0,data) {
+    
+    var buffer = '';
+    data.buffer.push("\n      <a ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "loginShow", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push(">Sign up / Log in</a>\n      <img src=\"assets/img/GAUSIAN_logo.png\" >\n    </span>\n  </li>\n</ul>\n");
+    data.buffer.push(">Sign up / Log in</a>\n      ");
+    return buffer;
+    }
+
+    data.buffer.push("<ul class=\"nav fadeIn fadeIn-50ms fadeOut fadeOut-50ms\">\n  <li class=\"logo fadeIn fadeIn-50ms\">\n    <span>Your Enterprise Name Here</span>\n  </li>\n  <li class=\"dock fadeIn fadeIn-50ms\">\n\n  </li>\n  <li class=\"login fadeIn fadeIn-50ms\">\n    <span>\n      ");
+    stack1 = helpers['if'].call(depth0, "user.isLogin", {hash:{},hashTypes:{},hashContexts:{},inverse:self.program(3, program3, data),fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],data:data});
+    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+    data.buffer.push("\n      <img src=\"assets/img/GAUSIAN_logo.png\" >\n    </span>\n  </li>\n</ul>\n");
     return buffer;
     
   });
@@ -892,12 +1099,62 @@ define('web-desktop/templates/login', ['exports', 'ember'], function (exports, E
   exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
-    var buffer = '', escapeExpression=this.escapeExpression;
+    var buffer = '', helper, options, escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing;
 
 
     data.buffer.push("<div class=\"overlay\">\n  <i class=\"icon-remove modal-close\" ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "loginClose", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push("></i>\n  <div class=\"modal fadeIn fadeIn-50ms\">\n    <div class=\"background-image\"></div>\n    <div class=\"flip-container fadeIn fadeIn-100ms\">\n      <div id=\"flipper\" class=\"\">\n        <div class=\"front\">\n          <div class=\"badge_band_right\"></div>\n          <div class=\"badge_band_left\"></div>\n          <div class=\"badge_band_left_shadow\"></div>\n          <div class=\"badge_band_end\"></div>\n          <a href=\"http://www.gausian.com\">\n            <div class=\"badge_buckle\">\n              <img class=\"logo_img\" src=\"assets/img/GAUSIAN_logo.png\">\n            </div>\n          </a>\n          <div class=\"badge_buckle_shadow\"></div>\n          <div id=\"badge_container\">\n            <div class=\"up_container\">\n              <img class=\"up_img\" src=\"assets/img/einstein.png\" onclick=\"\n                flipper.classList.toggle('flipped');\n                document.getElementById('visitor_container').style.opacity=0;\n                document.getElementById('sign_container').style.opacity=0;\n                document.getElementById('portrait_container').style.opacity=1;\n                \">\n              <div id=\"up_hole\"></div>\n            </div>\n            <div class=\"down_container\">\n              <div class=\"company_name\">\n                Your Company Name\n              </div>\n              <input class=\"email_input\" type=\"text\" name=\"Email\" placeholder=\"Email\" autofocus=\"\">\n              <input class=\"pw_input\" type=\"text\" name=\"Password\" placeholder=\"Password\">\n              <a href=\"http://yubin.github.io/web_desktop\">\n                <div class=\"login_bn\">Login</div>\n              </a>\n              <div class=\"sign_bn fadeIn fadeIn-100ms fadeIn-Delay-50ms\" onclick=\"\n                flipper.classList.toggle('flipped');\n                document.getElementById('visitor_container').style.opacity=0;\n                document.getElementById('sign_container').style.opacity=1;\n                document.getElementById('portrait_container').style.opacity=0;\n                \">\n                Sign up\n              </div>\n              <div class=\"visitor_bn fadeIn fadeIn-100ms fadeIn-Delay-50ms\" onclick=\"\n                flipper.classList.toggle('flipped');\n                document.getElementById('visitor_container').style.opacity=1;\n                document.getElementById('sign_container').style.opacity=0;\n                document.getElementById('portrait_container').style.opacity=0;\n                \">\n                I'm a Visitor\n              </div>\n            </div>\n          </div>\n        </div>\n        <div class=\"back\">\n          <div class=\"badge_band_right\"></div>\n          <div class=\"badge_band_left\"></div>\n          <div class=\"badge_band_left_shadow\"></div>\n          <div class=\"badge_band_end\"></div>\n          <div class=\"badge_buckle\"></div>\n          <div class=\"badge_buckle_back\"></div>\n          <div class=\"badge_buckle_shadow\"></div>\n          <div id=\"badge_container\">\n            <div class=\"up_container\">\n              <img class=\"up_img\" src=\"assets/img/empty.png\">\n              <div id=\"up_hole\"></div>\n            </div>\n            <img class=\"return_icon\" src=\"assets/img/return.png\" onclick=\"flipper.classList.toggle('flipped');\">\n            <div class=\"down_container\"></div>\n            <div id=\"sign_container\" style=\"opacity: 0;\">\n              <div class=\"back_container_header\">Sign up</div>\n              <input class=\"back_container_input_first\" type=\"text\" placeholder=\"First\">\n              <input class=\"back_container_input_last\" type=\"text\" placeholder=\"Last\">\n              <input class=\"back_container_input_email\" type=\"text\" placeholder=\"Email\">\n              <input class=\"back_container_input_company\" type=\"text\" placeholder=\"Full Company Name\">\n              <input class=\"back_container_input_pw\" type=\"password\" placeholder=\"Password\">\n              <a href=\"http://yubin.github.io/web_desktop\">\n                <div class=\"back_container_sign\">Sign</div>\n              </a>\n              <div class=\"back_container_invite\">Invite</div>\n            </div>\n            <div id=\"visitor_container\" style=\"opacity: 0;\">\n              <div class=\"back_container_header\">Visitor to</div>\n              <div class=\"back_container_visitor_company_name\">You Company Name</div>\n              <input class=\"back_container_visitor_first\" type=\"text\" placeholder=\"First\">\n              <input class=\"back_container_visitor_last\" type=\"text\" placeholder=\"Last\">\n              <input class=\"back_container_visitor_email\" type=\"text\" placeholder=\"Email\">\n              <input class=\"back_container_visitor_security\" type=\"text\" placeholder=\"Invitation Code\">\n              <a href=\"http://yubin.github.io/web_desktop\">\n                <div class=\"back_container_enter\">Enter</div>\n              </a>\n            </div>\n            <div id=\"portrait_container\" style=\"opacity: 1;\">\n              <div class=\"back_container_header\">Change Portrait</div>\n              <div class=\"portrait_container\">\n                <img class=\"portrait_img\" src=\"assets/img/einstein_5.png\">\n              </div>\n              <input class=\"portrait_email\" type=\"text\" placeholder=\"Email\">\n              <input class=\"portrait_pw\" type=\"password\" placeholder=\"Password\">\n              <div class=\"portrait_apply\">Apply New Portrait</div>\n            </div>\n          </div>\n        </div>\n      </div>\n    </div>\n  </div>\n</div>\n");
+    data.buffer.push("></i>\n  <div class=\"modal fadeIn fadeIn-50ms\">\n    <div class=\"background-image\"></div>\n    <div class=\"flip-container fadeIn fadeIn-100ms\">\n      <div id=\"flipper\" class=\"\">\n        <div class=\"front\">\n          <div class=\"badge_band_right\"></div>\n          <div class=\"badge_band_left\"></div>\n          <div class=\"badge_band_left_shadow\"></div>\n          <div class=\"badge_band_end\"></div>\n          <a href=\"http://www.gausian.com\">\n            <div class=\"badge_buckle\">\n              <img class=\"logo_img\" src=\"assets/img/GAUSIAN_logo.png\">\n            </div>\n          </a>\n          <div class=\"badge_buckle_shadow\"></div>\n          <div id=\"badge_container\">\n            <div class=\"up_container\">\n              <img class=\"up_img\" src=\"assets/img/einstein.png\" onclick=\"\n                flipper.classList.toggle('flipped');\n                document.getElementById('visitor_container').style.opacity=0;\n                document.getElementById('sign_container').style.opacity=0;\n                document.getElementById('portrait_container').style.opacity=1;\n                \">\n              <div id=\"up_hole\"></div>\n            </div>\n            <div class=\"down_container\">\n              <div class=\"company_name\">\n                Your Company Name\n              </div>\n              ");
+    data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
+      'type': ("text"),
+      'value': ("view.emailAddr"),
+      'class': ("email_input visitor_input"),
+      'placeholder': ("Email")
+    },hashTypes:{'type': "STRING",'value': "ID",'class': "STRING",'placeholder': "STRING"},hashContexts:{'type': depth0,'value': depth0,'class': depth0,'placeholder': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
+    data.buffer.push("\n              ");
+    data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
+      'type': ("password"),
+      'value': ("view.password"),
+      'class': ("pw_input"),
+      'placeholder': ("Password")
+    },hashTypes:{'type': "STRING",'value': "ID",'class': "STRING",'placeholder': "STRING"},hashContexts:{'type': depth0,'value': depth0,'class': depth0,'placeholder': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
+    data.buffer.push("\n              <button ");
+    data.buffer.push(escapeExpression(helpers.action.call(depth0, "login", {hash:{
+      'target': ("view")
+    },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
+    data.buffer.push(" class=\"login_bn\">Login</button>\n\n              <div class=\"sign_bn fadeIn fadeIn-100ms fadeIn-Delay-50ms\" onclick=\"\n                flipper.classList.toggle('flipped');\n                document.getElementById('visitor_container').style.opacity=0;\n                document.getElementById('sign_container').style.opacity=1;\n                document.getElementById('portrait_container').style.opacity=0;\n                \">\n                Sign up\n              </div>\n              <div class=\"visitor_bn fadeIn fadeIn-100ms fadeIn-Delay-50ms\" onclick=\"\n                flipper.classList.toggle('flipped');\n                document.getElementById('visitor_container').style.opacity=1;\n                document.getElementById('sign_container').style.opacity=0;\n                document.getElementById('portrait_container').style.opacity=0;\n                \">\n                I'm a Visitor\n              </div>\n            </div>\n          </div>\n        </div>\n        <div class=\"back\">\n          <div class=\"badge_band_right\"></div>\n          <div class=\"badge_band_left\"></div>\n          <div class=\"badge_band_left_shadow\"></div>\n          <div class=\"badge_band_end\"></div>\n          <div class=\"badge_buckle\"></div>\n          <div class=\"badge_buckle_back\"></div>\n          <div class=\"badge_buckle_shadow\"></div>\n          <div id=\"badge_container\">\n            <div class=\"up_container\">\n              <img class=\"up_img\" src=\"assets/img/empty.png\">\n              <div id=\"up_hole\"></div>\n            </div>\n            <img class=\"return_icon\" src=\"assets/img/return.png\" onclick=\"flipper.classList.toggle('flipped');\">\n            <div class=\"down_container\"></div>\n            <div id=\"sign_container\" style=\"opacity: 0;\">\n              <div class=\"back_container_header\">Sign up</div>\n              <input class=\"back_container_input_first\" type=\"text\" placeholder=\"First\">\n              <input class=\"back_container_input_last\" type=\"text\" placeholder=\"Last\">\n              <input class=\"back_container_input_email\" type=\"text\" placeholder=\"Email\">\n              <input class=\"back_container_input_company\" type=\"text\" placeholder=\"Full Company Name\">\n              <input class=\"back_container_input_pw\" type=\"password\" placeholder=\"Password\">\n              <a href=\"http://yubin.github.io/web_desktop\">\n                <div class=\"back_container_sign\">Sign</div>\n              </a>\n              <div class=\"back_container_invite\">Invite</div>\n            </div>\n            <div id=\"visitor_container\" style=\"opacity: 0;\">\n              <div class=\"back_container_header\">Visitor to</div>\n              <div class=\"visitor_input_company_name\">You Company Name</div>\n\n              ");
+    data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
+      'type': ("text"),
+      'value': ("view.firstName"),
+      'class': ("visitor_input_first visitor_input"),
+      'placeholder': ("First")
+    },hashTypes:{'type': "STRING",'value': "ID",'class': "STRING",'placeholder': "STRING"},hashContexts:{'type': depth0,'value': depth0,'class': depth0,'placeholder': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
+    data.buffer.push("\n              ");
+    data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
+      'type': ("text"),
+      'value': ("view.lastName"),
+      'class': ("visitor_input_last visitor_input"),
+      'placeholder': ("Last")
+    },hashTypes:{'type': "STRING",'value': "ID",'class': "STRING",'placeholder': "STRING"},hashContexts:{'type': depth0,'value': depth0,'class': depth0,'placeholder': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
+    data.buffer.push("\n              ");
+    data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
+      'type': ("text"),
+      'value': ("view.emailAddr"),
+      'class': ("visitor_input_email visitor_input"),
+      'placeholder': ("Email")
+    },hashTypes:{'type': "STRING",'value': "ID",'class': "STRING",'placeholder': "STRING"},hashContexts:{'type': depth0,'value': depth0,'class': depth0,'placeholder': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
+    data.buffer.push("\n              ");
+    data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
+      'type': ("text"),
+      'value': ("view.invCode"),
+      'class': ("visitor_input_security visitor_input"),
+      'placeholder': ("Invitation Code")
+    },hashTypes:{'type': "STRING",'value': "ID",'class': "STRING",'placeholder': "STRING"},hashContexts:{'type': depth0,'value': depth0,'class': depth0,'placeholder': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
+    data.buffer.push("\n              <button ");
+    data.buffer.push(escapeExpression(helpers.action.call(depth0, "visitor", {hash:{
+      'target': ("view")
+    },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
+    data.buffer.push(" class=\"back_container_enter\">Enter</button>\n            </div>\n            <div id=\"portrait_container\" style=\"opacity: 1;\">\n              <div class=\"back_container_header\">Change Portrait</div>\n              <div class=\"portrait_container\">\n                <img class=\"portrait_img\" src=\"assets/img/einstein_5.png\">\n              </div>\n              <input class=\"portrait_email\" type=\"text\" placeholder=\"Email\">\n              <input class=\"portrait_pw\" type=\"password\" placeholder=\"Password\">\n              <div class=\"portrait_apply\">Apply New Portrait</div>\n            </div>\n          </div>\n        </div>\n      </div>\n    </div>\n  </div>\n</div>\n");
     return buffer;
     
   });
@@ -1087,6 +1344,16 @@ define('web-desktop/templates/window', ['exports', 'ember'], function (exports, 
   });
 
 });
+define('web-desktop/tests/adapters/login.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - adapters');
+  test('adapters/login.js should pass jshint', function() { 
+    ok(false, 'adapters/login.js should pass jshint.\nadapters/login.js: line 19, col 16, \'Ember\' is not defined.\nadapters/login.js: line 32, col 11, \'Ember\' is not defined.\nadapters/login.js: line 39, col 9, \'Ember\' is not defined.\nadapters/login.js: line 43, col 9, \'Ember\' is not defined.\nadapters/login.js: line 43, col 58, \'surpressError\' is not defined.\nadapters/login.js: line 52, col 7, \'Ember\' is not defined.\nadapters/login.js: line 17, col 25, \'data\' is defined but never used.\n\n7 errors'); 
+  });
+
+});
 define('web-desktop/tests/app.jshint', function () {
 
   'use strict';
@@ -1248,6 +1515,16 @@ define('web-desktop/tests/mixins/window-view.jshint', function () {
   });
 
 });
+define('web-desktop/tests/models/login.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - models');
+  test('models/login.js should pass jshint', function() { 
+    ok(true, 'models/login.js should pass jshint.'); 
+  });
+
+});
 define('web-desktop/tests/router.jshint', function () {
 
   'use strict';
@@ -1264,7 +1541,17 @@ define('web-desktop/tests/routes/application.jshint', function () {
 
   module('JSHint - routes');
   test('routes/application.js should pass jshint', function() { 
-    ok(false, 'routes/application.js should pass jshint.\nroutes/application.js: line 9, col 20, \'params\' is defined but never used.\nroutes/application.js: line 104, col 27, \'content\' is defined but never used.\nroutes/application.js: line 108, col 24, \'content\' is defined but never used.\n\n3 errors'); 
+    ok(false, 'routes/application.js should pass jshint.\nroutes/application.js: line 9, col 20, \'params\' is defined but never used.\nroutes/application.js: line 114, col 27, \'content\' is defined but never used.\nroutes/application.js: line 118, col 24, \'content\' is defined but never used.\nroutes/application.js: line 145, col 13, \'responseCode\' is defined but never used.\n\n4 errors'); 
+  });
+
+});
+define('web-desktop/tests/serializers/login.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - serializers');
+  test('serializers/login.js should pass jshint', function() { 
+    ok(true, 'serializers/login.js should pass jshint.'); 
   });
 
 });
@@ -2303,6 +2590,11 @@ define('web-desktop/views/header', ['exports', 'ember'], function (exports, Embe
       this.adjustSize();
     },
 
+    actions: {
+      profile: function () {
+        // TBD: show user profile
+      }
+    }
 
   });
 
@@ -2313,7 +2605,23 @@ define('web-desktop/views/login', ['exports', 'ember'], function (exports, Ember
 
   exports['default'] = Ember['default'].View.extend({
     templateName: 'login',
-    classNames: ['login-badge']
+    classNames: ['login-badge'],
+    actions: {
+      login: function () {
+        this.get('controller').send('loginUser', {
+          emailAddr: this.get('emailAddr'),
+          password: this.get('password')
+        });
+      },
+      visitor: function () {
+        this.get('controller').send('loginVisitor', {
+          firstName: this.get('firstName'),
+          lastName: this.get('lastName'),
+          emailAddr: this.get('emailAddr'),
+          invCode: this.get('invCode')
+        });
+      }
+    }
   });
 
 });

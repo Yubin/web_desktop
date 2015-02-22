@@ -16,16 +16,20 @@ export default Ember.Controller.extend({
 
   init: function () {
     this._super.apply(this, arguments);
-    // this.setupOperator();
   },
 
-  // setupOperator: function () {
-  //   var i = 0;
-  //   for (i = 0; i <= this.get('screenNum'); i++) {
-  //     var name = 'screen_' + i;
-  //     Ember.defineProperty(this, name, Ember.computed.filterBy('@this', 'screen', i));
-  //   }
-  // },
+  reset: function () {
+
+    // close all open apps
+    this.get('openApps').forEach(function (app) {
+      this._actions['closeApp'].apply(this, [app]);
+    }.bind(this));
+
+    // clear properties
+    this.setProperties({
+      openApps: []
+    });
+  },
 
   appScreenChange: function () {
     var apps = this.get('content');

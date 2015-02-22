@@ -81,9 +81,19 @@ export default Ember.Route.extend({
   },
 
   setupController: function (controller, model) {
+    console.log('setupController');
     var ctl = this.controllerFor('applist');
+    ctl.reset();
     ctl.set('model', get(model, 'applist'));
     ctl.set('appinstall', this.get('appinstall'));
+
+    var user = {};
+    try {
+      user = JSON.parse(localStorage.getItem('gausian-user'));
+    } catch (e) {
+      console.error(e);
+    }
+    this.get('controller').set('user', user);
   },
 
   renderTemplate: function() {
@@ -122,6 +132,72 @@ export default Ember.Route.extend({
           parentView: 'application'
         });
       }.bind(this));
+    },
+
+    loginUser: function (content) {
+
+      this.store.createRecord('login', {
+        user_name: get(content, 'emailAddr'),
+        pwd: get(content, 'password')
+      }).save().then(function (res) {
+        console.log(res);
+        var responseBody = res._data.response;
+        var responseCode = res._data.response_code;
+        if (res._data.response_code !== 1) {
+          alert(res._data.response.error_message);
+        } else {
+
+          var user = {
+            firstName: get(responseBody, 'user.first'),
+            lastName: get(responseBody, 'user.last'),
+            emailAddr: get(content, 'emailAddr'),
+            isLogin: true,
+            loginType: 1,
+            signUpDate: get(res, 'signup_date'),
+            token: 'asdfasdfasdf'
+          };
+          this.get('controller').set('user', user);
+          localStorage.setItem('gausian-user', JSON.stringify(user));
+          Ember.$('.login-badge > .overlay').fadeOut( "slow", function() {
+            this.disconnectOutlet({
+              outlet: 'login',
+              parentView: 'application'
+            });
+          }.bind(this));
+        }
+      }.bind(this));
+    },
+
+    loginVisitor: function (content) {
+
+      var user = {
+        firstName: get(content, 'firstName'),
+        lastName: get(content, 'lastName'),
+        emailAddr: get(content, 'emailAddr'),
+        invCode: get(content, 'invCode'),
+        isLogin: true,
+        loginType: 2,
+        token: 'asdfasdfasdf'
+      };
+      this.get('controller').set('user', user);
+      localStorage.setItem('gausian-user', JSON.stringify(user));
+
+      Ember.$('.login-badge > .overlay').fadeOut( "slow", function() {
+        this.disconnectOutlet({
+          outlet: 'login',
+          parentView: 'application'
+        });
+      }.bind(this));
+
+
+    },
+    SignOut: function () {
+      this.get('controller').setProperties({
+        isLogin: false,
+        loginType: 0
+      });
+      this.refresh();
+      localStorage.setItem('gausian-user', null);
     }
   }
 });

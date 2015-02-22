@@ -29,11 +29,10 @@
               <div class="company_name">
                 Your Company Name
               </div>
-              <input class="email_input" type="text" name="Email" placeholder="Email" autofocus="">
-              <input class="pw_input" type="text" name="Password" placeholder="Password">
-              <a href="http://yubin.github.io/web_desktop">
-                <div class="login_bn">Login</div>
-              </a>
+              {{input type="text" value=view.emailAddr class="email_input visitor_input" placeholder="Email"}}
+              {{input type="password" value=view.password class="pw_input" placeholder="Password"}}
+              <button {{action "login" target=view}} class="login_bn">Login</button>
+
               <div class="sign_bn fadeIn fadeIn-100ms fadeIn-Delay-50ms" onclick="
                 flipper.classList.toggle('flipped');
                 document.getElementById('visitor_container').style.opacity=0;
@@ -82,14 +81,13 @@
             </div>
             <div id="visitor_container" style="opacity: 0;">
               <div class="back_container_header">Visitor to</div>
-              <div class="back_container_visitor_company_name">You Company Name</div>
-              <input class="back_container_visitor_first" type="text" placeholder="First">
-              <input class="back_container_visitor_last" type="text" placeholder="Last">
-              <input class="back_container_visitor_email" type="text" placeholder="Email">
-              <input class="back_container_visitor_security" type="text" placeholder="Invitation Code">
-              <a href="http://yubin.github.io/web_desktop">
-                <div class="back_container_enter">Enter</div>
-              </a>
+              <div class="visitor_input_company_name">You Company Name</div>
+
+              {{input type="text" value=view.firstName class="visitor_input_first visitor_input" placeholder="First"}}
+              {{input type="text" value=view.lastName class="visitor_input_last visitor_input" placeholder="Last"}}
+              {{input type="text" value=view.emailAddr class="visitor_input_email visitor_input" placeholder="Email"}}
+              {{input type="text" value=view.invCode class="visitor_input_security visitor_input" placeholder="Invitation Code"}}
+              <button {{action "visitor" target=view}} class="back_container_enter">Enter</button>
             </div>
             <div id="portrait_container" style="opacity: 1;">
               <div class="back_container_header">Change Portrait</div>

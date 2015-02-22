@@ -2,6 +2,7 @@
   position: absolute;
   width: 100%;
   height: 100%;
+  z-index: 999;
   .overlay {
     top: 0;
     left: 0;
@@ -686,7 +687,7 @@
           cursor: pointer;
           background: black;
         }
-        .back_container_visitor_company_name {
+        .visitor_input_company_name {
           position: absolute;
           top: 10.6vh;
           width: 40vh;
@@ -697,103 +698,41 @@
           font-weight: bold;
           font-size: 2.95vh;
           text-align: center;
-
         }
-        .back_container_visitor_first {
+        .visitor_input {
           position: absolute;
+          left: 5vh;
+          width: 28.5vh;
+          height: 4.8vh;
+          background: rgb(128, 128, 128);
+          border-radius: 1vh;
+          line-height: 4.8vh;
+          padding-left: 1.5vh;
+          font-family: arial;
+          color: white;
+          font-size: 2.2vh;
+          border-style: none;
+          border-width: 0;
+          z-index: 50;
+          letter-spacing: 0.15vh;
+          &:focus {
+            background: rgb(51,176,240);
+            text-decoration: none;
+            outline: 0;
+            box-shadow: 0 0 7px black;
+          }
+        }
+        .visitor_input_first {
           top: 20vh;
-          left: 5vh;
-          width: 28.5vh;
-          height: 4.8vh;
-          background: rgb(128, 128, 128);
-          border-radius: 1vh;
-          line-height: 4.8vh;
-          padding-left: 1.5vh;
-          font-family: arial;
-          color: white;
-          font-size: 2.2vh;
-          border-style: none;
-          border-width: 0;
-          z-index: 50;
-          letter-spacing: 0.15vh;
         }
-        .back_container_visitor_first:focus {
-          background: rgb(51,176,240);
-          text-decoration: none;
-          outline: 0;
-          box-shadow: 0 0 7px black;
-        }
-        .back_container_visitor_last {
-          position: absolute;
+        .visitor_input_last {
           top: 26.5vh;
-          left: 5vh;
-          width: 28.5vh;
-          height: 4.8vh;
-          background: rgb(128, 128, 128);
-          border-radius: 1vh;
-          line-height: 4.8vh;
-          padding-left: 1.5vh;
-          font-family: arial;
-          color: white;
-          font-size: 2.2vh;
-          border-style: none;
-          border-width: 0;
-          z-index: 50;
-          letter-spacing: 0.15vh;
         }
-        .back_container_visitor_last:focus {
-          background: rgb(51,176,240);
-          text-decoration: none;
-          outline: 0;
-          box-shadow: 0 0 7px black;
-        }
-        .back_container_visitor_email {
-          position: absolute;
+        .visitor_input_email {
           top: 33vh;
-          left: 5vh;
-          width: 28.5vh;
-          height: 4.8vh;
-          background: rgb(128, 128, 128);
-          border-radius: 1vh;
-          line-height: 4.8vh;
-          padding-left: 1.5vh;
-          font-family: arial;
-          color: white;
-          font-size: 2.2vh;
-          border-style: none;
-          border-width: 0;
-          z-index: 50;
-          letter-spacing: 0.15vh;
         }
-        .back_container_visitor_email:focus {
-          background: rgb(51,176,240);
-          text-decoration: none;
-          outline: 0;
-          box-shadow: 0 0 7px black;
-        }
-        .back_container_visitor_security {
-          position: absolute;
+        .visitor_input_security {
           top: 39.5vh;
-          left: 5vh;
-          width: 28.5vh;
-          height: 4.8vh;
-          background: rgb(128, 128, 128);
-          border-radius: 1vh;
-          line-height: 4.8vh;
-          padding-left: 1.5vh;
-          font-family: arial;
-          color: white;
-          font-size: 2.2vh;
-          border-style: none;
-          border-width: 0;
-          z-index: 50;
-          letter-spacing: 0.15vh;
-        }
-        .back_container_visitor_security:focus {
-          background: rgb(51,176,240);
-          text-decoration: none;
-          outline: 0;
-          box-shadow: 0 0 7px black;
         }
         .back_container_enter {
           position: absolute;
@@ -812,10 +751,10 @@
           text-align: center;
           font-weight: bold;
           z-index: 40;
-        }
-        .back_container_enter:hover {
-          cursor: pointer;
-          background: black;
+          &:hover {
+            cursor: pointer;
+            background: black;
+          }
         }
         .portrait_container {
           position: absolute;
@@ -838,11 +777,10 @@
           -o-transition: margin 0.7s ease;
           -ms-transition: margin 0.7s ease;
           transition: margin 0.7s ease;
-        }
-        .portrait_img:hover {
-          cursor: pointer;
-          margin-top: -22.5vh;
-
+          &:hover {
+            cursor: pointer;
+            margin-top: -22.5vh;
+          }
         }
         .portrait_email {
           position: absolute;
