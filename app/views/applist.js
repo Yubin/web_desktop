@@ -14,6 +14,8 @@ export default Ember.View.extend({
   left: 89,
   top: 103,
 
+  deleting: 0,
+
   init: function () {
     this._super();
     this.handleSize();
@@ -98,6 +100,28 @@ export default Ember.View.extend({
     var offset = node.$().parent().offset(); // TBD
     var x = originEvt.clientX - this.get('offsetX') - offset.left;
     var y = originEvt.clientY - this.get('offsetY') - offset.top;
+
+    if (y < -100) {
+      console.log(this.get('deleting'));
+      if (this.get('deleting') >= 5) {
+        this.get('controller').send('deleteApp', node.get('content'));
+        this.set('deleting', 0);
+        this.set('deleted', true);
+      }
+      this.incrementProperty('deleting');
+    } else {
+      this.set('deleting', 0);
+      this.set('deleted', false);
+    }
+
+    if (this.get('deleted')) {
+      this.$(document).off('mousemove');
+      this.off('mouseUp', this.onMouseRelease);
+      this.set('deleted', false);
+      this.set('appTouch', false);
+      this.get('controller').send('appStop');
+      return;
+    }
     node.$().css({ // image follow
       'top': y,
       'left': x,

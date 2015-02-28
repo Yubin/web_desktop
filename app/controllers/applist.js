@@ -120,11 +120,12 @@ export default Ember.Controller.extend({
 
     closeApp: function (item) {
       var name = get(item, 'name');
-      var obj = this.get('openApps').filter(function (it) {
-        return get(it, 'name') === name;
-      });
-      //
-      var instant = get(obj[0], 'instant');
+      var obj = this.get('openApps').findBy('name', name);
+
+      if (Ember.isEmpty(obj)) {
+        return;
+      }
+      var instant = get(obj, 'instant');
       if (instant) {
         this.get('openApps').removeObject(obj[0]);
         instant.destroy();
@@ -193,8 +194,12 @@ export default Ember.Controller.extend({
         }, content));
     },
 
-    deleteApp: function (/*item*/) { // TBD
-      console.log('deleteApp');
+    deleteApp: function (content) {
+      this._actions['closeApp'].apply(this, [content]);
+      var apps  = this.get('model');
+      apps.removeObject(content);
+      console.log(content);
+
     },
 
     moveImage: function (key) {

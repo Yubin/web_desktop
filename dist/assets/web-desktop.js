@@ -96,18 +96,9 @@ define('web-desktop/components/star-rating', ['exports', 'ember'], function (exp
 });
 define('web-desktop/components/trash-can', ['exports', 'ember', 'web-desktop/mixins/drag-n-drop-view'], function (exports, Ember, DragDrop) {
 
-  'use strict';
+	'use strict';
 
-  exports['default'] = Ember['default'].Component.extend(DragDrop['default'].Droppable,{
-
-    drop: function () {
-      console.log('drop');
-    },
-    mouseEnter: function () {
-      console.log('mouseEnter');
-    }
-
-  });
+	exports['default'] = Ember['default'].Component.extend(DragDrop['default'].Droppable,{});
 
 });
 define('web-desktop/controllers/application', ['exports', 'ember'], function (exports, Ember) {
@@ -265,11 +256,12 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
 
       closeApp: function (item) {
         var name = get(item, 'name');
-        var obj = this.get('openApps').filter(function (it) {
-          return get(it, 'name') === name;
-        });
-        //
-        var instant = get(obj[0], 'instant');
+        var obj = this.get('openApps').findBy('name', name);
+
+        if (Ember['default'].isEmpty(obj)) {
+          return;
+        }
+        var instant = get(obj, 'instant');
         if (instant) {
           this.get('openApps').removeObject(obj[0]);
           instant.destroy();
@@ -338,8 +330,12 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
           }, content));
       },
 
-      deleteApp: function (/*item*/) { // TBD
-        console.log('deleteApp');
+      deleteApp: function (content) {
+        this._actions['closeApp'].apply(this, [content]);
+        var apps  = this.get('model');
+        apps.removeObject(content);
+        console.log(content);
+
       },
 
       moveImage: function (key) {
@@ -2219,6 +2215,8 @@ define('web-desktop/views/applist', ['exports', 'ember', 'web-desktop/utils/keys
     left: 89,
     top: 103,
 
+    deleting: 0,
+
     init: function () {
       this._super();
       this.handleSize();
@@ -2303,6 +2301,28 @@ define('web-desktop/views/applist', ['exports', 'ember', 'web-desktop/utils/keys
       var offset = node.$().parent().offset(); // TBD
       var x = originEvt.clientX - this.get('offsetX') - offset.left;
       var y = originEvt.clientY - this.get('offsetY') - offset.top;
+
+      if (y < -100) {
+        console.log(this.get('deleting'));
+        if (this.get('deleting') >= 5) {
+          this.get('controller').send('deleteApp', node.get('content'));
+          this.set('deleting', 0);
+          this.set('deleted', true);
+        }
+        this.incrementProperty('deleting');
+      } else {
+        this.set('deleting', 0);
+        this.set('deleted', false);
+      }
+
+      if (this.get('deleted')) {
+        this.$(document).off('mousemove');
+        this.off('mouseUp', this.onMouseRelease);
+        this.set('deleted', false);
+        this.set('appTouch', false);
+        this.get('controller').send('appStop');
+        return;
+      }
       node.$().css({ // image follow
         'top': y,
         'left': x,
