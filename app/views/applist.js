@@ -166,7 +166,6 @@ export default Ember.View.extend({
     };
     this.get('childViews').forEach(function (itemView) {
       if (isSamePosition(itemView, to)) { // swap
-        console.log(from);
         itemView.position(get(from, 'row'), get(from, 'col'), get(from, 'scr'), 200);
       } else if (isSamePosition(itemView, from)) { // target
         itemView.setProperties({
@@ -177,7 +176,4 @@ export default Ember.View.extend({
       }
     });
   },
-
-
-
 });

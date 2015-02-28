@@ -19,7 +19,6 @@ export default Ember.Controller.extend({
   },
 
   reset: function () {
-
     // close all open apps
     this.get('openApps').forEach(function (app) {
       this._actions['closeApp'].apply(this, [app]);
@@ -94,7 +93,7 @@ export default Ember.Controller.extend({
     },
     openApp: function (item) { console.log(item);
       var name = get(item, 'name');
-
+      var icon = get(item, 'icon');
       var find = this.get('openApps').any(function (it) {
         return get(it, 'name') === name;
       });
@@ -113,7 +112,7 @@ export default Ember.Controller.extend({
             parentView: this,
             container:  this.container
           }).appendTo('body');
-          this.get('openApps').pushObject({name: name, instant: instant});
+          this.get('openApps').pushObject({name: name, icon: icon, instant: instant});
         }
       }
     },
@@ -127,7 +126,7 @@ export default Ember.Controller.extend({
       }
       var instant = get(obj, 'instant');
       if (instant) {
-        this.get('openApps').removeObject(obj[0]);
+        this.get('openApps').removeObject(obj);
         instant.destroy();
       }
 
@@ -147,8 +146,6 @@ export default Ember.Controller.extend({
     },
 
     addApp: function (content) {
-            console.log(content);
-
       var screen = 0;
       var col = 0;
       var row = 0;
@@ -199,11 +196,9 @@ export default Ember.Controller.extend({
       var apps  = this.get('model');
       apps.removeObject(content);
       console.log(content);
-
     },
 
     moveImage: function (key) {
-
       console.log('moveImage' + key);
     },
 

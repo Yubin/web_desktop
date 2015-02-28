@@ -155,7 +155,6 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
     },
 
     reset: function () {
-
       // close all open apps
       this.get('openApps').forEach(function (app) {
         this._actions['closeApp'].apply(this, [app]);
@@ -230,7 +229,7 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
       },
       openApp: function (item) { console.log(item);
         var name = get(item, 'name');
-
+        var icon = get(item, 'icon');
         var find = this.get('openApps').any(function (it) {
           return get(it, 'name') === name;
         });
@@ -249,7 +248,7 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
               parentView: this,
               container:  this.container
             }).appendTo('body');
-            this.get('openApps').pushObject({name: name, instant: instant});
+            this.get('openApps').pushObject({name: name, icon: icon, instant: instant});
           }
         }
       },
@@ -263,7 +262,7 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
         }
         var instant = get(obj, 'instant');
         if (instant) {
-          this.get('openApps').removeObject(obj[0]);
+          this.get('openApps').removeObject(obj);
           instant.destroy();
         }
 
@@ -283,8 +282,6 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
       },
 
       addApp: function (content) {
-              console.log(content);
-
         var screen = 0;
         var col = 0;
         var row = 0;
@@ -335,11 +332,9 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
         var apps  = this.get('model');
         apps.removeObject(content);
         console.log(content);
-
       },
 
       moveImage: function (key) {
-
         console.log('moveImage' + key);
       },
 
@@ -356,7 +351,17 @@ define('web-desktop/controllers/header', ['exports', 'ember'], function (exports
   'use strict';
 
   exports['default'] = Ember['default'].Controller.extend({
-    dock: []
+    needs: ['applist'],
+    openApps: Ember['default'].computed.alias('controllers.applist.openApps'),
+    dock: function () {
+      return this.get('openApps').slice(0, 10);
+    }.property('openApps.length'),
+
+    sendDock: function () {
+      return this.get('openApps').slice(11);
+    }.property('openApps.length')
+
+
   });
 
 });
@@ -906,13 +911,13 @@ define('web-desktop/templates/application', ['exports', 'ember'], function (expo
   exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
-    var buffer = '', stack1, helper, options, escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing, self=this;
+    var buffer = '', stack1, helper, options, helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, self=this;
 
   function program1(depth0,data) {
     
     var buffer = '', helper, options;
     data.buffer.push("\n");
-    data.buffer.push(escapeExpression(helpers.view.call(depth0, "header", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
+    data.buffer.push(escapeExpression((helper = helpers.render || (depth0 && depth0.render),options={hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data},helper ? helper.call(depth0, "header", options) : helperMissing.call(depth0, "render", "header", options))));
     data.buffer.push("\n\n");
     data.buffer.push(escapeExpression((helper = helpers.render || (depth0 && depth0.render),options={hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data},helper ? helper.call(depth0, "searchBar", options) : helperMissing.call(depth0, "render", "searchBar", options))));
     data.buffer.push("\n");
@@ -1042,6 +1047,26 @@ define('web-desktop/templates/components/trash-can', ['exports', 'ember'], funct
   });
 
 });
+define('web-desktop/templates/header-dock-item', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+  helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
+    var buffer = '', escapeExpression=this.escapeExpression;
+
+
+    data.buffer.push("<div class=\"app-img\" style=\"background-image: url(");
+    data.buffer.push(escapeExpression(helpers.unbound.call(depth0, "view.content.icon", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data})));
+    data.buffer.push(");\"></div>\n<em><span>");
+    data.buffer.push(escapeExpression(helpers.unbound.call(depth0, "view.content.name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data})));
+    data.buffer.push("</span></em>\n");
+    return buffer;
+    
+  });
+
+});
 define('web-desktop/templates/header', ['exports', 'ember'], function (exports, Ember) {
 
   'use strict';
@@ -1079,7 +1104,11 @@ define('web-desktop/templates/header', ['exports', 'ember'], function (exports, 
     return buffer;
     }
 
-    data.buffer.push("<ul class=\"nav fadeIn fadeIn-50ms fadeOut fadeOut-50ms\">\n  <li class=\"logo fadeIn fadeIn-50ms\">\n    <span>Your Enterprise Name Here</span>\n  </li>\n  <li class=\"dock fadeIn fadeIn-50ms\">\n\n  </li>\n  <li class=\"login fadeIn fadeIn-50ms\">\n    <span>\n      ");
+    data.buffer.push("<ul class=\"nav fadeIn fadeIn-50ms fadeOut fadeOut-50ms\">\n  <li class=\"logo fadeIn fadeIn-50ms\">\n    <span>Your Enterprise Name Here</span>\n  </li>\n  ");
+    data.buffer.push(escapeExpression(helpers.view.call(depth0, "header-dock", {hash:{
+      'content': ("dock")
+    },hashTypes:{'content': "ID"},hashContexts:{'content': depth0},contexts:[depth0],types:["STRING"],data:data})));
+    data.buffer.push("\n  <li class=\"login fadeIn fadeIn-50ms\">\n    <span>\n      ");
     stack1 = helpers['if'].call(depth0, "user.isLogin", {hash:{},hashTypes:{},hashContexts:{},inverse:self.program(3, program3, data),fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
     data.buffer.push("\n      <img src=\"assets/img/GAUSIAN_logo.png\" >\n    </span>\n  </li>\n</ul>\n");
@@ -1685,6 +1714,26 @@ define('web-desktop/tests/views/backup.jshint', function () {
   module('JSHint - views');
   test('views/backup.js should pass jshint', function() { 
     ok(true, 'views/backup.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/views/header-dock-item.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - views');
+  test('views/header-dock-item.js should pass jshint', function() { 
+    ok(true, 'views/header-dock-item.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/views/header-dock.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - views');
+  test('views/header-dock.js should pass jshint', function() { 
+    ok(false, 'views/header-dock.js should pass jshint.\nviews/header-dock.js: line 7, col 3, Missing semicolon.\n\n1 error'); 
   });
 
 });
@@ -2367,7 +2416,6 @@ define('web-desktop/views/applist', ['exports', 'ember', 'web-desktop/utils/keys
       };
       this.get('childViews').forEach(function (itemView) {
         if (isSamePosition(itemView, to)) { // swap
-          console.log(from);
           itemView.position(get(from, 'row'), get(from, 'col'), get(from, 'scr'), 200);
         } else if (isSamePosition(itemView, from)) { // target
           itemView.setProperties({
@@ -2378,9 +2426,6 @@ define('web-desktop/views/applist', ['exports', 'ember', 'web-desktop/utils/keys
         }
       });
     },
-
-
-
   });
 
 });
@@ -2581,6 +2626,29 @@ define('web-desktop/views/backup', ['exports', 'ember', 'web-desktop/utils/keys'
 
 
   });
+
+});
+define('web-desktop/views/header-dock-item', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].View.extend({
+    templateName: 'header-dock-item',
+    click: function () {
+      this.get('content.instant').changeZindex();
+    }
+  });
+
+});
+define('web-desktop/views/header-dock', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].CollectionView.extend({
+    tagName: 'ul',
+    classNames: ['dock'],
+    itemViewClass: 'header-dock-item'
+  })
 
 });
 define('web-desktop/views/header', ['exports', 'ember'], function (exports, Ember) {

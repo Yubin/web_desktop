@@ -2,9 +2,7 @@
   <li class="logo fadeIn fadeIn-50ms">
     <span>Your Enterprise Name Here</span>
   </li>
-  <li class="dock fadeIn fadeIn-50ms">
-
-  </li>
+  {{view 'header-dock' content=dock}}
   <li class="login fadeIn fadeIn-50ms">
     <span>
       {{#if user.isLogin}}
