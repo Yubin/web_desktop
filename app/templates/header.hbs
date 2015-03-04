@@ -1,17 +1,31 @@
 <ul class="nav fadeIn fadeIn-50ms fadeOut fadeOut-50ms">
   <li class="logo fadeIn fadeIn-50ms">
-    <span>Your Enterprise Name Here</span>
+    <span>{{view.companyName}}</span>
   </li>
   {{view 'header-dock' content=dock}}
   <li class="login fadeIn fadeIn-50ms">
-    <span>
       {{#if user.isLogin}}
-      <a {{action 'profile' target=view}}>{{user.firstName}} {{user.lastName}}</a>
-      <a {{action 'SignOut'}}>Sign Out</a>
+      <span>
+        <a {{action 'showProfile' target=view}}>{{user.firstName}} {{user.lastName}}</a>
+      </span>
+
       {{else}}
-      <a {{action 'loginShow'}}>Sign up / Log in</a>
+      <span>
+        <a {{action 'loginShow'}}>Sign up / Log in</a>
+        <img src="assets/img/GAUSIAN_logo.png" >
+      </span>
       {{/if}}
-      <img src="assets/img/GAUSIAN_logo.png" >
-    </span>
   </li>
+  {{#if view.showProfile}}
+  <ul class="dropdown-menu pull-right">
+    {{#each user.companies}}
+    <li>
+      <a {{action 'changeCompany' id target=view}}>{{name}}</a>
+    </li>
+    {{/each}}
+    <li>
+      <a {{action 'SignOut'}}>Sign Out</a>
+    </li>
+  </ul>
+  {{/if}}
 </ul>

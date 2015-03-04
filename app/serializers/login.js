@@ -11,9 +11,6 @@ export default DS.RESTSerializer.extend({
     if (response) {
       obj = JSON.parse(response);
     }
-
-    // var companies = Ember.get(obj, 'companies');
-    // var res = Ember.get(obj, 'user');
     Ember.set(payload, 'response', obj);
     return payload;
   }

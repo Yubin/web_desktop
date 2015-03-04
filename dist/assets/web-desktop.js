@@ -2,7 +2,7 @@
 
 /* jshint ignore:end */
 
-define('web-desktop/adapters/login', ['exports', 'ember-data', 'web-desktop/serializers/login'], function (exports, DS, Serializer) {
+define('web-desktop/adapters/login', ['exports', 'ember-data', 'web-desktop/serializers/login', 'ember'], function (exports, DS, Serializer, Ember) {
 
   'use strict';
 
@@ -17,11 +17,10 @@ define('web-desktop/adapters/login', ['exports', 'ember-data', 'web-desktop/seri
       return this.ajax(url, 'POST', { data: query });
     },
 
-
     ajax: function (rawUrl, type, rawHash) {
-      var adapter = this, data;
+      var adapter = this;
 
-      return new Ember.RSVP.Promise(function (resolve, reject) {
+      return new Ember['default'].RSVP.Promise(function (resolve, reject) {
         var hash = {},
           url = rawUrl;
         hash.type = type;
@@ -34,18 +33,21 @@ define('web-desktop/adapters/login', ['exports', 'ember-data', 'web-desktop/seri
         hash.beforeSend = function (xhr) {
           if (adapter.headers !== undefined) {
             var headers = adapter.headers;
-            Ember.keys(headers).forEach(function (key) {
+            Ember['default'].keys(headers).forEach(function (key) {
               xhr.setRequestHeader(key, headers[key]);
             });
           }
         };
 
         hash.success = function (json/*, textStatus, jqXHR*/) {
-          Ember.run(null, resolve, json);
+          Ember['default'].run(null, resolve, json);
         };
 
         hash.error = function (jqXHR/*, textStatus, errorThrown*/) {
-          Ember.run(null, reject, adapter.ajaxError(jqXHR, surpressError));
+          Ember['default'].run(null, reject, adapter.ajaxError(jqXHR, function (hash) {
+            console.error('ajax error');
+            console.log(hash);
+          }));
         };
 
         hash.url = url.toLowerCase();
@@ -54,7 +56,7 @@ define('web-desktop/adapters/login', ['exports', 'ember-data', 'web-desktop/seri
         // CORS: This enables cookies to be sent with the request
         // hash.xhrFields = { withCredentials: true };
 
-        Ember.$.ajax(hash);
+        Ember['default'].$.ajax(hash);
       }.bind(this), 'DS: AudienceAdapter#ajax ' + type + ' to ' + rawUrl);
     }
 
@@ -351,8 +353,9 @@ define('web-desktop/controllers/header', ['exports', 'ember'], function (exports
   'use strict';
 
   exports['default'] = Ember['default'].Controller.extend({
-    needs: ['applist'],
+    needs: ['applist', 'application'],
     openApps: Ember['default'].computed.alias('controllers.applist.openApps'),
+    user: Ember['default'].computed.alias('controllers.application.user'),
     dock: function () {
       return this.get('openApps').slice(0, 10);
     }.property('openApps.length'),
@@ -478,30 +481,6 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
         this.$('.header').on('dblclick', function () {
           this._actions['maximizeApp'].apply(this);
         }.bind(this));
-      // this.$('.header').on('mousedown', function (event) {
-      //   if (event.which !== 1) { return ;}
-      //   var originEvt = event.originalEvent;
-      //   var offsetX = originEvt.offsetX ? originEvt.offsetX : originEvt.layerX;
-      //   var offsetY = originEvt.offsetY ? originEvt.offsetY : originEvt.layerY;
-      //
-      //   this.$(document).on('mousemove', function (event) {
-      //     var originEvt = event.originalEvent;
-      //     var x = originEvt.clientX - offsetX;
-      //     var y = originEvt.clientY - offsetY;
-      //     this.$().css({ // image follow
-      //       'top': y,
-      //       'left': x
-      //     });
-      //     this.setProperties({
-      //       top: y,
-      //       left: x
-      //     });
-      //   }.bind(this));
-      //
-      // }.bind(this)).on('dblclick', function () {
-      //   this._actions['maximizeApp'].apply(this);
-      // }.bind(this));
-
       this.$('.header').on('mouseup', function () {console.log('mixin -  mouseup');
         this.$(document).off('mousemove');
       }.bind(this));
@@ -582,79 +561,19 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
     model: function (params) {
       return {
         applist:[
-  // {
-  //   name: "Deliver Bid",
-  //   icon: "img/DeliverBid_logo.png",
-  //   viewName: 'deliverBid',
-  //   screen: 0,
-  //   col: 0,
-  //   row: 0
-  // }, {
-  //   name: "E-Inventory",
-  //   icon: "img/Einventory_logo.png",
-  //   viewName: 'Einventory',
-  //   screen: 0,
-  //   col: 0,
-  //   row: 2
-  // }, {
-  //   name: "Vender Match",
-  //   icon: "img/VenderMatch_logo.png",
-  //   viewName: 'vendorMatch',
-  //   screen: 0,
-  //   col: 0,
-  //   row: 1
-  // },
-  {
-    name: "Gausian Store",
-    icon: "img/icon_17.png",
-    viewName: 'gausianStore',
-    screen: 0,
-    col: 0,
-    row: 0
-  },
-  //
-  //       {name: "icon_11", icon: "img/icon_11", screen: 0, col: 1, row: 2},
-  //       {name: "icon_12", icon: "img/icon_12", screen: 0, col: 2, row: 2},
-  //       {name: "icon_13", icon: "img/icon_13", screen: 0, col: 3, row: 2},
-  //       {name: "icon_14", icon: "img/icon_14", screen: 0, col: 1, row: 3},
-  //       {name: "icon_15", icon: "img/icon_15", screen: 0, col: 2, row: 3},
-  //       {name: "icon_16", icon: "img/icon_16", screen: 0, col: 3, row: 3},
-  //       {name: "icon_13", icon: "img/icon_13", screen: 0, col: 3, row: 4},
-  //       {name: "icon_14", icon: "img/icon_14", screen: 0, col: 2, row: 4},
-  //       {name: "icon_15", icon: "img/icon_15", screen: 0, col: 1, row: 4},
-  //       {name: "icon_16", icon: "img/icon_16", screen: 0, col: 0, row: 4},
-        // {name: "icon_21", icon: "img/icon_1", screen: 1, col: 11, row: 0},
-        // {name: "icon_22", icon: "img/icon_2", screen: 1, col: 12, row: 0},
-        // {name: "icon_23", icon: "img/icon_3", screen: 1, col: 13, row: 0},
-        // {name: "icon_24", icon: "img/icon_4", screen: 1, col: 14, row: 0},
-        // {name: "icon_25", icon: "img/icon_5", screen: 1, col: 15, row: 1},
-        // {name: "icon_27", icon: "img/icon_7", screen: 1, col: 16, row: 1},
-        // {name: "icon_28", icon: "img/icon_8", screen: 1, col: 11, row: 1},
-        // {name: "icon_29", icon: "img/icon_9", screen: 1, col: 12, row: 2},
-        // {name: "icon_211", icon: "img/icon_11", screen: 1, col: 13, row: 2},
-        // {name: "icon_212", icon: "img/icon_12", screen: 1, col: 14, row: 2},
-        // {name: "icon_213", icon: "img/icon_13", screen: 1, col: 15, row: 2},
-        // {name: "icon_214", icon: "img/icon_14", screen: 1, col: 16, row: 2},
-        // {name: "icon_215", icon: "img/icon_15", screen: 1, col: 1, row: 3},
-        // {name: "icon_216", icon: "img/icon_16.png", screen: 1, col: 3, row: 3},
-        // {name: "icon_31", icon: "img/icon_1", screen: 2, col: 0, row: 1},
-        // {name: "icon_32", icon: "img/icon_2", screen: 2, col: 1, row: 1},
-        // {name: "icon_33", icon: "img/icon_3", screen: 2, col: 2, row: 1},
-        // {name: "icon_34", icon: "img/icon_4", screen: 2, col: 3, row: 1},
-        // {name: "icon_35", icon: "img/icon_5", screen: 2, col: 0, row: 0},
-        // {name: "icon_36", icon: "img/icon_6", screen: 2, col: 1, row: 0},
-        // {name: "icon_38", icon: "img/icon_8", screen: 2, col: 3, row: 0},
-        // {name: "icon_39", icon: "img/icon_9", screen: 2, col: 0, row: 2},
-        // {name: "icon_311", icon: "img/icon_11", screen: 2, col: 1, row: 2},
-        // {name: "icon_312", icon: "img/icon_12", screen: 2, col: 2, row: 2},
-        // {name: "icon_313", icon: "img/icon_13", screen: 2, col: 3, row: 2},
-        // {name: "icon_317", icon: "img/icon_17.png", screen: 2, col: 0, row: 3},
+          {
+            name: "Gausian Store",
+            icon: "img/icon_17.png",
+            viewName: 'gausianStore',
+            screen: 0,
+            col: 0,
+            row: 0
+          }
         ]
       };
     },
 
     setupController: function (controller, model) {
-      console.log('setupController');
       var ctl = this.controllerFor('applist');
       ctl.reset();
       ctl.set('model', get(model, 'applist'));
@@ -727,7 +646,9 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
               isLogin: true,
               loginType: 1,
               signUpDate: get(res, 'signup_date'),
-              token: 'asdfasdfasdf'
+              token: 'asdfasdfasdf',
+              companies: get(responseBody, 'companies'),
+              current_compony_id: get(responseBody, 'current_login_company')
             };
             this.get('controller').set('user', user);
             localStorage.setItem('gausian-user', JSON.stringify(user));
@@ -761,9 +682,12 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
             parentView: 'application'
           });
         }.bind(this));
-
-
       },
+
+      changeCompany: function (id) {
+        this.get('controller').set('user.current_compony_id', id);
+      },
+
       SignOut: function () {
         this.get('controller').setProperties({
           isLogin: false,
@@ -790,9 +714,6 @@ define('web-desktop/serializers/login', ['exports', 'ember', 'ember-data'], func
       if (response) {
         obj = JSON.parse(response);
       }
-
-      // var companies = Ember.get(obj, 'companies');
-      // var res = Ember.get(obj, 'user');
       Ember['default'].set(payload, 'response', obj);
       return payload;
     }
@@ -1079,8 +1000,8 @@ define('web-desktop/templates/header', ['exports', 'ember'], function (exports, 
   function program1(depth0,data) {
     
     var buffer = '', stack1;
-    data.buffer.push("\n      <a ");
-    data.buffer.push(escapeExpression(helpers.action.call(depth0, "profile", {hash:{
+    data.buffer.push("\n      <span>\n        <a ");
+    data.buffer.push(escapeExpression(helpers.action.call(depth0, "showProfile", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
     data.buffer.push(">");
@@ -1089,29 +1010,58 @@ define('web-desktop/templates/header', ['exports', 'ember'], function (exports, 
     data.buffer.push(" ");
     stack1 = helpers._triageMustache.call(depth0, "user.lastName", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("</a>\n      <a ");
-    data.buffer.push(escapeExpression(helpers.action.call(depth0, "SignOut", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push(">Sign Out</a>\n      ");
+    data.buffer.push("</a>\n      </span>\n\n      ");
     return buffer;
     }
 
   function program3(depth0,data) {
     
     var buffer = '';
-    data.buffer.push("\n      <a ");
+    data.buffer.push("\n      <span>\n        <a ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "loginShow", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push(">Sign up / Log in</a>\n      ");
+    data.buffer.push(">Sign up / Log in</a>\n        <img src=\"assets/img/GAUSIAN_logo.png\" >\n      </span>\n      ");
     return buffer;
     }
 
-    data.buffer.push("<ul class=\"nav fadeIn fadeIn-50ms fadeOut fadeOut-50ms\">\n  <li class=\"logo fadeIn fadeIn-50ms\">\n    <span>Your Enterprise Name Here</span>\n  </li>\n  ");
+  function program5(depth0,data) {
+    
+    var buffer = '', stack1;
+    data.buffer.push("\n  <ul class=\"dropdown-menu pull-right\">\n    ");
+    stack1 = helpers.each.call(depth0, "user.companies", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(6, program6, data),contexts:[depth0],types:["ID"],data:data});
+    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+    data.buffer.push("\n    <li>\n      <a ");
+    data.buffer.push(escapeExpression(helpers.action.call(depth0, "SignOut", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
+    data.buffer.push(">Sign Out</a>\n    </li>\n  </ul>\n  ");
+    return buffer;
+    }
+  function program6(depth0,data) {
+    
+    var buffer = '', stack1;
+    data.buffer.push("\n    <li>\n      <a ");
+    data.buffer.push(escapeExpression(helpers.action.call(depth0, "changeCompany", "id", {hash:{
+      'target': ("view")
+    },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0,depth0],types:["STRING","ID"],data:data})));
+    data.buffer.push(">");
+    stack1 = helpers._triageMustache.call(depth0, "name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+    data.buffer.push("</a>\n    </li>\n    ");
+    return buffer;
+    }
+
+    data.buffer.push("<ul class=\"nav fadeIn fadeIn-50ms fadeOut fadeOut-50ms\">\n  <li class=\"logo fadeIn fadeIn-50ms\">\n    <span>");
+    stack1 = helpers._triageMustache.call(depth0, "view.companyName", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+    data.buffer.push("</span>\n  </li>\n  ");
     data.buffer.push(escapeExpression(helpers.view.call(depth0, "header-dock", {hash:{
       'content': ("dock")
     },hashTypes:{'content': "ID"},hashContexts:{'content': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push("\n  <li class=\"login fadeIn fadeIn-50ms\">\n    <span>\n      ");
+    data.buffer.push("\n  <li class=\"login fadeIn fadeIn-50ms\">\n      ");
     stack1 = helpers['if'].call(depth0, "user.isLogin", {hash:{},hashTypes:{},hashContexts:{},inverse:self.program(3, program3, data),fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\n      <img src=\"assets/img/GAUSIAN_logo.png\" >\n    </span>\n  </li>\n</ul>\n");
+    data.buffer.push("\n  </li>\n  ");
+    stack1 = helpers['if'].call(depth0, "view.showProfile", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(5, program5, data),contexts:[depth0],types:["ID"],data:data});
+    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+    data.buffer.push("\n</ul>\n");
     return buffer;
     
   });
@@ -1127,63 +1077,63 @@ define('web-desktop/templates/login', ['exports', 'ember'], function (exports, E
     var buffer = '', helper, options, escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing;
 
 
-    data.buffer.push("<div class=\"overlay\">\n  <i class=\"icon-remove modal-close\" ");
+    data.buffer.push("<div class=\"overlay fadeIn fadeIn-50ms\">\n  <i class=\"icon-remove modal-close\" ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "loginClose", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push("></i>\n  <div class=\"modal fadeIn fadeIn-50ms\">\n    <div class=\"background-image\"></div>\n    <div class=\"flip-container fadeIn fadeIn-100ms\">\n      <div id=\"flipper\" class=\"\">\n        <div class=\"front\">\n          <div class=\"badge_band_right\"></div>\n          <div class=\"badge_band_left\"></div>\n          <div class=\"badge_band_left_shadow\"></div>\n          <div class=\"badge_band_end\"></div>\n          <a href=\"http://www.gausian.com\">\n            <div class=\"badge_buckle\">\n              <img class=\"logo_img\" src=\"assets/img/GAUSIAN_logo.png\">\n            </div>\n          </a>\n          <div class=\"badge_buckle_shadow\"></div>\n          <div ");
+    data.buffer.push("></i>\n  <div class=\"blur-image\"></div>\n  <div class=\"flip-container fadeIn fadeIn-100ms\">\n    <div id=\"flipper\" class=\"\">\n      <div class=\"front\">\n        <div class=\"badge_band_right\"></div>\n        <div class=\"badge_band_left\"></div>\n        <div class=\"badge_band_left_shadow\"></div>\n        <div class=\"badge_band_end\"></div>\n        <a href=\"http://www.gausian.com\">\n          <div class=\"badge_buckle\">\n            <img class=\"logo_img\" src=\"assets/img/GAUSIAN_logo.png\">\n          </div>\n        </a>\n        <div class=\"badge_buckle_shadow\"></div>\n        <div ");
     data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
       'class': (":badge_container loginFail:has-error loginFail")
     },hashTypes:{'class': "STRING"},hashContexts:{'class': depth0},contexts:[],types:[],data:data})));
-    data.buffer.push(">\n            <div class=\"up_container\">\n              <img class=\"up_img\" src=\"assets/img/einstein.png\" onclick=\"\n                flipper.classList.toggle('flipped');\n                document.getElementById('visitor_container').style.opacity=0;\n                document.getElementById('sign_container').style.opacity=0;\n                document.getElementById('portrait_container').style.opacity=1;\n                \">\n              <div id=\"up_hole\"></div>\n            </div>\n            <div class=\"down_container\">\n              <div class=\"company_name\"> Your Company Name </div>\n              ");
+    data.buffer.push(">\n          <div class=\"up_container\">\n            <img class=\"up_img\" src=\"assets/img/einstein.png\" onclick=\"\n              flipper.classList.toggle('flipped');\n              document.getElementById('visitor_container').style.opacity=0;\n              document.getElementById('sign_container').style.opacity=0;\n              document.getElementById('portrait_container').style.opacity=1;\n              \">\n            <div id=\"up_hole\"></div>\n          </div>\n          <div class=\"down_container\">\n            <div class=\"company_name\"> Your Company Name </div>\n            ");
     data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
       'type': ("text"),
       'value': ("view.emailAddr"),
       'class': ("email_input visitor_input"),
       'placeholder': ("Email")
     },hashTypes:{'type': "STRING",'value': "ID",'class': "STRING",'placeholder': "STRING"},hashContexts:{'type': depth0,'value': depth0,'class': depth0,'placeholder': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
-    data.buffer.push("\n              ");
+    data.buffer.push("\n            ");
     data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
       'type': ("password"),
       'value': ("view.password"),
       'class': ("pw_input"),
       'placeholder': ("Password")
     },hashTypes:{'type': "STRING",'value': "ID",'class': "STRING",'placeholder': "STRING"},hashContexts:{'type': depth0,'value': depth0,'class': depth0,'placeholder': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
-    data.buffer.push("\n              <button ");
+    data.buffer.push("\n            <button ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "login", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push(" class=\"login_bn\">Login</button>\n\n              <div class=\"sign_bn fadeIn fadeIn-100ms fadeIn-Delay-50ms\" onclick=\"\n                flipper.classList.toggle('flipped');\n                document.getElementById('visitor_container').style.opacity=0;\n                document.getElementById('sign_container').style.opacity=1;\n                document.getElementById('portrait_container').style.opacity=0;\n                \">\n                Sign up\n              </div>\n              <div class=\"visitor_bn fadeIn fadeIn-100ms fadeIn-Delay-50ms\" onclick=\"\n                flipper.classList.toggle('flipped');\n                document.getElementById('visitor_container').style.opacity=1;\n                document.getElementById('sign_container').style.opacity=0;\n                document.getElementById('portrait_container').style.opacity=0;\n                \">\n                I'm a Visitor\n              </div>\n            </div>\n          </div>\n        </div>\n        <div class=\"back\">\n          <div class=\"badge_band_right\"></div>\n          <div class=\"badge_band_left\"></div>\n          <div class=\"badge_band_left_shadow\"></div>\n          <div class=\"badge_band_end\"></div>\n          <div class=\"badge_buckle\"></div>\n          <div class=\"badge_buckle_back\"></div>\n          <div class=\"badge_buckle_shadow\"></div>\n          <div class=\"badge_container\">\n            <div class=\"up_container\">\n              <img class=\"up_img\" src=\"assets/img/empty.png\">\n              <div id=\"up_hole\"></div>\n            </div>\n            <img class=\"return_icon\" src=\"assets/img/return.png\" onclick=\"flipper.classList.toggle('flipped');\">\n            <div class=\"down_container\"></div>\n            <div id=\"sign_container\" style=\"opacity: 0;\">\n              <div class=\"back_container_header\">Sign up</div>\n              <input class=\"back_container_input_first\" type=\"text\" placeholder=\"First\">\n              <input class=\"back_container_input_last\" type=\"text\" placeholder=\"Last\">\n              <input class=\"back_container_input_email\" type=\"text\" placeholder=\"Email\">\n              <input class=\"back_container_input_company\" type=\"text\" placeholder=\"Full Company Name\">\n              <input class=\"back_container_input_pw\" type=\"password\" placeholder=\"Password\">\n              <a href=\"http://yubin.github.io/web_desktop\">\n                <div class=\"back_container_sign\">Sign</div>\n              </a>\n              <div class=\"back_container_invite\">Invite</div>\n            </div>\n            <div id=\"visitor_container\" style=\"opacity: 0;\">\n              <div class=\"back_container_header\">Visitor to</div>\n              <div class=\"visitor_input_company_name\">You Company Name</div>\n\n              ");
+    data.buffer.push(" class=\"login_bn\">Login</button>\n\n            <div class=\"sign_bn fadeIn fadeIn-100ms fadeIn-Delay-50ms\" onclick=\"\n              flipper.classList.toggle('flipped');\n              document.getElementById('visitor_container').style.opacity=0;\n              document.getElementById('sign_container').style.opacity=1;\n              document.getElementById('portrait_container').style.opacity=0;\n              \">\n              Sign up\n            </div>\n            <div class=\"visitor_bn fadeIn fadeIn-100ms fadeIn-Delay-50ms\" onclick=\"\n              flipper.classList.toggle('flipped');\n              document.getElementById('visitor_container').style.opacity=1;\n              document.getElementById('sign_container').style.opacity=0;\n              document.getElementById('portrait_container').style.opacity=0;\n              \">\n              I'm a Visitor\n            </div>\n          </div>\n        </div>\n      </div>\n      <div class=\"back\">\n        <div class=\"badge_band_right\"></div>\n        <div class=\"badge_band_left\"></div>\n        <div class=\"badge_band_left_shadow\"></div>\n        <div class=\"badge_band_end\"></div>\n        <div class=\"badge_buckle\"></div>\n        <div class=\"badge_buckle_back\"></div>\n        <div class=\"badge_buckle_shadow\"></div>\n        <div class=\"badge_container\">\n          <div class=\"up_container\">\n            <img class=\"up_img\" src=\"assets/img/empty.png\">\n            <div id=\"up_hole\"></div>\n          </div>\n          <img class=\"return_icon\" src=\"assets/img/return.png\" onclick=\"flipper.classList.toggle('flipped');\">\n          <div class=\"down_container\"></div>\n          <div id=\"sign_container\" style=\"opacity: 0;\">\n            <div class=\"back_container_header\">Sign up</div>\n            <input class=\"back_container_input_first\" type=\"text\" placeholder=\"First\">\n            <input class=\"back_container_input_last\" type=\"text\" placeholder=\"Last\">\n            <input class=\"back_container_input_email\" type=\"text\" placeholder=\"Email\">\n            <input class=\"back_container_input_company\" type=\"text\" placeholder=\"Full Company Name\">\n            <input class=\"back_container_input_pw\" type=\"password\" placeholder=\"Password\">\n            <a href=\"http://yubin.github.io/web_desktop\">\n              <div class=\"back_container_sign\">Sign</div>\n            </a>\n            <div class=\"back_container_invite\">Invite</div>\n          </div>\n          <div id=\"visitor_container\" style=\"opacity: 0;\">\n            <div class=\"back_container_header\">Visitor to</div>\n            <div class=\"visitor_input_company_name\">You Company Name</div>\n\n            ");
     data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
       'type': ("text"),
       'value': ("view.firstName"),
       'class': ("visitor_input_first visitor_input"),
       'placeholder': ("First")
     },hashTypes:{'type': "STRING",'value': "ID",'class': "STRING",'placeholder': "STRING"},hashContexts:{'type': depth0,'value': depth0,'class': depth0,'placeholder': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
-    data.buffer.push("\n              ");
+    data.buffer.push("\n            ");
     data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
       'type': ("text"),
       'value': ("view.lastName"),
       'class': ("visitor_input_last visitor_input"),
       'placeholder': ("Last")
     },hashTypes:{'type': "STRING",'value': "ID",'class': "STRING",'placeholder': "STRING"},hashContexts:{'type': depth0,'value': depth0,'class': depth0,'placeholder': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
-    data.buffer.push("\n              ");
+    data.buffer.push("\n            ");
     data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
       'type': ("text"),
       'value': ("view.emailAddr"),
       'class': ("visitor_input_email visitor_input"),
       'placeholder': ("Email")
     },hashTypes:{'type': "STRING",'value': "ID",'class': "STRING",'placeholder': "STRING"},hashContexts:{'type': depth0,'value': depth0,'class': depth0,'placeholder': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
-    data.buffer.push("\n              ");
+    data.buffer.push("\n            ");
     data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
       'type': ("text"),
       'value': ("view.invCode"),
       'class': ("visitor_input_security visitor_input"),
       'placeholder': ("Invitation Code")
     },hashTypes:{'type': "STRING",'value': "ID",'class': "STRING",'placeholder': "STRING"},hashContexts:{'type': depth0,'value': depth0,'class': depth0,'placeholder': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
-    data.buffer.push("\n              <button ");
+    data.buffer.push("\n            <button ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "visitor", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push(" class=\"back_container_enter\">Enter</button>\n            </div>\n            <div id=\"portrait_container\" style=\"opacity: 1;\">\n              <div class=\"back_container_header\">Change Portrait</div>\n              <div class=\"portrait_container\">\n                <img class=\"portrait_img\" src=\"assets/img/einstein_5.png\">\n              </div>\n              <input class=\"portrait_email\" type=\"text\" placeholder=\"Email\">\n              <input class=\"portrait_pw\" type=\"password\" placeholder=\"Password\">\n              <div class=\"portrait_apply\">Apply New Portrait</div>\n            </div>\n          </div>\n        </div>\n      </div>\n    </div>\n  </div>\n</div>\n");
+    data.buffer.push(" class=\"back_container_enter\">Enter</button>\n          </div>\n          <div id=\"portrait_container\" style=\"opacity: 1;\">\n            <div class=\"back_container_header\">Change Portrait</div>\n            <div class=\"portrait_container\">\n              <img class=\"portrait_img\" src=\"assets/img/einstein_5.png\">\n            </div>\n            <input class=\"portrait_email\" type=\"text\" placeholder=\"Email\">\n            <input class=\"portrait_pw\" type=\"password\" placeholder=\"Password\">\n            <div class=\"portrait_apply\">Apply New Portrait</div>\n          </div>\n        </div>\n      </div>\n    </div>\n  </div>\n</div>\n");
     return buffer;
     
   });
@@ -1379,7 +1329,7 @@ define('web-desktop/tests/adapters/login.jshint', function () {
 
   module('JSHint - adapters');
   test('adapters/login.js should pass jshint', function() { 
-    ok(false, 'adapters/login.js should pass jshint.\nadapters/login.js: line 19, col 16, \'Ember\' is not defined.\nadapters/login.js: line 32, col 11, \'Ember\' is not defined.\nadapters/login.js: line 39, col 9, \'Ember\' is not defined.\nadapters/login.js: line 43, col 9, \'Ember\' is not defined.\nadapters/login.js: line 43, col 58, \'surpressError\' is not defined.\nadapters/login.js: line 52, col 7, \'Ember\' is not defined.\nadapters/login.js: line 17, col 25, \'data\' is defined but never used.\n\n7 errors'); 
+    ok(true, 'adapters/login.js should pass jshint.'); 
   });
 
 });
@@ -1570,7 +1520,7 @@ define('web-desktop/tests/routes/application.jshint', function () {
 
   module('JSHint - routes');
   test('routes/application.js should pass jshint', function() { 
-    ok(false, 'routes/application.js should pass jshint.\nroutes/application.js: line 9, col 20, \'params\' is defined but never used.\nroutes/application.js: line 114, col 27, \'content\' is defined but never used.\nroutes/application.js: line 118, col 24, \'content\' is defined but never used.\nroutes/application.js: line 145, col 13, \'responseCode\' is defined but never used.\n\n4 errors'); 
+    ok(false, 'routes/application.js should pass jshint.\nroutes/application.js: line 9, col 20, \'params\' is defined but never used.\nroutes/application.js: line 54, col 27, \'content\' is defined but never used.\nroutes/application.js: line 58, col 24, \'content\' is defined but never used.\nroutes/application.js: line 85, col 13, \'responseCode\' is defined but never used.\n\n4 errors'); 
   });
 
 });
@@ -1707,16 +1657,6 @@ define('web-desktop/tests/views/appscreen.jshint', function () {
   });
 
 });
-define('web-desktop/tests/views/backup.jshint', function () {
-
-  'use strict';
-
-  module('JSHint - views');
-  test('views/backup.js should pass jshint', function() { 
-    ok(true, 'views/backup.js should pass jshint.'); 
-  });
-
-});
 define('web-desktop/tests/views/header-dock-item.jshint', function () {
 
   'use strict';
@@ -1733,7 +1673,7 @@ define('web-desktop/tests/views/header-dock.jshint', function () {
 
   module('JSHint - views');
   test('views/header-dock.js should pass jshint', function() { 
-    ok(false, 'views/header-dock.js should pass jshint.\nviews/header-dock.js: line 7, col 3, Missing semicolon.\n\n1 error'); 
+    ok(true, 'views/header-dock.js should pass jshint.'); 
   });
 
 });
@@ -2466,168 +2406,6 @@ define('web-desktop/views/appscreen', ['exports', 'ember'], function (exports, E
   });
 
 });
-define('web-desktop/views/backup', ['exports', 'ember', 'web-desktop/utils/keys'], function (exports, Ember, keyUtils) {
-
-  'use strict';
-
-  var KEYS = keyUtils['default'].KEYS;
-  var get = Ember['default'].get;
-
-  exports['default'] = Ember['default'].CollectionView.extend({
-    // templateName: 'appscreen',
-    classNames: ['appscreen', 'appscreen-set', 'dropzone'],
-    classNameBindings: ['appTouch:background'],
-    appTouch: false,
-    contentBinding: 'controller',
-    tagName: 'ul',
-    height: 600,
-    width: 400,
-
-    left: 89,
-    top: 103,
-
-    itemViewClass: 'appicon',
-
-    activeApp: null,
-
-    init: function () {
-      this._super();
-      Ember['default'].$(window).resize(function() {
-
-        this.handleSize();
-      }.bind(this));
-    },
-
-    didInsertElement: function () {
-      this.handleSize();
-      Ember['default'].$(document).on('keyup.applist', this.onKeyUp.bind(this));
-    },
-
-    onKeyUp: function (evt) {
-      // key event 27 is the escape key
-      if (evt.which === KEYS.LEFT_ARROW || evt.which === KEYS.RIGHT_ARROW) {
-        Ember['default'].run(this, function () {
-          this.controller.send('moveImage', evt.which);
-        });
-      }
-    },
-
-    handleSize: function () {
-
-      var minHeightIcon = 64;
-      var minWidthIcon = 48;
-      var minHeightScreen = minHeightIcon * 6;
-      var minWidthScreen = minWidthIcon * 4;
-      var minHeightWin = minHeightScreen + 60;
-      var minWidthWin = minWidthScreen * 4;
-      var winWidth  = Math.max(Ember['default'].$(window).width(), minWidthWin);
-      var winHeight = Math.max(Ember['default'].$(window).height(), minHeightWin);
-
-      var height = (winHeight - 60) * 0.9;
-      var width = winWidth / 3 * 0.9 ;
-
-      var top = (winHeight - 60 - height) / 2 + 45;
-      var left = (winWidth - width * 3) / 4;
-
-      var iconWidth = Math.max(width/4 * 0.6, minWidthIcon);
-      // var node = this.$();
-      // node.css({
-      //   width: width,
-      //   height: height,
-      //   left: left,
-      //   top: top
-      // });
-      // node.css({
-      //   width: '100%',
-      //   height: '100%'
-      // });
-      this.setProperties({
-        screenWidth: width,
-        screenHeight: height,
-        top: top,
-        left: left,
-        iconWidth: iconWidth
-      });
-    },
-
-
-    getScreenRowCol: function (left, top) { // TBD: refine accuracy
-      var newCol = Math.round(left * 4 / this.get('screenWidth'));
-      var newRow = Math.round(top * 5 / this.get('screenHeight'));
-      return {row: newRow, col: newCol};
-    },
-
-    onMouseMove: function (event) {
-      // this.set('parentView.appTouch', true);
-      this.set('controller.appTouch', true);
-
-      var node = this.get('activeApp');
-      var originEvt = event.originalEvent;
-      var offset = node.$().parent().offset(); // TBD
-      var x = originEvt.clientX - this.get('offsetX') - offset.left;
-      var y = originEvt.clientY - this.get('offsetY') - offset.top;
-      node.$().css({ // image follow
-        'top': y,
-        'left': x,
-        'z-index': '100'
-      });
-      var rowCol = this.getScreenRowCol(x, y);
-      if (node.get('row') !== rowCol.row || node.get('col') !== rowCol.col) {
-        this.shuffle(
-        {row: node.get('row'), col: node.get('col')},
-        rowCol);
-      }
-    },
-
-    onMouseRelease: function () {
-      var node = this.get('activeApp');
-      node.$().removeClass('dragging');
-      this.$(document).off('mousemove');
-      this.off('mouseUp', this.onMouseRelease);
-      // this.off('mouseLeave', this.onMouseRelease);
-      node.position(node.get('row'), node.get('col'), 300);
-
-      node.$().css({
-        'z-index': 1
-      });
-      if (!this.get('controller.appTouch')) {
-        this.get('controller').send('openApp', node.get('content'));
-      }
-      this.set('controller.appTouch', false);
-    },
-
-    onMouseDown: function (app, offsetX, offsetY) { // this will be called by item
-      this.setProperties({
-        'activeApp': app,
-        'offsetX': offsetX,
-        'offsetY': offsetY
-      });
-
-      this.$(document).on('mousemove', this.onMouseMove.bind(this));
-      this.on('mouseUp', this.onMouseRelease);
-      //this.on('mouseLeave', this.onMouseRelease);
-    },
-
-    shuffle: function (from, to) {  // TBD add screen constrain
-      console.log(JSON.stringify(from) + ' -> ' + JSON.stringify(to));
-      this.get('childViews').forEach(function (itemView) {
-        var col = get(itemView, 'col');
-        var row = get(itemView, 'row');
-        if (col === get(to, 'col') && row === get(to, 'row') ) {
-          itemView.position(get(from, 'row'), get(from, 'col'), 200);
-        } else if (col === get(from, 'col') && row === get(from, 'row') ) {
-          itemView.setProperties({
-            col: get(to, 'col'),
-            row: get(to, 'row')
-          });
-        }
-      });
-    }
-
-
-  });
-
-});
 define('web-desktop/views/header-dock-item', ['exports', 'ember'], function (exports, Ember) {
 
   'use strict';
@@ -2648,7 +2426,7 @@ define('web-desktop/views/header-dock', ['exports', 'ember'], function (exports,
     tagName: 'ul',
     classNames: ['dock'],
     itemViewClass: 'header-dock-item'
-  })
+  });
 
 });
 define('web-desktop/views/header', ['exports', 'ember'], function (exports, Ember) {
@@ -2661,6 +2439,18 @@ define('web-desktop/views/header', ['exports', 'ember'], function (exports, Embe
     width_dock_icon: 52,
     width_dock_corner: 25,
     width_sync: 66,
+    showProfile: false,
+    companyName: function () {
+      var name = 'Company Name';
+      var companies = this.get('controller.user.companies');
+      var id = this.get('controller.user.current_compony_id');
+      if (!Ember['default'].isEmpty(companies) && !Ember['default'].isEmpty(id)) {
+        var obj = companies.findBy('id', parseInt(id));
+        name = Ember['default'].get(obj, 'name');
+      }
+
+      return name;
+    }.property('controller.user.companies.[]', 'controller.user.current_compony_id'),
 
     adjustSize: function () {
       var total_dock = this.get('content.dock.length');
@@ -2683,8 +2473,12 @@ define('web-desktop/views/header', ['exports', 'ember'], function (exports, Embe
     },
 
     actions: {
-      profile: function () {
-        // TBD: show user profile
+      showProfile: function () {
+        this.toggleProperty('showProfile');
+      },
+      changeCompany: function (id) {
+        this.get('controller').send('changeCompany', id);
+        this.toggleProperty('showProfile');
       }
     }
 

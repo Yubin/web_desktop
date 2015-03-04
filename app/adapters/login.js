@@ -1,5 +1,6 @@
 import DS from 'ember-data';
 import Serializer from '../serializers/login';
+import Ember from 'ember';
 
 export default DS.RESTAdapter.extend({
   serializer: Serializer.create(),
@@ -12,9 +13,8 @@ export default DS.RESTAdapter.extend({
     return this.ajax(url, 'POST', { data: query });
   },
 
-
   ajax: function (rawUrl, type, rawHash) {
-    var adapter = this, data;
+    var adapter = this;
 
     return new Ember.RSVP.Promise(function (resolve, reject) {
       var hash = {},
@@ -40,7 +40,10 @@ export default DS.RESTAdapter.extend({
       };
 
       hash.error = function (jqXHR/*, textStatus, errorThrown*/) {
-        Ember.run(null, reject, adapter.ajaxError(jqXHR, surpressError));
+        Ember.run(null, reject, adapter.ajaxError(jqXHR, function (hash) {
+          console.error('ajax error');
+          console.log(hash);
+        }));
       };
 
       hash.url = url.toLowerCase();
