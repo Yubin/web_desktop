@@ -741,7 +741,7 @@ define('web-desktop/templates/app/customer', ['exports', 'ember'], function (exp
     data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
       'src': ("view.content.url")
     },hashTypes:{'src': "ID"},hashContexts:{'src': depth0},contexts:[],types:[],data:data})));
-    data.buffer.push(" width=\"100%\" height=\"100%\"></iframe>\r\n");
+    data.buffer.push(" width=\"100%\" height=\"100%\" frameBorder=\"0\"></iframe>\r\n");
     return buffer;
     
   });
