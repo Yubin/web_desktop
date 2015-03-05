@@ -13,17 +13,22 @@
     background-color: rgba(0, 0, 0, 0.5);
     .modal-close {
       color: white;
-      font-size: 20px;
+      font-size: 25px;
       position: absolute;
       right: 20px;
       top: 20px;
       cursor: pointer;
       z-index: 9999;
+      font-weight: bold;
+      right: 2vw;
       &:before {
         font-family: Tahoma,Arial,sans-serif;
         font-weight: 30;
         font-style: normal;
         content: 'X';
+      }
+      &:hover {
+        color: orange;
       }
     }
 
@@ -134,7 +139,7 @@
           top: 0;
           left: 50%;
           height: 10.5vh;
-          width: 9.5vh;
+          width: 9vh;
           background: rgb(51,176,240);
           transform: skewX(9deg) translateX(-50%);
           transform-origin: 100% 100%;
@@ -145,13 +150,14 @@
           border-right-style: solid;
           border-right-width: 1px;
           border-right-color: rgb(11, 136, 200);
+          box-shadow: 0 0.5vh 0.5vh 0.1vh black;
         }
         .badge_band_left_shadow {
           position: absolute;
           top: 0;
           left: 50%;
           height: 10.5vh;
-          width: 8vh;
+          width: 7.5vh;
           background: transparent;
           transform: skewX(4.5deg) translateX(-50%);
           transform-origin: 100% 100%;
@@ -163,7 +169,7 @@
           top: 0;
           left: 50%;
           height: 10.5vh;
-          width: 9.5vh;
+          width: 9vh;
           background: rgb(11,136,200);
           transform: skewX(-9deg) translateX(-50%);
           transform-origin: 100% 100%;
@@ -178,7 +184,7 @@
           top: 10.5vh;
           left: 50%;
           height: 10.5vh;
-          width: 9.5vh;
+          width: 9vh;
           background: #33b0f0;
           /* Old browsers */
           background: -moz-linear-gradient(top, #33b0f0 0%, #33b0f0 63%, #47b7ef 80%, #00335e 100%);
@@ -275,9 +281,9 @@
           background: transparent;
           border-radius: 2.5vh;
           transform: translateX(-50%);
-          box-shadow: 0 0 1.5vh 0.2vh rgb(200, 200, 200);
+          box-shadow: 0 0 1.5vh 0.2vh #000000;
           &:hover {
-            box-shadow: 0 0 3vh 0.2vh rgb(200, 200, 200);
+            box-shadow: 0 0 3vh 0.2vh #000000;
           }
         }
         .badge_container.shake{
@@ -406,14 +412,16 @@
           left: 27vh;
           width: 8vh;
           height: 5vh;
-          background: rgb(245, 130, 33);
+          background: #f58221;
           border-radius: 1vh;
-          line-height: 5vh;
+          line-height: 0vh;
           font-family: arial;
           color: white;
           font-size: 2vh;
           text-align: center;
           font-weight: bold;
+          border-style: none;
+          border-width: 0px;
         }
         .login_bn:hover {
           background: black;
