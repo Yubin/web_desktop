@@ -7,7 +7,9 @@
   // height: 100%;
 
   .search {
-    position: relative;
+    position: absolute;
+    top: 45px;
+    left: 30%;
     display: inline-block;
     margin-top: 2.3%;
     height: 2.5vw;
@@ -16,9 +18,10 @@
     -moz-border-radius: 10px;
     border-radius: 40px;
     background: rgba(50, 50, 50, 0.3);
-    box-shadow: 0 0 12px #FFFFFF;
+    box-shadow: 0 0 10px 0px rgba(0, 0, 0, 0.6);
+    background: rgba(51, 176, 240, 0.3);
     &:hover {
-        background: rgba(51, 176, 240, 0.3);
+        background: rgb(193, 125, 0);
       }
 
     .search-icon {
@@ -28,7 +31,7 @@
       height: 0.7vw;
       margin: 0 0.5vw;
       background: transparent;
-      border: 2px solid #b9b9b9;
+      border: 2px solid #DEDEDE;
       border-radius: 50%;
       bottom: 0.1vh;
       cursor: pointer;
@@ -39,7 +42,7 @@
         height: 8px;
         bottom: -7px;
         right: -2px;
-        background-color: #b8b8b8;
+        background-color: #DEDEDE;
         border-radius: 2px;
         -webkit-transform: rotate(-38deg);
         -moz-transform: rotate(-38deg);
@@ -56,7 +59,7 @@
       border: none;
       background-color: transparent;
       width: 33%;
-
+      line-height: 3vh;
       &:focus {
         width: 300px;
       }
@@ -84,7 +87,8 @@
     .modal {
       width: 40%;
       position: relative;
-      padding-top: 60px;
+      top: 45px;
+      padding-top: 4vh;
       left: 30%;
       border-radius: 25px;
       text-align: center;
@@ -113,7 +117,7 @@
         font-size: 2.5vh;
         position: absolute;
         right: 1.5vw;
-        top: 5.1vh;
+        top: 4.9vh;
         font-weight: bold;
         color: #f70000;
         cursor: pointer;
@@ -151,15 +155,8 @@
           .search-results-item {
             background: transparent;
             &:hover {
-            background: #666666; /* Old browsers */
-            background: -moz-linear-gradient(top,  #666666 0%, #161616 100%, #1d1d1d 100%); /* FF3.6+ */
-            background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#666666), color-stop(100%,#161616), color-stop(100%,#1d1d1d)); /* Chrome,Safari4+ */
-            background: -webkit-linear-gradient(top,  #666666 0%,#161616 100%,#1d1d1d 100%); /* Chrome10+,Safari5.1+ */
-            background: -o-linear-gradient(top,  #666666 0%,#161616 100%,#1d1d1d 100%); /* Opera 11.10+ */
-            background: -ms-linear-gradient(top,  #666666 0%,#161616 100%,#1d1d1d 100%); /* IE10+ */
-            background: linear-gradient(to bottom,  #666666 0%,#161616 100%,#1d1d1d 100%); /* W3C */
-            filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#666666', endColorstr='#1d1d1d',GradientType=0 ); /* IE6-9 */
-            box-shadow: inset 0 0 1px black;
+            box-shadow: 0 0 5px black;
+            background: rgba(0, 0, 0, 0.5)
             }
 
             &:first-child {
@@ -384,3 +381,20 @@
 @-moz-keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
 @-o-keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
 @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+
+::-webkit-input-placeholder {
+   color: #DEDEDE;
+}
+
+:-moz-placeholder { /* Firefox 18- */
+   color: #DEDEDE;
+}
+
+::-moz-placeholder {  /* Firefox 19+ */
+   color: #DEDEDE;
+}
+
+:-ms-input-placeholder {  
+   color: #DEDEDE;
+}

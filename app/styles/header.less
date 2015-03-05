@@ -1,7 +1,7 @@
 .nav {
   width: 100%;
   height: 45px;
-  /* background-color: rgba(51, 204, 255, 0.5); */
+  background-color: rgba(51, 176, 240, 0.3);
   display: -webkit-box;
   display: -moz-box;
   display: -ms-flexbox;
@@ -12,18 +12,10 @@
   list-style-type: none;
   padding: 0px;
   margin: 0px;
-  background: #86cce8;
-  background: -moz-linear-gradient(top, #86cce8 0%, #00a4ea 100%);
-  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#86cce8), color-stop(100%,#00a4ea));
-  background: -webkit-linear-gradient(top, #86cce8 0%,#00a4ea 100%);
-  background: -o-linear-gradient(top, #86cce8 0%,#00a4ea 100%);
-  background: -ms-linear-gradient(top, #86cce8 0%,#00a4ea 100%);
-  background: linear-gradient(to bottom, #00B7FF 0%,#003D57 100%);
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#86cce8', endColorstr='#00a4ea',GradientType=0 );
-  box-shadow: 0 0 15px white;
+  box-shadow: 0 0 10px 1px black;
   > li {
     margin: 0;
-    padding-top: 0.2vh;
+    padding-top: 0.25vh;
     height: 100%;
     span {
       display: block;
@@ -39,23 +31,27 @@
     margin-left: 2vw;
     font-size: 20px;
     font-weight: bold;
+    &:hover {
+      cursor: pointer;
+    }
   }
   .login {
     margin-right: 20px;
     margin-top: 1px;
     font-weight: bold;
     span {
-      font-size: 17px;
+      font-size: 18px;
       a {
         cursor: pointer;
         margin-right: 10px;
         &:hover {
-          opacity: 0.8;
+          color: orange;
         }
       }
       img {
         width: 36px;
         vertical-align: middle;
+        margin-top: -0.5vh;
       }
     }
   }
