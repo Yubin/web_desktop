@@ -18,6 +18,12 @@
   </li>
   {{#if view.showProfile}}
   <ul class="dropdown-menu pull-right">
+    <li>
+      <a>My Account</a>
+    </li>
+    <li>
+      <a>Generate New Account</a>
+    </li>
     {{#each user.companies}}
     <li>
       <a {{action 'changeCompany' id target=view}}>{{name}}</a>

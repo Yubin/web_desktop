@@ -5,7 +5,7 @@ export default Ember.View.extend({
   templateName: 'header',
   width_dock_icon: 52,
   width_dock_corner: 25,
-  width_sync: 66,
+  width_sync: 0,
   showProfile: false,
   companyName: function () {
     var name = 'Company Name';

@@ -1026,7 +1026,7 @@ define('web-desktop/templates/header', ['exports', 'ember'], function (exports, 
   function program5(depth0,data) {
     
     var buffer = '', stack1;
-    data.buffer.push("\r\n  <ul class=\"dropdown-menu pull-right\">\r\n    ");
+    data.buffer.push("\r\n  <ul class=\"dropdown-menu pull-right\">\r\n    <li>\r\n      <a>My Account</a>\r\n    </li>\r\n    <li>\r\n      <a>Generate New Account</a>\r\n    </li>\r\n    ");
     stack1 = helpers.each.call(depth0, "user.companies", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(6, program6, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
     data.buffer.push("\r\n    <li>\r\n      <a ");
@@ -2438,7 +2438,7 @@ define('web-desktop/views/header', ['exports', 'ember'], function (exports, Embe
     templateName: 'header',
     width_dock_icon: 52,
     width_dock_corner: 25,
-    width_sync: 66,
+    width_sync: 0,
     showProfile: false,
     companyName: function () {
       var name = 'Company Name';
