@@ -31,8 +31,14 @@
     margin-left: 2vw;
     font-size: 20px;
     font-weight: bold;
-    &:hover {
-      cursor: pointer;
+    span {
+      a {
+        cursor: pointer;
+        margin-right: 10px;
+        &:hover {
+          color: orange;
+        }
+      }
     }
   }
   .login {
@@ -160,13 +166,61 @@
       }
       &:hover {
         a {
-          background-color: rgba(51, 176, 240, 1);
+          background-color: rgba(51,176,240,1);
+          font-weight: bold;
           opacity: 1;
           z-index: 4;
         }
       }
     }
   }
+
+  .dropdown-menu-left{
+    left: 5px;
+    right: auto;
+    text-align: center;
+    border-radius: 0;
+    margin-top: 0;
+    background-clip: border-box;
+    padding: 0;
+    float: right!important;
+    position: absolute;
+    top: 50px;
+    float: left;
+    min-width: 180px;
+    margin: 2px 0 0;
+    list-style: none;
+    font-size: 14px;
+    border: 1px solid #676769;
+    -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+    box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.6);
+    border-width: 0px;
+    z-index: 4;
+    li {
+      a {
+        padding: 4px 12px;
+        display: block;
+        clear: both;
+        font-weight: 400;
+        line-height: 1.42857143;
+        color: #fff;
+        white-space: nowrap;
+        cursor: pointer;
+        z-index: 4;
+        background-color: rgba(80, 80, 80, 0.6);
+      }
+      &:hover {
+        a {
+          background-color: rgba(51,176,240,1);
+          font-weight: bold;
+          opacity: 1;
+          z-index: 4;
+        }
+      }
+    }
+  }
+
+
 }
 
 /* Animation Times - Time for image to fade in

@@ -10,6 +10,7 @@ export default Ember.Mixin.create({
   top: 0,
   layoutName: 'window',
   isFullSize: false,
+  isMinSize: false,
 
   changeZindex: function () {
     var zindex = -1;
@@ -77,7 +78,22 @@ export default Ember.Mixin.create({
     },
 
     minimizeApp: function () {
-      //TBD
+      if (this.get('isMinSize')) {
+        this.$().animate({ // image follow
+          'top': this.get('top'),
+          'left': this.get('left'),
+          'width': this.get('width'),
+          'height': this.get('height')
+        });
+      } else {
+        this.$().animate({ // image follow
+          'top': 45,
+          'left': '50%',
+          'width': 0,
+          'height': 0
+        });
+      }
+      this.toggleProperty('isMinSize');
     }
   }
 

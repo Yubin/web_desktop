@@ -19,6 +19,8 @@ export default Ember.View.extend({
 
     openApp: function () {
       this.get('controller').send('openApp', this.get('content'));
+      $('.overlay').hide();
+      $('.search').show();
     }
   }
 });

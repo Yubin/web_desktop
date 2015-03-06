@@ -1,8 +1,22 @@
 <ul class="nav fadeIn fadeIn-50ms fadeOut fadeOut-50ms">
   <li class="logo fadeIn fadeIn-50ms">
-    <span>{{view.companyName}}</span>
+    <span>
+      <a {{action 'showProfile_comp' target=view}}> {{view.companyName}} </a>
+    </span>
   </li>
+  {{#if view.showProfile_comp}}
+  <ul class="dropdown-menu-left">
+    <li>
+      <a>Company Info</a>
+    </li>
+    <li>
+      <a>Create New Accounts</a>
+    </li>   
+  </ul>
+  {{/if}}
+
   {{view 'header-dock' content=dock}}
+
   <li class="login fadeIn fadeIn-50ms">
       {{#if user.isLogin}}
       <span>
@@ -20,9 +34,6 @@
   <ul class="dropdown-menu pull-right">
     <li>
       <a>My Account</a>
-    </li>
-    <li>
-      <a>Generate New Account</a>
     </li>
     {{#each user.companies}}
     <li>

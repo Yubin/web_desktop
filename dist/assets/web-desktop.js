@@ -445,6 +445,7 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
     top: 0,
     layoutName: 'window',
     isFullSize: false,
+    isMinSize: false,
 
     changeZindex: function () {
       var zindex = -1;
@@ -512,7 +513,22 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
       },
 
       minimizeApp: function () {
-        //TBD
+        if (this.get('isMinSize')) {
+          this.$().animate({ // image follow
+            'top': this.get('top'),
+            'left': this.get('left'),
+            'width': this.get('width'),
+            'height': this.get('height')
+          });
+        } else {
+          this.$().animate({ // image follow
+            'top': 45,
+            'left': '50%',
+            'width': 0,
+            'height': 0
+          });
+        }
+        this.toggleProperty('isMinSize');
       }
     }
 
@@ -999,6 +1015,12 @@ define('web-desktop/templates/header', ['exports', 'ember'], function (exports, 
 
   function program1(depth0,data) {
     
+    
+    data.buffer.push("\r\n  <ul class=\"dropdown-menu-left\">\r\n    <li>\r\n      <a>Company Info</a>\r\n    </li>\r\n    <li>\r\n      <a>Create New Accounts</a>\r\n    </li>   \r\n  </ul>\r\n  ");
+    }
+
+  function program3(depth0,data) {
+    
     var buffer = '', stack1;
     data.buffer.push("\r\n      <span>\r\n        <a ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "showProfile", {hash:{
@@ -1014,7 +1036,7 @@ define('web-desktop/templates/header', ['exports', 'ember'], function (exports, 
     return buffer;
     }
 
-  function program3(depth0,data) {
+  function program5(depth0,data) {
     
     var buffer = '';
     data.buffer.push("\r\n      <span>\r\n        <a ");
@@ -1023,18 +1045,18 @@ define('web-desktop/templates/header', ['exports', 'ember'], function (exports, 
     return buffer;
     }
 
-  function program5(depth0,data) {
+  function program7(depth0,data) {
     
     var buffer = '', stack1;
-    data.buffer.push("\r\n  <ul class=\"dropdown-menu pull-right\">\r\n    <li>\r\n      <a>My Account</a>\r\n    </li>\r\n    <li>\r\n      <a>Generate New Account</a>\r\n    </li>\r\n    ");
-    stack1 = helpers.each.call(depth0, "user.companies", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(6, program6, data),contexts:[depth0],types:["ID"],data:data});
+    data.buffer.push("\r\n  <ul class=\"dropdown-menu pull-right\">\r\n    <li>\r\n      <a>My Account</a>\r\n    </li>\r\n    ");
+    stack1 = helpers.each.call(depth0, "user.companies", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(8, program8, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
     data.buffer.push("\r\n    <li>\r\n      <a ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "SignOut", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
     data.buffer.push(">Sign Out</a>\r\n    </li>\r\n  </ul>\r\n  ");
     return buffer;
     }
-  function program6(depth0,data) {
+  function program8(depth0,data) {
     
     var buffer = '', stack1;
     data.buffer.push("\r\n    <li>\r\n      <a ");
@@ -1048,18 +1070,25 @@ define('web-desktop/templates/header', ['exports', 'ember'], function (exports, 
     return buffer;
     }
 
-    data.buffer.push("<ul class=\"nav fadeIn fadeIn-50ms fadeOut fadeOut-50ms\">\r\n  <li class=\"logo fadeIn fadeIn-50ms\">\r\n    <span>");
+    data.buffer.push("<ul class=\"nav fadeIn fadeIn-50ms fadeOut fadeOut-50ms\">\r\n  <li class=\"logo fadeIn fadeIn-50ms\">\r\n    <span>\r\n      <a ");
+    data.buffer.push(escapeExpression(helpers.action.call(depth0, "showProfile_comp", {hash:{
+      'target': ("view")
+    },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
+    data.buffer.push("> ");
     stack1 = helpers._triageMustache.call(depth0, "view.companyName", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("</span>\r\n  </li>\r\n  ");
+    data.buffer.push(" </a>\r\n    </span>\r\n  </li>\r\n  ");
+    stack1 = helpers['if'].call(depth0, "view.showProfile_comp", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],data:data});
+    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+    data.buffer.push("\r\n\r\n  ");
     data.buffer.push(escapeExpression(helpers.view.call(depth0, "header-dock", {hash:{
       'content': ("dock")
     },hashTypes:{'content': "ID"},hashContexts:{'content': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push("\r\n  <li class=\"login fadeIn fadeIn-50ms\">\r\n      ");
-    stack1 = helpers['if'].call(depth0, "user.isLogin", {hash:{},hashTypes:{},hashContexts:{},inverse:self.program(3, program3, data),fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],data:data});
+    data.buffer.push("\r\n\r\n  <li class=\"login fadeIn fadeIn-50ms\">\r\n      ");
+    stack1 = helpers['if'].call(depth0, "user.isLogin", {hash:{},hashTypes:{},hashContexts:{},inverse:self.program(5, program5, data),fn:self.program(3, program3, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
     data.buffer.push("\r\n  </li>\r\n  ");
-    stack1 = helpers['if'].call(depth0, "view.showProfile", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(5, program5, data),contexts:[depth0],types:["ID"],data:data});
+    stack1 = helpers['if'].call(depth0, "view.showProfile", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(7, program7, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
     data.buffer.push("\r\n</ul>\r\n");
     return buffer;
@@ -1305,8 +1334,10 @@ define('web-desktop/templates/window', ['exports', 'ember'], function (exports, 
     stack1 = helpers._triageMustache.call(depth0, "view.content.name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
     data.buffer.push("</span>\r\n</div>\r\n<nav class=\"control-window\">\r\n  <a href=\"#\" class=\"minimize\" ");
-    data.buffer.push(escapeExpression(helpers.action.call(depth0, "minimizeApp", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push(">&nbsp;</a>\r\n  <a href=\"#\" class=\"maximize\" ");
+    data.buffer.push(escapeExpression(helpers.action.call(depth0, "minimizeApp", {hash:{
+      'target': ("view")
+    },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
+    data.buffer.push(">minimize</a>\r\n  <a href=\"#\" class=\"maximize\" ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "maximizeApp", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
@@ -1733,7 +1764,7 @@ define('web-desktop/tests/views/search-results-item.jshint', function () {
 
   module('JSHint - views');
   test('views/search-results-item.js should pass jshint', function() { 
-    ok(true, 'views/search-results-item.js should pass jshint.'); 
+    ok(false, 'views/search-results-item.js should pass jshint.\nviews/search-results-item.js: line 22, col 7, \'$\' is not defined.\nviews/search-results-item.js: line 23, col 7, \'$\' is not defined.\n\n2 errors'); 
   });
 
 });
@@ -2440,6 +2471,7 @@ define('web-desktop/views/header', ['exports', 'ember'], function (exports, Embe
     width_dock_corner: 25,
     width_sync: 0,
     showProfile: false,
+    showProfile_comp: false,
     companyName: function () {
       var name = 'Company Name';
       var companies = this.get('controller.user.companies');
@@ -2475,6 +2507,9 @@ define('web-desktop/views/header', ['exports', 'ember'], function (exports, Embe
     actions: {
       showProfile: function () {
         this.toggleProperty('showProfile');
+      },
+      showProfile_comp: function () {
+        this.toggleProperty('showProfile_comp');
       },
       changeCompany: function (id) {
         this.get('controller').send('changeCompany', id);
@@ -2841,6 +2876,8 @@ define('web-desktop/views/search-results-item', ['exports', 'ember'], function (
 
       openApp: function () {
         this.get('controller').send('openApp', this.get('content'));
+        $('.overlay').hide();
+        $('.search').show();
       }
     }
   });

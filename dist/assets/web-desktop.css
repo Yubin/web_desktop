@@ -244,7 +244,7 @@
   display: none;
 }
 .window.active .header {
-  background-color: #ec9800;
+  background-color: #D28800;
 }
 .ui-draggable-dragging.window .header {
   cursor: grabbing;
@@ -833,8 +833,12 @@ h1.title-mac {
   font-size: 20px;
   font-weight: bold;
 }
-.nav .logo:hover {
+.nav .logo span a {
   cursor: pointer;
+  margin-right: 10px;
+}
+.nav .logo span a:hover {
+  color: orange;
 }
 .nav .login {
   margin-right: 20px;
@@ -960,6 +964,47 @@ h1.title-mac {
 }
 .nav .dropdown-menu li:hover a {
   background-color: #33b0f0;
+  font-weight: bold;
+  opacity: 1;
+  z-index: 4;
+}
+.nav .dropdown-menu-left {
+  left: 5px;
+  right: auto;
+  text-align: center;
+  border-radius: 0;
+  margin-top: 0;
+  background-clip: border-box;
+  padding: 0;
+  float: right!important;
+  position: absolute;
+  top: 50px;
+  float: left;
+  min-width: 180px;
+  margin: 2px 0 0;
+  list-style: none;
+  font-size: 14px;
+  border: 1px solid #676769;
+  -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+  box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.6);
+  border-width: 0px;
+  z-index: 4;
+}
+.nav .dropdown-menu-left li a {
+  padding: 4px 12px;
+  display: block;
+  clear: both;
+  font-weight: 400;
+  line-height: 1.42857143;
+  color: #fff;
+  white-space: nowrap;
+  cursor: pointer;
+  z-index: 4;
+  background-color: rgba(80, 80, 80, 0.6);
+}
+.nav .dropdown-menu-left li:hover a {
+  background-color: #33b0f0;
+  font-weight: bold;
   opacity: 1;
   z-index: 4;
 }

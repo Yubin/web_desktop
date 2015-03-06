@@ -7,6 +7,7 @@ export default Ember.View.extend({
   width_dock_corner: 25,
   width_sync: 0,
   showProfile: false,
+  showProfile_comp: false,
   companyName: function () {
     var name = 'Company Name';
     var companies = this.get('controller.user.companies');
@@ -42,6 +43,9 @@ export default Ember.View.extend({
   actions: {
     showProfile: function () {
       this.toggleProperty('showProfile');
+    },
+    showProfile_comp: function () {
+      this.toggleProperty('showProfile_comp');
     },
     changeCompany: function (id) {
       this.get('controller').send('changeCompany', id);
