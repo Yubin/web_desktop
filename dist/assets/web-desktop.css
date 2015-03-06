@@ -964,7 +964,6 @@ h1.title-mac {
 }
 .nav .dropdown-menu li:hover a {
   background-color: #33b0f0;
-  font-weight: bold;
   opacity: 1;
   z-index: 4;
 }
@@ -1004,7 +1003,6 @@ h1.title-mac {
 }
 .nav .dropdown-menu-left li:hover a {
   background-color: #33b0f0;
-  font-weight: bold;
   opacity: 1;
   z-index: 4;
 }

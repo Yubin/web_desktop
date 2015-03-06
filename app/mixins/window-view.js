@@ -26,6 +26,41 @@ export default Ember.Mixin.create({
     this.$().addClass('active');
   },
 
+  showMinimizedApp: function () {
+    if (this.get('isMinSize')) {
+      if (this.get('isFullSize')) { // for windows that originally is full sized.
+        this.$().animate({
+          'top': 45,
+          'left': 0,
+          'width': '100%',
+          'height': '100%'
+        });
+      }
+      else { // for windows that originally is NOT full sized.
+        this.$().animate({ 
+          'top': this.get('top'),
+          'left': this.get('left'),
+          'width': this.get('width'),
+          'height': this.get('height')
+        });
+      }
+      this.$().css({
+        'boxShadow': '0px 0px 10px 1px black'
+      })
+    } else { // minimize the windows to dock
+      this.$().animate({
+        'top': 45,
+        'left': '50%',
+        'width': 0,
+        'height': 0
+      });
+      this.$().css({
+        'boxShadow': '0px 0px 0px 0px black'
+      })
+    }
+    this.toggleProperty('isMinSize');
+  },
+
   mouseDown: function () {
     this.changeZindex();
   },
@@ -43,11 +78,18 @@ export default Ember.Mixin.create({
       top: this.get('top')
     });
     this.$().resizable();
-      this.$().draggable();
-      this.$('.header').on('dblclick', function () {
-        this._actions['maximizeApp'].apply(this);
-      }.bind(this));
-    this.$('.header').on('mouseup', function () {console.log('mixin -  mouseup');
+    this.$().draggable();
+    this.$('.header').on('dblclick', function () {
+      this._actions['maximizeApp'].apply(this);
+    }.bind(this));
+    this.$('.header').on('mouseup', function () {
+      // update position info, so when show app from minimize, it goes original place
+      var window_position=this.$().position();
+      console.log("window-x:" + window_position.left + ", window-y:" + window_position.top);
+      this.top = window_position.top; 
+      this.left = window_position.left;
+      this.width = this.$().width();
+      this.height = this.$().height();
       this.$(document).off('mousemove');
     }.bind(this));
 
@@ -85,13 +127,19 @@ export default Ember.Mixin.create({
           'width': this.get('width'),
           'height': this.get('height')
         });
+        this.$().css({
+          'boxShadow': '0px 0px 10px 1px black'
+        })
       } else {
         this.$().animate({ // image follow
           'top': 45,
           'left': '50%',
           'width': 0,
-          'height': 0
+          'height': 0,
         });
+        this.$().css({
+          'boxShadow': '0px 0px 0px 0px black'
+        })
       }
       this.toggleProperty('isMinSize');
     }

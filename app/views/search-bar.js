@@ -9,6 +9,7 @@ export default Ember.View.extend({
 
   didInsertElement: function () {
     this.$('.search').on('click', function () {
+      this.set('query', '');
       this.$('.overlay').show();
       this.$('.search').hide();
       this.$('.overlay input').focus();
