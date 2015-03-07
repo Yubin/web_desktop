@@ -31,8 +31,8 @@
   list-style: none;
 }
 .applist ul li {
-  -webkit-transition: opacity, -webkit-transform 0.25s ease-in-out;
-  transition: opacity, transform 0.25s ease-in-out;
+  -webkit-transition: opacity, -webkit-transform 0.2s ease-in-out;
+  transition: opacity, transform 0.2s ease-in-out;
   cursor: pointer;
   list-style: none;
   position: absolute;
@@ -45,8 +45,8 @@
   width: 103%;
   height: 110%;
   border-radius: 23%;
-  -webkit-transition: -webkit-transform 0.25s ease-out;
-  transition: transform 0.25s ease-out;
+  -webkit-transition: -webkit-transform 0.2s ease-out;
+  transition: transform 0.2s ease-out;
   background: #004264;
   position: relative;
   top: 0px;
@@ -57,8 +57,8 @@
   width: 100%;
   height: 100%;
   border-radius: 23%;
-  -webkit-transition: -webkit-transform 0.25s ease-out;
-  transition: transform 0.25s ease-out;
+  -webkit-transition: -webkit-transform 0.2s ease-out;
+  transition: transform 0.2s ease-out;
   top: 0;
   position: absolute;
   box-shadow: 0px 0px 6px white;
@@ -94,14 +94,15 @@
   -webkit-transition: none;
   transition: none;
   opacity: 0.75;
+  -webkit-transition: -webkit-transform 0.1s;
 }
 .applist li.dragging div {
-  -webkit-transform: scale(1.1);
-  -ms-transform: scale(1.1);
-  transform: scale(1.1);
+  -webkit-transform: scale(1);
+  -ms-transform: scale(1);
+  transform: scale(1);
 }
 .applist li.dragging div:after {
-  opacity: 0.75;
+  opacity: 0.7;
 }
 .fadeIn {
   /* CSS needed for animation
