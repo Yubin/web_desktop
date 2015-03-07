@@ -6,9 +6,11 @@ var set = Ember.set;
 export default Ember.Controller.extend({
   // itemController: 'applist-item',
   screenNum: 3,
-  screens: [{ id: 0, hasApp: false},
+  screens: [
+  { id: 0, hasApp: false},
   { id: 1, hasApp: false},
-  { id: 2, hasApp: false}],
+  { id: 2, hasApp: false}
+  ],
 
   appTouch: false,
 

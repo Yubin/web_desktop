@@ -553,6 +553,8 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
 
     actions: {
       maximizeApp: function () {
+        var max_height = this.$(document).height() - 75;
+        console.log(max_height);
         if (this.get('isFullSize')) {
           this.$().animate({ // image follow
             'top': this.get('top'),
@@ -565,7 +567,7 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
             'top': 45,
             'left': 0,
             'width': '100%',
-            'height': '100%'
+            'height': max_height
           });
         }
         this.toggleProperty('isFullSize');
@@ -1586,7 +1588,7 @@ define('web-desktop/tests/mixins/window-view.jshint', function () {
 
   module('JSHint - mixins');
   test('mixins/window-view.js should pass jshint', function() { 
-    ok(false, 'mixins/window-view.js should pass jshint.\nmixins/window-view.js: line 50, col 9, Missing semicolon.\nmixins/window-view.js: line 63, col 11, Missing semicolon.\nmixins/window-view.js: line 147, col 11, Missing semicolon.\nmixins/window-view.js: line 157, col 11, Missing semicolon.\n\n4 errors'); 
+    ok(false, 'mixins/window-view.js should pass jshint.\nmixins/window-view.js: line 50, col 9, Missing semicolon.\nmixins/window-view.js: line 63, col 11, Missing semicolon.\nmixins/window-view.js: line 149, col 11, Missing semicolon.\nmixins/window-view.js: line 159, col 11, Missing semicolon.\n\n4 errors'); 
   });
 
 });
