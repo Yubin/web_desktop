@@ -144,9 +144,11 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
   exports['default'] = Ember['default'].Controller.extend({
     // itemController: 'applist-item',
     screenNum: 3,
-    screens: [{ id: 0, hasApp: false},
+    screens: [
+    { id: 0, hasApp: false},
     { id: 1, hasApp: false},
-    { id: 2, hasApp: false}],
+    { id: 2, hasApp: false}
+    ],
 
     appTouch: false,
 
@@ -462,6 +464,7 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
     },
 
     showMinimizedApp: function () {
+      console.log("showMinimizedApp:" + this.$().hasClass('active'));
       if (this.get('isMinSize')) {
         if (this.get('isFullSize')) { // for windows that originally is full sized.
           this.$().animate({
@@ -482,18 +485,23 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
         this.$().css({
           'boxShadow': '0px 0px 10px 1px black'
         })
-      } else { // minimize the windows to dock
-        this.$().animate({
-          'top': 45,
-          'left': '50%',
-          'width': 0,
-          'height': 0
-        });
-        this.$().css({
-          'boxShadow': '0px 0px 0px 0px black'
-        })
+        this.isMinSize = false;
+      } 
+      else { // minimize the windows to dock
+        if (this.$().hasClass('active')) { // only minimize those are already activated
+          this.$().animate({
+            'top': 45,
+            'left': '50%',
+            'width': 0,
+            'height': 0
+          });
+          this.$().css({
+            'boxShadow': '0px 0px 0px 0px black'
+          })
+          this.isMinSize = true;
+        }
       }
-      this.toggleProperty('isMinSize');
+  /*    this.toggleProperty('isMinSize');*/
     },
 
     mouseDown: function () {
@@ -527,7 +535,16 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
         this.height = this.$().height();
         this.$(document).off('mousemove');
       }.bind(this));
-
+      this.$().resize(function() {
+        console.log("resized");
+        // update position info, so when show app from minimize, it goes original place
+        var window_position=this.$().position();
+        console.log("window-x:" + window_position.left + ", window-y:" + window_position.top);
+        this.top = window_position.top; 
+        this.left = window_position.left;
+        this.width = this.$().width();
+        this.height = this.$().height();
+      }.bind(this));
     },
 
     willDestroyElement: function () {
@@ -1042,7 +1059,7 @@ define('web-desktop/templates/header-dock-item', ['exports', 'ember'], function 
     var buffer = '', escapeExpression=this.escapeExpression;
 
 
-    data.buffer.push("<div class=\"app-img\" style=\"background-image: url(");
+    data.buffer.push("<div class=\"app-img fadeIn fadeIn-50ms\" style=\"background-image: url(");
     data.buffer.push(escapeExpression(helpers.unbound.call(depth0, "view.content.icon", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data})));
     data.buffer.push(");\"></div>\r\n<em><span>");
     data.buffer.push(escapeExpression(helpers.unbound.call(depth0, "view.content.name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data})));
@@ -1569,7 +1586,7 @@ define('web-desktop/tests/mixins/window-view.jshint', function () {
 
   module('JSHint - mixins');
   test('mixins/window-view.js should pass jshint', function() { 
-    ok(false, 'mixins/window-view.js should pass jshint.\nmixins/window-view.js: line 49, col 9, Missing semicolon.\nmixins/window-view.js: line 59, col 9, Missing semicolon.\nmixins/window-view.js: line 132, col 11, Missing semicolon.\nmixins/window-view.js: line 142, col 11, Missing semicolon.\n\n4 errors'); 
+    ok(false, 'mixins/window-view.js should pass jshint.\nmixins/window-view.js: line 50, col 9, Missing semicolon.\nmixins/window-view.js: line 63, col 11, Missing semicolon.\nmixins/window-view.js: line 147, col 11, Missing semicolon.\nmixins/window-view.js: line 157, col 11, Missing semicolon.\n\n4 errors'); 
   });
 
 });
@@ -2492,8 +2509,8 @@ define('web-desktop/views/header-dock-item', ['exports', 'ember'], function (exp
   exports['default'] = Ember['default'].View.extend({
     templateName: 'header-dock-item',
     click: function () {
-      this.get('content.instant').changeZindex();
       this.get('content.instant').showMinimizedApp();
+      this.get('content.instant').changeZindex();
     }
   });
 
