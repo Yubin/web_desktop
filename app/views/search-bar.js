@@ -51,7 +51,7 @@ export default Ember.View.extend({
       icon: 'http://asa.static.gausian.com/user_app/Customers/icon.png',
       viewName: 'customer',
       installed: false,
-      url: 'http://gausian-developers.github.io/user-app-template5/app/'
+      url: 'http://localhost/user-app-template5/app/'
     },
     {
       name: 'Pixlr',

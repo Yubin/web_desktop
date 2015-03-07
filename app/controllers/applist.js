@@ -2,9 +2,11 @@ import Ember from 'ember';
 
 var get = Ember.get;
 var set = Ember.set;
+var isEmpty = Ember.isEmpty;
 
 export default Ember.Controller.extend({
   // itemController: 'applist-item',
+  needs: ['application'],
   screenNum: 3,
   screens: [
   { id: 0, hasApp: false},
@@ -15,6 +17,8 @@ export default Ember.Controller.extend({
   appTouch: false,
 
   openApps: [],
+
+  installApps: Ember.computed.alias('controllers.application.user.installApps'),
 
   init: function () {
     this._super.apply(this, arguments);
@@ -45,48 +49,26 @@ export default Ember.Controller.extend({
     });
   }.observes('content.@each.screen'),
 
-  _getContentById: function (id) {
-    return {
-      id: id,
-      name: 'App_' + id,
-      rating: 5,
-      category: 'Base',
-      price: 4,
-      freeDays: 30,
-      icon: 'http://asa.static.gausian.com/user_app/Customers/icon.png',
-      viewName: 'customer',
-      installed: false,
-      url: 'http://gausian-developers.github.io/user-app-template5/app/'
-    };
-  },
+  loadInstallApps: function () {
+    var installApps = this.get('installApps');
 
-  observeAppinstall: function () {
-    var appinstall = this.get('appinstall');
-    var applist = this.get('model');
-
-    if (appinstall) {
-      var ids = appinstall.split(',');
-      var needOpen = ids.length === 1 ? true : false;
-      ids.forEach(function (id) {
-        console.log(id);
-        var found = applist.any(function (app) {
-          return get(app, 'id') === id;
-        });
-        if (!found) {
-          // TBD: search from server to get content
-          var content = this._getContentById(id);
-          if (content) {
-            this._actions['addApp'].apply(this, [content]);
-            if (needOpen) {
-              Ember.run.later(function () {
-                this._actions['openApp'].apply(this, [content]);
-              }.bind(this), 2000);
-            }
-          }
+    if (!isEmpty(installApps)) {
+      var ids = installApps.findBy('id');
+      this.store.findQuery('app-info', {ids: ids}).then(function (res) {
+        var apps = res.get('content');
+        if (apps) {
+          apps.forEach(function (app) {
+            console.log(app);
+            this.get('model').pushObject(app);
+          }.bind(this));
         }
       }.bind(this));
-    }
 
+    }
+  }.observes('installApps'),
+
+  observeAppinstall: function () {
+    // Send install APP
   }.observes('appinstall'),
 
   actions: {

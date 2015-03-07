@@ -10,9 +10,10 @@ export default Ember.Route.extend({
     return {
       applist:[
         {
-          name: "Gausian Store",
+          name: "ASA API",
           icon: "img/icon_17.png",
-          viewName: 'gausianStore',
+          viewName: 'customer',
+          url: 'http://tianjiasun.github.io/ASA_api/app/index.html',
           screen: 0,
           col: 0,
           row: 0
@@ -33,6 +34,7 @@ export default Ember.Route.extend({
     } catch (e) {
       console.error(e);
     }
+    console.log(user);
     this.get('controller').set('user', user);
   },
 
@@ -86,7 +88,6 @@ export default Ember.Route.extend({
         if (res._data.response_code !== 1) {
           this.get('controller').set('loginFail', true);
         } else {
-
           var user = {
             firstName: get(responseBody, 'user.first'),
             lastName: get(responseBody, 'user.last'),
@@ -96,6 +97,7 @@ export default Ember.Route.extend({
             signUpDate: get(res, 'signup_date'),
             token: 'asdfasdfasdf',
             companies: get(responseBody, 'companies'),
+            installApps: get(responseBody, 'installed_apps'),
             current_compony_id: get(responseBody, 'current_login_company')
           };
           this.get('controller').set('user', user);

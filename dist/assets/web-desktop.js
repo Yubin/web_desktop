@@ -2,33 +2,67 @@
 
 /* jshint ignore:end */
 
-define('web-desktop/adapters/login', ['exports', 'ember-data', 'web-desktop/serializers/login', 'ember'], function (exports, DS, Serializer, Ember) {
+define('web-desktop/adapters/app-info', ['exports', 'web-desktop/adapters/base', 'web-desktop/serializers/app-info'], function (exports, Adapter, Serializer) {
+
+  'use strict';
+
+  exports['default'] = Adapter['default'].extend({
+    serializer: Serializer['default'].create(),
+
+    findQuery: function (store, type, query) {
+      var url = this.buildURL();
+      // Get on id = 2 or id = 3
+      var ids = query.ids;
+      var onStr = '';
+      if (ids) {
+        if (ids.length) { // TBD Array
+
+        } else { // only one
+          onStr = 'id=' + ids.id;
+        }
+      } else { // Get All!
+
+      }
+
+      onStr = onStr ? 'ON ' + onStr : '';
+      console.log(onStr);
+
+      var requestStr = 'GET ' + onStr;
+      return this.ajax(url, 'POST', {
+        data: {requestString: requestStr},
+        serviceAppName: 'UserAppInfo',
+        userAppId: 'Fl2GDgDECXcbmJsBAJVayUhuLwkAAAA'
+      });
+    }
+
+  });
+
+});
+define('web-desktop/adapters/base', ['exports', 'ember-data', 'ember'], function (exports, DS, Ember) {
 
   'use strict';
 
   exports['default'] = DS['default'].RESTAdapter.extend({
-    serializer: Serializer['default'].create(),
+
     buildURL: function (/*type, id*/) {
       return 'http://asa.gausian.com/';
     },
 
-    findQuery: function (store, type, query) {
-      var url = this.buildURL();
-      return this.ajax(url, 'POST', { data: query });
-    },
-
     ajax: function (rawUrl, type, rawHash) {
       var adapter = this;
+      console.log(rawHash);
+      var userAppId = rawHash.userAppId; // app_id
+      var serviceAppName = rawHash.serviceAppName;// Login
+      var requestString = rawHash.data.requestString;
 
       return new Ember['default'].RSVP.Promise(function (resolve, reject) {
         var hash = {},
           url = rawUrl;
         hash.type = type;
         hash.dataType = 'json';
-
         hash.context = adapter;
-        hash.data = 'user_app_id=app_id&service_app_name=Login&request_string=' +
-          JSON.stringify(rawHash.data.login);
+        hash.data = 'user_app_id=%@&service_app_name=%@&request_string=%@'
+          .fmt(userAppId, serviceAppName, requestString);
 
         hash.beforeSend = function (xhr) {
           if (adapter.headers !== undefined) {
@@ -58,6 +92,25 @@ define('web-desktop/adapters/login', ['exports', 'ember-data', 'web-desktop/seri
 
         Ember['default'].$.ajax(hash);
       }.bind(this), 'DS: AudienceAdapter#ajax ' + type + ' to ' + rawUrl);
+    }
+
+  });
+
+});
+define('web-desktop/adapters/login', ['exports', 'web-desktop/adapters/base', 'web-desktop/serializers/login'], function (exports, Adapter, Serializer) {
+
+  'use strict';
+
+  exports['default'] = Adapter['default'].extend({
+    serializer: Serializer['default'].create(),
+
+    createRecord: function (store, type, query) {
+      var url = this.buildURL();
+      return this.ajax(url, 'POST', {
+        data: {requestString: JSON.stringify(query)},
+        serviceAppName: 'Login',
+        userAppId: 'Fl2GDgDECXcbmJsBAJVayUhuLwkAAAA'
+      });
     }
 
   });
@@ -105,24 +158,11 @@ define('web-desktop/components/trash-can', ['exports', 'ember', 'web-desktop/mix
 });
 define('web-desktop/controllers/application', ['exports', 'ember'], function (exports, Ember) {
 
-  'use strict';
+	'use strict';
 
-  exports['default'] = Ember['default'].Controller.extend({
-    // queryParams: ['applist'],
-    // applist: null,
-    // installApp: function() {
-    //   var applist = this.get('applist');
-    //   var userApps = this.get('model');
-    //
-    //   if (applist) {
-    //     console.log(applist);
-    //     // userApps.filter
-    //
-    //   } else {
-    //     return [];
-    //   }
-    // }.property('applist', 'model')
-  });
+	exports['default'] = Ember['default'].Controller.extend({
+
+	});
 
 });
 define('web-desktop/controllers/applist-item', ['exports', 'ember'], function (exports, Ember) {
@@ -140,9 +180,11 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
 
   var get = Ember['default'].get;
   var set = Ember['default'].set;
+  var isEmpty = Ember['default'].isEmpty;
 
   exports['default'] = Ember['default'].Controller.extend({
     // itemController: 'applist-item',
+    needs: ['application'],
     screenNum: 3,
     screens: [
     { id: 0, hasApp: false},
@@ -153,6 +195,8 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
     appTouch: false,
 
     openApps: [],
+
+    installApps: Ember['default'].computed.alias('controllers.application.user.installApps'),
 
     init: function () {
       this._super.apply(this, arguments);
@@ -183,48 +227,26 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
       });
     }.observes('content.@each.screen'),
 
-    _getContentById: function (id) {
-      return {
-        id: id,
-        name: 'App_' + id,
-        rating: 5,
-        category: 'Base',
-        price: 4,
-        freeDays: 30,
-        icon: 'http://asa.static.gausian.com/user_app/Customers/icon.png',
-        viewName: 'customer',
-        installed: false,
-        url: 'http://gausian-developers.github.io/user-app-template5/app/'
-      };
-    },
+    loadInstallApps: function () {
+      var installApps = this.get('installApps');
 
-    observeAppinstall: function () {
-      var appinstall = this.get('appinstall');
-      var applist = this.get('model');
-
-      if (appinstall) {
-        var ids = appinstall.split(',');
-        var needOpen = ids.length === 1 ? true : false;
-        ids.forEach(function (id) {
-          console.log(id);
-          var found = applist.any(function (app) {
-            return get(app, 'id') === id;
-          });
-          if (!found) {
-            // TBD: search from server to get content
-            var content = this._getContentById(id);
-            if (content) {
-              this._actions['addApp'].apply(this, [content]);
-              if (needOpen) {
-                Ember['default'].run.later(function () {
-                  this._actions['openApp'].apply(this, [content]);
-                }.bind(this), 2000);
-              }
-            }
+      if (!isEmpty(installApps)) {
+        var ids = installApps.findBy('id');
+        this.store.findQuery('app-info', {ids: ids}).then(function (res) {
+          var apps = res.get('content');
+          if (apps) {
+            apps.forEach(function (app) {
+              console.log(app);
+              this.get('model').pushObject(app);
+            }.bind(this));
           }
         }.bind(this));
-      }
 
+      }
+    }.observes('installApps'),
+
+    observeAppinstall: function () {
+      // Send install APP
     }.observes('appinstall'),
 
     actions: {
@@ -610,6 +632,28 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
   });
 
 });
+define('web-desktop/models/app-info', ['exports', 'ember-data'], function (exports, DS) {
+
+  'use strict';
+
+  exports['default'] = DS['default'].Model.extend({
+    owner: DS['default'].attr('string'),
+    app_name: DS['default'].attr('string'),
+    last_version: DS['default'].attr('string'),
+    show_in_store: DS['default'].attr('boolean'),
+    pricing_by_month: DS['default'].attr('number'),
+    security_level: DS['default'].attr('string'),
+    certified: DS['default'].attr('boolean'),
+    default_install: DS['default'].attr('boolean'),
+    subscribed_services: DS['default'].attr('string'),
+    output_service_id: DS['default'].attr('string'),
+    input_service_id: DS['default'].attr('string'),
+    censorship_date: DS['default'].attr('string'),
+    path: DS['default'].attr('string'),
+    icon: DS['default'].attr('string')
+  });
+
+});
 define('web-desktop/models/login', ['exports', 'ember-data'], function (exports, DS) {
 
   'use strict';
@@ -653,9 +697,10 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
       return {
         applist:[
           {
-            name: "Gausian Store",
+            name: "ASA API",
             icon: "img/icon_17.png",
-            viewName: 'gausianStore',
+            viewName: 'customer',
+            url: 'http://tianjiasun.github.io/ASA_api/app/index.html',
             screen: 0,
             col: 0,
             row: 0
@@ -676,6 +721,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
       } catch (e) {
         console.error(e);
       }
+      console.log(user);
       this.get('controller').set('user', user);
     },
 
@@ -729,7 +775,6 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
           if (res._data.response_code !== 1) {
             this.get('controller').set('loginFail', true);
           } else {
-
             var user = {
               firstName: get(responseBody, 'user.first'),
               lastName: get(responseBody, 'user.last'),
@@ -739,6 +784,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
               signUpDate: get(res, 'signup_date'),
               token: 'asdfasdfasdf',
               companies: get(responseBody, 'companies'),
+              installApps: get(responseBody, 'installed_apps'),
               current_compony_id: get(responseBody, 'current_login_company')
             };
             this.get('controller').set('user', user);
@@ -791,6 +837,38 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
   });
 
 });
+define('web-desktop/serializers/app-info', ['exports', 'ember', 'ember-data'], function (exports, Ember, DS) {
+
+  'use strict';
+
+  exports['default'] = DS['default'].RESTSerializer.extend({
+
+
+    extract: function (store, type, payload/*, id, requestType*/) {
+      var response = Ember['default'].get(payload, 'response');
+      var code = Ember['default'].get(payload, 'response_code');
+
+      var obj = [];
+      if (code === 1 && response) {
+        try {
+          obj = JSON.parse(response);
+        } catch (e) {
+          console.error('serializer - app-info failed to parse response: ' +response);
+        }
+      }
+      console.log(obj);
+      return obj;
+    }
+    // serializeIntoHash: function (hash, type, record, options) {
+    //   var oldHash = this.serialize(record, options);
+    //   oldHash.seatId = parseInt(record.get('seatId.id'), 10);
+    //   oldHash.id = parseInt(record.get('id'), 10);
+    //
+    //   Ember.merge(hash, oldHash);
+    // }
+  });
+
+});
 define('web-desktop/serializers/login', ['exports', 'ember', 'ember-data'], function (exports, Ember, DS) {
 
   'use strict';
@@ -832,7 +910,7 @@ define('web-desktop/templates/app/customer', ['exports', 'ember'], function (exp
     data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
       'src': ("view.content.url")
     },hashTypes:{'src': "ID"},hashContexts:{'src': depth0},contexts:[],types:[],data:data})));
-    data.buffer.push(" width=\"100%\" height=\"100%\" frameBorder=\"0\"></iframe>\r\n");
+    data.buffer.push(" width=\"100%\" height=\"100%\" frameBorder=\"0\"></iframe>\n");
     return buffer;
     
   });
@@ -852,7 +930,7 @@ define('web-desktop/templates/app/deliver-bid', ['exports', 'ember'], function (
     data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
       'src': ("view.logoUrl")
     },hashTypes:{'src': "ID"},hashContexts:{'src': depth0},contexts:[],types:[],data:data})));
-    data.buffer.push(" width=\"100%\" height=\"100%\">\r\n<img src=\"img/spinnerSmall.gif\" class='spinner' style=\"top:270px; left:37px\">\r\n");
+    data.buffer.push(" width=\"100%\" height=\"100%\">\n<img src=\"img/spinnerSmall.gif\" class='spinner' style=\"top:270px; left:37px\">\n");
     return buffer;
     
   });
@@ -872,7 +950,7 @@ define('web-desktop/templates/app/einventory', ['exports', 'ember'], function (e
     data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
       'src': ("view.logoUrl")
     },hashTypes:{'src': "ID"},hashContexts:{'src': depth0},contexts:[],types:[],data:data})));
-    data.buffer.push(" width=\"100%\" height=\"100%\">\r\n<img src=\"img/spinnerSmall.gif\" class='spinner' style=\"top:270px; left:37px\">\r\n");
+    data.buffer.push(" width=\"100%\" height=\"100%\">\n<img src=\"img/spinnerSmall.gif\" class='spinner' style=\"top:270px; left:37px\">\n");
     return buffer;
     
   });
@@ -892,7 +970,7 @@ define('web-desktop/templates/app/vendor-match', ['exports', 'ember'], function 
     data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
       'src': ("view.logoUrl")
     },hashTypes:{'src': "ID"},hashContexts:{'src': depth0},contexts:[],types:[],data:data})));
-    data.buffer.push(" width=\"100%\" height=\"100%\">\r\n<img src=\"img/spinnerSmall.gif\" class='spinner' style=\"top:270px; left:37px\">\r\n");
+    data.buffer.push(" width=\"100%\" height=\"100%\">\n<img src=\"img/spinnerSmall.gif\" class='spinner' style=\"top:270px; left:37px\">\n");
     return buffer;
     
   });
@@ -908,7 +986,7 @@ define('web-desktop/templates/appicon', ['exports', 'ember'], function (exports,
     var buffer = '', escapeExpression=this.escapeExpression;
 
 
-    data.buffer.push("<div class=\"effect fadeIn fadeIn-50ms fadeIn-Delay-100ms\"></div>\r\n<div class=\"app-edge fadeIn fadeIn-50ms fadeIn-Delay-100ms\"></div>\r\n<div class=\"app-img fadeIn fadeIn-50ms fadeIn-Delay-100ms\"></div>\r\n<div class=\"app-text fadeIn fadeIn-50ms fadeIn-Delay-100ms\">");
+    data.buffer.push("<div class=\"effect fadeIn fadeIn-50ms fadeIn-Delay-100ms\"></div>\n<div class=\"app-edge fadeIn fadeIn-50ms fadeIn-Delay-100ms\"></div>\n<div class=\"app-img fadeIn fadeIn-50ms fadeIn-Delay-100ms\"></div>\n<div class=\"app-text fadeIn fadeIn-50ms fadeIn-Delay-100ms\">");
     data.buffer.push(escapeExpression(helpers.unbound.call(depth0, "view.content.name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data})));
     data.buffer.push("</div>");
     return buffer;
@@ -928,35 +1006,35 @@ define('web-desktop/templates/application', ['exports', 'ember'], function (expo
   function program1(depth0,data) {
     
     var buffer = '', helper, options;
-    data.buffer.push("\r\n	");
+    data.buffer.push("\n	");
     data.buffer.push(escapeExpression((helper = helpers.render || (depth0 && depth0.render),options={hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data},helper ? helper.call(depth0, "header", options) : helperMissing.call(depth0, "render", "header", options))));
-    data.buffer.push("\r\n");
+    data.buffer.push("\n");
     return buffer;
     }
 
   function program3(depth0,data) {
     
     var buffer = '', stack1;
-    data.buffer.push("\r\n  ");
+    data.buffer.push("\n  ");
     stack1 = helpers._triageMustache.call(depth0, "trash-can", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\r\n");
+    data.buffer.push("\n");
     return buffer;
     }
 
-    data.buffer.push("<!-- DESKTOP -->\r\n\r\n");
+    data.buffer.push("<!-- DESKTOP -->\n\n");
     stack1 = helpers.unless.call(depth0, "controller.appMoving", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\r\n\r\n");
+    data.buffer.push("\n\n");
     data.buffer.push(escapeExpression((helper = helpers.render || (depth0 && depth0.render),options={hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data},helper ? helper.call(depth0, "searchBar", options) : helperMissing.call(depth0, "render", "searchBar", options))));
-    data.buffer.push("\r\n\r\n");
+    data.buffer.push("\n\n");
     data.buffer.push(escapeExpression((helper = helpers.outlet || (depth0 && depth0.outlet),options={hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data},helper ? helper.call(depth0, "applist", options) : helperMissing.call(depth0, "outlet", "applist", options))));
-    data.buffer.push("\r\n\r\n");
+    data.buffer.push("\n\n");
     stack1 = helpers['if'].call(depth0, "controller.appMoving", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(3, program3, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\r\n\r\n");
+    data.buffer.push("\n\n");
     data.buffer.push(escapeExpression((helper = helpers.outlet || (depth0 && depth0.outlet),options={hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data},helper ? helper.call(depth0, "login", options) : helperMissing.call(depth0, "outlet", "login", options))));
-    data.buffer.push("\r\n\r\n<svg version=\"1.1\" xmlns='http://www.w3.org/2000/svg'>\r\n  <filter id='blur'>\r\n    <feGaussianBlur stdDeviation='6' />\r\n  </filter>\r\n</svg>\r\n");
+    data.buffer.push("\n\n<svg version=\"1.1\" xmlns='http://www.w3.org/2000/svg'>\n  <filter id='blur'>\n    <feGaussianBlur stdDeviation='6' />\n  </filter>\n</svg>\n");
     return buffer;
     
   });
@@ -974,33 +1052,33 @@ define('web-desktop/templates/applist', ['exports', 'ember'], function (exports,
   function program1(depth0,data) {
     
     var buffer = '';
-    data.buffer.push("\r\n  ");
+    data.buffer.push("\n  ");
     data.buffer.push(escapeExpression(helpers.view.call(depth0, "appscreen", {hash:{
       'index': ("id"),
       'hasApp': ("hasApp")
     },hashTypes:{'index': "ID",'hasApp': "ID"},hashContexts:{'index': depth0,'hasApp': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push("\r\n  ");
+    data.buffer.push("\n  ");
     return buffer;
     }
 
   function program3(depth0,data) {
     
     var buffer = '';
-    data.buffer.push("\r\n    ");
+    data.buffer.push("\n    ");
     data.buffer.push(escapeExpression(helpers.view.call(depth0, "appicon", {hash:{
       'content': ("app")
     },hashTypes:{'content': "ID"},hashContexts:{'content': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push("\r\n    ");
+    data.buffer.push("\n    ");
     return buffer;
     }
 
-    data.buffer.push("\r\n\r\n\r\n  ");
+    data.buffer.push("\n\n\n  ");
     stack1 = helpers.each.call(depth0, "view.controller.screens", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\r\n\r\n  <ul>\r\n    ");
+    data.buffer.push("\n\n  <ul>\n    ");
     stack1 = helpers.each.call(depth0, "app", "in", "view.controller.model", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(3, program3, data),contexts:[depth0,depth0,depth0],types:["ID","ID","ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\r\n  </ul>\r\n");
+    data.buffer.push("\n  </ul>\n");
     return buffer;
     
   });
@@ -1016,7 +1094,7 @@ define('web-desktop/templates/appscreen', ['exports', 'ember'], function (export
     
 
 
-    data.buffer.push("\r\n");
+    data.buffer.push("\n");
     
   });
 
@@ -1033,12 +1111,12 @@ define('web-desktop/templates/components/star-rating', ['exports', 'ember'], fun
   function program1(depth0,data) {
     
     
-    data.buffer.push("\r\n  <i class=\"fa fa-star\"></i>\r\n");
+    data.buffer.push("\n  <i class=\"fa fa-star\"></i>\n");
     }
 
     stack1 = helpers.each.call(depth0, "stars", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\r\n");
+    data.buffer.push("\n");
     return buffer;
     
   });
@@ -1054,7 +1132,7 @@ define('web-desktop/templates/components/trash-can', ['exports', 'ember'], funct
     
 
 
-    data.buffer.push("\r\n<div class=\"trash fadeIn fadeIn-50ms fadeIn-Delay-20ms fadeOut fadeOut-50ms\">DELETE</div>\r\n");
+    data.buffer.push("\n<div class=\"trash fadeIn fadeIn-50ms fadeIn-Delay-20ms fadeOut fadeOut-50ms\">DELETE</div>\n");
     
   });
 
@@ -1071,9 +1149,9 @@ define('web-desktop/templates/header-dock-item', ['exports', 'ember'], function 
 
     data.buffer.push("<div class=\"app-img fadeIn fadeIn-50ms\" style=\"background-image: url(");
     data.buffer.push(escapeExpression(helpers.unbound.call(depth0, "view.content.icon", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data})));
-    data.buffer.push(");\"></div>\r\n<em><span>");
+    data.buffer.push(");\"></div>\n<em><span>");
     data.buffer.push(escapeExpression(helpers.unbound.call(depth0, "view.content.name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data})));
-    data.buffer.push("</span></em>\r\n");
+    data.buffer.push("</span></em>\n");
     return buffer;
     
   });
@@ -1091,13 +1169,13 @@ define('web-desktop/templates/header', ['exports', 'ember'], function (exports, 
   function program1(depth0,data) {
     
     
-    data.buffer.push("\r\n  <ul class=\"dropdown-menu-left\">\r\n    <li>\r\n      <a>Company Info</a>\r\n    </li>\r\n    <li>\r\n      <a>Create New Accounts</a>\r\n    </li>   \r\n  </ul>\r\n  ");
+    data.buffer.push("\n  <ul class=\"dropdown-menu-left\">\n    <li>\n      <a>Company Info</a>\n    </li>\n    <li>\n      <a>Create New Accounts</a>\n    </li>   \n  </ul>\n  ");
     }
 
   function program3(depth0,data) {
     
     var buffer = '', stack1;
-    data.buffer.push("\r\n      <span>\r\n        <a ");
+    data.buffer.push("\n      <span>\n        <a ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "showProfile", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
@@ -1107,65 +1185,65 @@ define('web-desktop/templates/header', ['exports', 'ember'], function (exports, 
     data.buffer.push(" ");
     stack1 = helpers._triageMustache.call(depth0, "user.lastName", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("</a>\r\n      </span>\r\n\r\n      ");
+    data.buffer.push("</a>\n      </span>\n\n      ");
     return buffer;
     }
 
   function program5(depth0,data) {
     
     var buffer = '';
-    data.buffer.push("\r\n      <span>\r\n        <a ");
+    data.buffer.push("\n      <span>\n        <a ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "loginShow", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push(">Sign up / Log in</a>\r\n        <img src=\"assets/img/GAUSIAN_logo.png\" >\r\n      </span>\r\n      ");
+    data.buffer.push(">Sign up / Log in</a>\n        <img src=\"assets/img/GAUSIAN_logo.png\" >\n      </span>\n      ");
     return buffer;
     }
 
   function program7(depth0,data) {
     
     var buffer = '', stack1;
-    data.buffer.push("\r\n  <ul class=\"dropdown-menu pull-right\">\r\n    <li>\r\n      <a>My Account</a>\r\n    </li>\r\n    ");
+    data.buffer.push("\n  <ul class=\"dropdown-menu pull-right\">\n    <li>\n      <a>My Account</a>\n    </li>\n    ");
     stack1 = helpers.each.call(depth0, "user.companies", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(8, program8, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\r\n    <li>\r\n      <a ");
+    data.buffer.push("\n    <li>\n      <a ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "SignOut", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push(">Sign Out</a>\r\n    </li>\r\n  </ul>\r\n  ");
+    data.buffer.push(">Sign Out</a>\n    </li>\n  </ul>\n  ");
     return buffer;
     }
   function program8(depth0,data) {
     
     var buffer = '', stack1;
-    data.buffer.push("\r\n    <li>\r\n      <a ");
+    data.buffer.push("\n    <li>\n      <a ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "changeCompany", "id", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0,depth0],types:["STRING","ID"],data:data})));
     data.buffer.push(">");
     stack1 = helpers._triageMustache.call(depth0, "name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("</a>\r\n    </li>\r\n    ");
+    data.buffer.push("</a>\n    </li>\n    ");
     return buffer;
     }
 
-    data.buffer.push("<ul class=\"nav fadeIn fadeIn-50ms fadeOut fadeOut-50ms\">\r\n  <li class=\"logo fadeIn fadeIn-50ms\">\r\n    <span>\r\n      <a ");
+    data.buffer.push("<ul class=\"nav fadeIn fadeIn-50ms fadeOut fadeOut-50ms\">\n  <li class=\"logo fadeIn fadeIn-50ms\">\n    <span>\n      <a ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "showProfile_comp", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
     data.buffer.push("> ");
     stack1 = helpers._triageMustache.call(depth0, "view.companyName", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push(" </a>\r\n    </span>\r\n  </li>\r\n  ");
+    data.buffer.push(" </a>\n    </span>\n  </li>\n  ");
     stack1 = helpers['if'].call(depth0, "view.showProfile_comp", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\r\n\r\n  ");
+    data.buffer.push("\n\n  ");
     data.buffer.push(escapeExpression(helpers.view.call(depth0, "header-dock", {hash:{
       'content': ("dock")
     },hashTypes:{'content': "ID"},hashContexts:{'content': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push("\r\n\r\n  <li class=\"login fadeIn fadeIn-50ms\">\r\n      ");
+    data.buffer.push("\n\n  <li class=\"login fadeIn fadeIn-50ms\">\n      ");
     stack1 = helpers['if'].call(depth0, "user.isLogin", {hash:{},hashTypes:{},hashContexts:{},inverse:self.program(5, program5, data),fn:self.program(3, program3, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\r\n  </li>\r\n  ");
+    data.buffer.push("\n  </li>\n  ");
     stack1 = helpers['if'].call(depth0, "view.showProfile", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(7, program7, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\r\n</ul>\r\n");
+    data.buffer.push("\n</ul>\n");
     return buffer;
     
   });
@@ -1181,63 +1259,63 @@ define('web-desktop/templates/login', ['exports', 'ember'], function (exports, E
     var buffer = '', helper, options, escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing;
 
 
-    data.buffer.push("<div class=\"overlay fadeIn fadeIn-50ms\">\r\n  <i class=\"icon-remove modal-close\" ");
+    data.buffer.push("<div class=\"overlay fadeIn fadeIn-50ms\">\n  <i class=\"icon-remove modal-close\" ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "loginClose", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push("></i>\r\n  <div class=\"blur-image\"></div>\r\n  <div class=\"flip-container fadeIn fadeIn-100ms\">\r\n    <div id=\"flipper\" class=\"\">\r\n      <div class=\"front\">\r\n        <div class=\"badge_band_right\"></div>\r\n        <div class=\"badge_band_left\"></div>\r\n        <div class=\"badge_band_left_shadow\"></div>\r\n        <div class=\"badge_band_end\"></div>\r\n        <a href=\"http://www.gausian.com\">\r\n          <div class=\"badge_buckle\">\r\n            <img class=\"logo_img\" src=\"assets/img/GAUSIAN_logo.png\">\r\n          </div>\r\n        </a>\r\n        <div class=\"badge_buckle_shadow\"></div>\r\n        <div ");
+    data.buffer.push("></i>\n  <div class=\"blur-image\"></div>\n  <div class=\"flip-container fadeIn fadeIn-100ms\">\n    <div id=\"flipper\" class=\"\">\n      <div class=\"front\">\n        <div class=\"badge_band_right\"></div>\n        <div class=\"badge_band_left\"></div>\n        <div class=\"badge_band_left_shadow\"></div>\n        <div class=\"badge_band_end\"></div>\n        <a href=\"http://www.gausian.com\">\n          <div class=\"badge_buckle\">\n            <img class=\"logo_img\" src=\"assets/img/GAUSIAN_logo.png\">\n          </div>\n        </a>\n        <div class=\"badge_buckle_shadow\"></div>\n        <div ");
     data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
       'class': (":badge_container loginFail:has-error loginFail")
     },hashTypes:{'class': "STRING"},hashContexts:{'class': depth0},contexts:[],types:[],data:data})));
-    data.buffer.push(">\r\n          <div class=\"up_container\">\r\n            <img class=\"up_img\" src=\"assets/img/einstein.png\" onclick=\"\r\n              flipper.classList.toggle('flipped');\r\n              document.getElementById('visitor_container').style.opacity=0;\r\n              document.getElementById('sign_container').style.opacity=0;\r\n              document.getElementById('portrait_container').style.opacity=1;\r\n              \">\r\n            <div id=\"up_hole\"></div>\r\n          </div>\r\n          <div class=\"down_container\">\r\n            <div class=\"company_name\"> Your Company Name </div>\r\n            ");
+    data.buffer.push(">\n          <div class=\"up_container\">\n            <img class=\"up_img\" src=\"assets/img/einstein.png\" onclick=\"\n              flipper.classList.toggle('flipped');\n              document.getElementById('visitor_container').style.opacity=0;\n              document.getElementById('sign_container').style.opacity=0;\n              document.getElementById('portrait_container').style.opacity=1;\n              \">\n            <div id=\"up_hole\"></div>\n          </div>\n          <div class=\"down_container\">\n            <div class=\"company_name\"> Your Company Name </div>\n            ");
     data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
       'type': ("text"),
       'value': ("view.emailAddr"),
       'class': ("email_input visitor_input"),
       'placeholder': ("Email")
     },hashTypes:{'type': "STRING",'value': "ID",'class': "STRING",'placeholder': "STRING"},hashContexts:{'type': depth0,'value': depth0,'class': depth0,'placeholder': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
-    data.buffer.push("\r\n            ");
+    data.buffer.push("\n            ");
     data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
       'type': ("password"),
       'value': ("view.password"),
       'class': ("pw_input"),
       'placeholder': ("Password")
     },hashTypes:{'type': "STRING",'value': "ID",'class': "STRING",'placeholder': "STRING"},hashContexts:{'type': depth0,'value': depth0,'class': depth0,'placeholder': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
-    data.buffer.push("\r\n            <button ");
+    data.buffer.push("\n            <button ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "login", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push(" class=\"login_bn\">Login</button>\r\n\r\n            <div class=\"sign_bn fadeIn fadeIn-100ms fadeIn-Delay-50ms\" onclick=\"\r\n              flipper.classList.toggle('flipped');\r\n              document.getElementById('visitor_container').style.opacity=0;\r\n              document.getElementById('sign_container').style.opacity=1;\r\n              document.getElementById('portrait_container').style.opacity=0;\r\n              \">\r\n              Sign up\r\n            </div>\r\n            <div class=\"visitor_bn fadeIn fadeIn-100ms fadeIn-Delay-50ms\" onclick=\"\r\n              flipper.classList.toggle('flipped');\r\n              document.getElementById('visitor_container').style.opacity=1;\r\n              document.getElementById('sign_container').style.opacity=0;\r\n              document.getElementById('portrait_container').style.opacity=0;\r\n              \">\r\n              I'm a Visitor\r\n            </div>\r\n          </div>\r\n        </div>\r\n      </div>\r\n      <div class=\"back\">\r\n        <div class=\"badge_band_right\"></div>\r\n        <div class=\"badge_band_left\"></div>\r\n        <div class=\"badge_band_left_shadow\"></div>\r\n        <div class=\"badge_band_end\"></div>\r\n        <div class=\"badge_buckle\"></div>\r\n        <div class=\"badge_buckle_back\"></div>\r\n        <div class=\"badge_buckle_shadow\"></div>\r\n        <div class=\"badge_container\">\r\n          <div class=\"up_container\">\r\n            <img class=\"up_img\" src=\"assets/img/empty.png\">\r\n            <div id=\"up_hole\"></div>\r\n          </div>\r\n          <img class=\"return_icon\" src=\"assets/img/return.png\" onclick=\"flipper.classList.toggle('flipped');\">\r\n          <div class=\"down_container\"></div>\r\n          <div id=\"sign_container\" style=\"opacity: 0;\">\r\n            <div class=\"back_container_header\">Sign up</div>\r\n            <input class=\"back_container_input_first\" type=\"text\" placeholder=\"First\">\r\n            <input class=\"back_container_input_last\" type=\"text\" placeholder=\"Last\">\r\n            <input class=\"back_container_input_email\" type=\"text\" placeholder=\"Email\">\r\n            <input class=\"back_container_input_company\" type=\"text\" placeholder=\"Full Company Name\">\r\n            <input class=\"back_container_input_pw\" type=\"password\" placeholder=\"Password\">\r\n            <a href=\"http://yubin.github.io/web_desktop\">\r\n              <div class=\"back_container_sign\">Sign</div>\r\n            </a>\r\n            <div class=\"back_container_invite\">Invite</div>\r\n          </div>\r\n          <div id=\"visitor_container\" style=\"opacity: 0;\">\r\n            <div class=\"back_container_header\">Visitor to</div>\r\n            <div class=\"visitor_input_company_name\">You Company Name</div>\r\n\r\n            ");
+    data.buffer.push(" class=\"login_bn\">Login</button>\n\n            <div class=\"sign_bn fadeIn fadeIn-100ms fadeIn-Delay-50ms\" onclick=\"\n              flipper.classList.toggle('flipped');\n              document.getElementById('visitor_container').style.opacity=0;\n              document.getElementById('sign_container').style.opacity=1;\n              document.getElementById('portrait_container').style.opacity=0;\n              \">\n              Sign up\n            </div>\n            <div class=\"visitor_bn fadeIn fadeIn-100ms fadeIn-Delay-50ms\" onclick=\"\n              flipper.classList.toggle('flipped');\n              document.getElementById('visitor_container').style.opacity=1;\n              document.getElementById('sign_container').style.opacity=0;\n              document.getElementById('portrait_container').style.opacity=0;\n              \">\n              I'm a Visitor\n            </div>\n          </div>\n        </div>\n      </div>\n      <div class=\"back\">\n        <div class=\"badge_band_right\"></div>\n        <div class=\"badge_band_left\"></div>\n        <div class=\"badge_band_left_shadow\"></div>\n        <div class=\"badge_band_end\"></div>\n        <div class=\"badge_buckle\"></div>\n        <div class=\"badge_buckle_back\"></div>\n        <div class=\"badge_buckle_shadow\"></div>\n        <div class=\"badge_container\">\n          <div class=\"up_container\">\n            <img class=\"up_img\" src=\"assets/img/empty.png\">\n            <div id=\"up_hole\"></div>\n          </div>\n          <img class=\"return_icon\" src=\"assets/img/return.png\" onclick=\"flipper.classList.toggle('flipped');\">\n          <div class=\"down_container\"></div>\n          <div id=\"sign_container\" style=\"opacity: 0;\">\n            <div class=\"back_container_header\">Sign up</div>\n            <input class=\"back_container_input_first\" type=\"text\" placeholder=\"First\">\n            <input class=\"back_container_input_last\" type=\"text\" placeholder=\"Last\">\n            <input class=\"back_container_input_email\" type=\"text\" placeholder=\"Email\">\n            <input class=\"back_container_input_company\" type=\"text\" placeholder=\"Full Company Name\">\n            <input class=\"back_container_input_pw\" type=\"password\" placeholder=\"Password\">\n            <a href=\"http://yubin.github.io/web_desktop\">\n              <div class=\"back_container_sign\">Sign</div>\n            </a>\n            <div class=\"back_container_invite\">Invite</div>\n          </div>\n          <div id=\"visitor_container\" style=\"opacity: 0;\">\n            <div class=\"back_container_header\">Visitor to</div>\n            <div class=\"visitor_input_company_name\">You Company Name</div>\n\n            ");
     data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
       'type': ("text"),
       'value': ("view.firstName"),
       'class': ("visitor_input_first visitor_input"),
       'placeholder': ("First")
     },hashTypes:{'type': "STRING",'value': "ID",'class': "STRING",'placeholder': "STRING"},hashContexts:{'type': depth0,'value': depth0,'class': depth0,'placeholder': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
-    data.buffer.push("\r\n            ");
+    data.buffer.push("\n            ");
     data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
       'type': ("text"),
       'value': ("view.lastName"),
       'class': ("visitor_input_last visitor_input"),
       'placeholder': ("Last")
     },hashTypes:{'type': "STRING",'value': "ID",'class': "STRING",'placeholder': "STRING"},hashContexts:{'type': depth0,'value': depth0,'class': depth0,'placeholder': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
-    data.buffer.push("\r\n            ");
+    data.buffer.push("\n            ");
     data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
       'type': ("text"),
       'value': ("view.emailAddr"),
       'class': ("visitor_input_email visitor_input"),
       'placeholder': ("Email")
     },hashTypes:{'type': "STRING",'value': "ID",'class': "STRING",'placeholder': "STRING"},hashContexts:{'type': depth0,'value': depth0,'class': depth0,'placeholder': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
-    data.buffer.push("\r\n            ");
+    data.buffer.push("\n            ");
     data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
       'type': ("text"),
       'value': ("view.invCode"),
       'class': ("visitor_input_security visitor_input"),
       'placeholder': ("Invitation Code")
     },hashTypes:{'type': "STRING",'value': "ID",'class': "STRING",'placeholder': "STRING"},hashContexts:{'type': depth0,'value': depth0,'class': depth0,'placeholder': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
-    data.buffer.push("\r\n            <button ");
+    data.buffer.push("\n            <button ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "visitor", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push(" class=\"back_container_enter\">Enter</button>\r\n          </div>\r\n          <div id=\"portrait_container\" style=\"opacity: 1;\">\r\n            <div class=\"back_container_header\">Change Portrait</div>\r\n            <div class=\"portrait_container\">\r\n              <img class=\"portrait_img\" src=\"assets/img/einstein_5.png\">\r\n            </div>\r\n            <input class=\"portrait_email\" type=\"text\" placeholder=\"Email\">\r\n            <input class=\"portrait_pw\" type=\"password\" placeholder=\"Password\">\r\n            <div class=\"portrait_apply\">Apply New Portrait</div>\r\n          </div>\r\n        </div>\r\n      </div>\r\n    </div>\r\n  </div>\r\n</div>\r\n");
+    data.buffer.push(" class=\"back_container_enter\">Enter</button>\n          </div>\n          <div id=\"portrait_container\" style=\"opacity: 1;\">\n            <div class=\"back_container_header\">Change Portrait</div>\n            <div class=\"portrait_container\">\n              <img class=\"portrait_img\" src=\"assets/img/einstein_5.png\">\n            </div>\n            <input class=\"portrait_email\" type=\"text\" placeholder=\"Email\">\n            <input class=\"portrait_pw\" type=\"password\" placeholder=\"Password\">\n            <div class=\"portrait_apply\">Apply New Portrait</div>\n          </div>\n        </div>\n      </div>\n    </div>\n  </div>\n</div>\n");
     return buffer;
     
   });
@@ -1257,7 +1335,7 @@ define('web-desktop/templates/scroll-bar-handler', ['exports', 'ember'], functio
     data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
       'style': ("view.style")
     },hashTypes:{'style': "STRING"},hashContexts:{'style': depth0},contexts:[],types:[],data:data})));
-    data.buffer.push(">\r\n  <div class=\"jspDragTop\"></div>\r\n  <div class=\"jspDragBottom\"></div>\r\n</div>\r\n");
+    data.buffer.push(">\n  <div class=\"jspDragTop\"></div>\n  <div class=\"jspDragBottom\"></div>\n</div>\n");
     return buffer;
     
   });
@@ -1273,16 +1351,16 @@ define('web-desktop/templates/scroll-bar', ['exports', 'ember'], function (expor
     var buffer = '', escapeExpression=this.escapeExpression;
 
 
-    data.buffer.push("<div class=\"jspCap jspCapTop\"></div>\r\n<div class=\"jspTrack\" ");
+    data.buffer.push("<div class=\"jspCap jspCapTop\"></div>\n<div class=\"jspTrack\" ");
     data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
       'style': ("view.trackStyle")
     },hashTypes:{'style': "STRING"},hashContexts:{'style': depth0},contexts:[],types:[],data:data})));
-    data.buffer.push(">\r\n  ");
+    data.buffer.push(">\n  ");
     data.buffer.push(escapeExpression(helpers.view.call(depth0, "scroll-bar-handler", {hash:{
       'len': ("view.handlerLen"),
       'top': ("view.handlerTop")
     },hashTypes:{'len': "ID",'top': "ID"},hashContexts:{'len': depth0,'top': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push("\r\n</div>\r\n<div class=\"jspCap jspCapBottom\"></div>\r\n");
+    data.buffer.push("\n</div>\n<div class=\"jspCap jspCapBottom\"></div>\n");
     return buffer;
     
   });
@@ -1298,32 +1376,32 @@ define('web-desktop/templates/search-bar', ['exports', 'ember'], function (expor
     var buffer = '', helper, options, helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
 
 
-    data.buffer.push("<div class=\"search fadeIn fadeIn-50ms fadeIn-Delay-20ms\">\r\n  <div class=\"search-icon\"></div>\r\n  ");
+    data.buffer.push("<div class=\"search fadeIn fadeIn-50ms fadeIn-Delay-20ms\">\n  <div class=\"search-icon\"></div>\n  ");
     data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
       'type': ("text"),
       'placeholder': ("Search APP or Content"),
       'disabled': (true)
     },hashTypes:{'type': "STRING",'placeholder': "STRING",'disabled': "BOOLEAN"},hashContexts:{'type': depth0,'placeholder': depth0,'disabled': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
-    data.buffer.push("\r\n</div>\r\n\r\n<div class=\"overlay\">\r\n  <div class=\"modal fadeIn fadeIn-50ms\">\r\n    ");
+    data.buffer.push("\n</div>\n\n<div class=\"overlay\">\n  <div class=\"modal fadeIn fadeIn-50ms\">\n    ");
     data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
       'type': ("text"),
       'value': ("view.query")
     },hashTypes:{'type': "STRING",'value': "ID"},hashContexts:{'type': depth0,'value': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
-    data.buffer.push("\r\n    <a class=\"cancel_search\" ");
+    data.buffer.push("\n    <a class=\"cancel_search\" ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "cancel", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push(">Cancel</a>\r\n    <div class=\"container\">\r\n    ");
+    data.buffer.push(">Cancel</a>\n    <div class=\"container\">\n    ");
     data.buffer.push(escapeExpression(helpers.view.call(depth0, "search-results", {hash:{
       'content': ("view.searchContent")
     },hashTypes:{'content': "ID"},hashContexts:{'content': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push("\r\n\r\n    ");
+    data.buffer.push("\n\n    ");
     data.buffer.push(escapeExpression(helpers.view.call(depth0, "scroll-bar", {hash:{
       'trackLen': ("view.trackLen"),
       'handlerLen': ("view.handlerLen"),
       'handlerTop': ("view.handlerTop")
     },hashTypes:{'trackLen': "ID",'handlerLen': "ID",'handlerTop': "ID"},hashContexts:{'trackLen': depth0,'handlerLen': depth0,'handlerTop': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push("\r\n    </div>\r\n  </div>\r\n</div>\r\n");
+    data.buffer.push("\n    </div>\n  </div>\n</div>\n");
     return buffer;
     
   });
@@ -1341,55 +1419,55 @@ define('web-desktop/templates/search-results-item', ['exports', 'ember'], functi
   function program1(depth0,data) {
     
     var buffer = '', stack1;
-    data.buffer.push("\r\n<a class=\"action open\" ");
+    data.buffer.push("\n<a class=\"action open\" ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "openApp", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push(">\r\n  ");
+    data.buffer.push(">\n  ");
     stack1 = helpers._triageMustache.call(depth0, "view.label", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\r\n</a>\r\n");
+    data.buffer.push("\n</a>\n");
     return buffer;
     }
 
   function program3(depth0,data) {
     
     var buffer = '', stack1;
-    data.buffer.push("\r\n<a class=\"action get\" ");
+    data.buffer.push("\n<a class=\"action get\" ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "installApp", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push(">\r\n  ");
+    data.buffer.push(">\n  ");
     stack1 = helpers._triageMustache.call(depth0, "view.label", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\r\n</a>\r\n");
+    data.buffer.push("\n</a>\n");
     return buffer;
     }
 
-    data.buffer.push("<div class=\"icon\">\r\n  <img ");
+    data.buffer.push("<div class=\"icon\">\n  <img ");
     data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
       'src': ("view.content.icon")
     },hashTypes:{'src': "ID"},hashContexts:{'src': depth0},contexts:[],types:[],data:data})));
-    data.buffer.push(" />\r\n</div>\r\n<div class=\"detail\">\r\n  <a class=\"name\">");
+    data.buffer.push(" />\n</div>\n<div class=\"detail\">\n  <a class=\"name\">");
     stack1 = helpers._triageMustache.call(depth0, "view.content.name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("</a>\r\n  <a class=\"star-rating\"> ");
+    data.buffer.push("</a>\n  <a class=\"star-rating\"> ");
     data.buffer.push(escapeExpression((helper = helpers['star-rating'] || (depth0 && depth0['star-rating']),options={hash:{
       'content': ("view.content.rating")
     },hashTypes:{'content': "ID"},hashContexts:{'content': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "star-rating", options))));
-    data.buffer.push(" </a>\r\n  <a class=\"category\">");
+    data.buffer.push(" </a>\n  <a class=\"category\">");
     stack1 = helpers._triageMustache.call(depth0, "view.content.category", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("</a>\r\n  <a class=\"price\">");
+    data.buffer.push("</a>\n  <a class=\"price\">");
     stack1 = helpers._triageMustache.call(depth0, "view.content.freeDay", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
     data.buffer.push(" days free trail, $");
     stack1 = helpers._triageMustache.call(depth0, "view.content.price", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push(" /month</a>\r\n</div>\r\n");
+    data.buffer.push(" /month</a>\n</div>\n");
     stack1 = helpers['if'].call(depth0, "view.content.installed", {hash:{},hashTypes:{},hashContexts:{},inverse:self.program(3, program3, data),fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\r\n");
+    data.buffer.push("\n");
     return buffer;
     
   });
@@ -1405,27 +1483,47 @@ define('web-desktop/templates/window', ['exports', 'ember'], function (exports, 
     var buffer = '', stack1, escapeExpression=this.escapeExpression;
 
 
-    data.buffer.push("<div class=\"header\">\r\n  <span class=\"titleInside\">");
+    data.buffer.push("<div class=\"header\">\n  <span class=\"titleInside\">");
     stack1 = helpers._triageMustache.call(depth0, "view.content.name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("</span>\r\n</div>\r\n<nav class=\"control-window\">\r\n  <a href=\"#\" class=\"minimize\" ");
+    data.buffer.push("</span>\n</div>\n<nav class=\"control-window\">\n  <a href=\"#\" class=\"minimize\" ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "minimizeApp", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push(">minimize</a>\r\n  <a href=\"#\" class=\"maximize\" ");
+    data.buffer.push(">minimize</a>\n  <a href=\"#\" class=\"maximize\" ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "maximizeApp", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push(">maximize</a>\r\n  <a href=\"#\" class=\"close\" ");
+    data.buffer.push(">maximize</a>\n  <a href=\"#\" class=\"close\" ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "closeApp", "view.content", {hash:{
       'target': ("view.parentView")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0,depth0],types:["STRING","ID"],data:data})));
-    data.buffer.push(">close</a>\r\n</nav>\r\n<div class=\"container\">\r\n  ");
+    data.buffer.push(">close</a>\n</nav>\n<div class=\"container\">\n  ");
     stack1 = helpers._triageMustache.call(depth0, "yield", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\r\n</div>\r\n");
+    data.buffer.push("\n</div>\n");
     return buffer;
     
+  });
+
+});
+define('web-desktop/tests/adapters/app-info.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - adapters');
+  test('adapters/app-info.js should pass jshint', function() { 
+    ok(true, 'adapters/app-info.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/adapters/base.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - adapters');
+  test('adapters/base.js should pass jshint', function() { 
+    ok(true, 'adapters/base.js should pass jshint.'); 
   });
 
 });
@@ -1600,6 +1698,16 @@ define('web-desktop/tests/mixins/window-view.jshint', function () {
   });
 
 });
+define('web-desktop/tests/models/app-info.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - models');
+  test('models/app-info.js should pass jshint', function() { 
+    ok(true, 'models/app-info.js should pass jshint.'); 
+  });
+
+});
 define('web-desktop/tests/models/login.jshint', function () {
 
   'use strict';
@@ -1626,7 +1734,17 @@ define('web-desktop/tests/routes/application.jshint', function () {
 
   module('JSHint - routes');
   test('routes/application.js should pass jshint', function() { 
-    ok(false, 'routes/application.js should pass jshint.\nroutes/application.js: line 9, col 20, \'params\' is defined but never used.\nroutes/application.js: line 54, col 27, \'content\' is defined but never used.\nroutes/application.js: line 58, col 24, \'content\' is defined but never used.\nroutes/application.js: line 85, col 13, \'responseCode\' is defined but never used.\n\n4 errors'); 
+    ok(false, 'routes/application.js should pass jshint.\nroutes/application.js: line 9, col 20, \'params\' is defined but never used.\nroutes/application.js: line 56, col 27, \'content\' is defined but never used.\nroutes/application.js: line 60, col 24, \'content\' is defined but never used.\nroutes/application.js: line 87, col 13, \'responseCode\' is defined but never used.\n\n4 errors'); 
+  });
+
+});
+define('web-desktop/tests/serializers/app-info.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - serializers');
+  test('serializers/app-info.js should pass jshint', function() { 
+    ok(true, 'serializers/app-info.js should pass jshint.'); 
   });
 
 });
@@ -2623,8 +2741,8 @@ define('web-desktop/views/login', ['exports', 'ember'], function (exports, Ember
     actions: {
       login: function () {
         this.get('controller').send('loginUser', {
-          emailAddr: this.get('emailAddr'),
-          password: this.get('password')
+          emailAddr: this.get('emailAddr') || 'yubin@gausian.com',
+          password: this.get('password') || 'gausian'
         });
       },
       visitor: function () {
@@ -2793,7 +2911,7 @@ define('web-desktop/views/search-bar', ['exports', 'ember'], function (exports, 
         icon: 'http://asa.static.gausian.com/user_app/Customers/icon.png',
         viewName: 'customer',
         installed: false,
-        url: 'http://gausian-developers.github.io/user-app-template5/app/'
+        url: 'http://localhost/user-app-template5/app/'
       },
       {
         name: 'Pixlr',

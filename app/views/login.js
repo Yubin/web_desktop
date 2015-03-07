@@ -23,8 +23,8 @@ export default Ember.View.extend({
   actions: {
     login: function () {
       this.get('controller').send('loginUser', {
-        emailAddr: this.get('emailAddr'),
-        password: this.get('password')
+        emailAddr: this.get('emailAddr') || 'yubin@gausian.com',
+        password: this.get('password') || 'gausian'
       });
     },
     visitor: function () {
