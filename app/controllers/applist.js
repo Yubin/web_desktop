@@ -104,8 +104,8 @@ export default Ember.Controller.extend({
         var viewType = 'app.' + get(item, 'viewName');
         var klass = this.container.lookupFactory('view:' + viewType);
         var length = this.get('openApps').length;
-        var top = 150 + 20 * length;
-        var left = 350 + 20 * length;
+        var top = 125 + 30 * length;
+        var left = 250 + 30 * length;
         if (klass) {
           var instant = klass.create({
             top: top,
@@ -116,6 +116,14 @@ export default Ember.Controller.extend({
           }).appendTo('body');
           this.get('openApps').pushObject({name: name, icon: icon, instant: instant});
         }
+      } else {
+          var obj = this.get('openApps').findBy('name', name);
+          // if user clicks a app icon and the app has been minimized
+          if (obj.instant.get('isMinSize')) {
+            obj.instant.showMinimizedApp();
+          }
+          // if user clicks a app icon and the app is not on top
+          obj.instant.changeZindex();
       }
     },
 
