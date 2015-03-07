@@ -85,61 +85,20 @@ export default Ember.View.extend({
       viewName: 'customer',
       url: 'http://127.0.0.1/',
       installed: false
-    },
-    // {
-    //   name: 'Aplus',
-    //   rating: 5,
-    //   category: 'Inventory Management',
-    //   price: 8,
-    //   freeDays: 30,
-    //   icon: 'img/icon_1.png',
-    //   installed: false
-    // }, {
-    //   name: 'Docs',
-    //   rating: 4,
-    //   category: 'Inventory Management',
-    //   price: 6,
-    //   freeDays: 30,
-    //   icon: 'img/icon_3.png',
-    //   installed: false
-    // }, {
-    //   name: 'Report',
-    //   rating: 4,
-    //   category: 'Inventory Management',
-    //   price: 2,
-    //   freeDays: 30,
-    //   icon: 'img/icon_8.png',
-    //   installed: false
-    // }, {
-    //   name: 'Match',
-    //   rating: 3,
-    //   category: 'Inventory Management',
-    //   price: 8,
-    //   freeDays: 30,
-    //   icon: 'img/icon_4.png',
-    //   installed: false
-    // }, {
-    //   name: 'Scan',
-    //   rating: 5,
-    //   category: 'Inventory Management',
-    //   price: 4,
-    //   freeDays: 30,
-    //   icon: 'img/icon_5.png',
-    //   installed: false
-    // }
+    }
   ],
 
-  searchContent: function () {
-    var array = [];
+  queryUpdate: function () {
     var query = this.get('query');
+
     if (query) {
-      query = query.toLowerCase();
-      array = this.get('all').filter(function (item) {
-        return get(item, 'name').toLowerCase().indexOf(query) !== -1 || get(item, 'category').toLowerCase() === query;
-      });
+      Ember.run.debounce(function () {
+        this.get('controller').send('getSearchContent', query);
+      }.bind(this), 500);
+    } else {
+      this.get('controller').set('searchContent', []);
     }
-    return array;
-  }.property('query'),
+  }.observes('query'),
 
   keyUp: function (evt) {
     if (evt.keyCode === 27) {

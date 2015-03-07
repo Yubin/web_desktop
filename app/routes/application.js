@@ -10,13 +10,13 @@ export default Ember.Route.extend({
     return {
       applist:[
         {
-          name: "ASA API",
+          app_name: "ASA API",
           icon: "img/icon_17.png",
           viewName: 'customer',
-          url: 'http://tianjiasun.github.io/ASA_api/app/index.html',
+          path: 'http://tianjiasun.github.io/ASA_api/app/index.html',
           screen: 0,
           col: 0,
-          row: 0
+          row: 4
         }
       ]
     };
@@ -25,7 +25,7 @@ export default Ember.Route.extend({
   setupController: function (controller, model) {
     var ctl = this.controllerFor('applist');
     ctl.reset();
-    ctl.set('model', get(model, 'applist'));
+    ctl.set('model', get(model , 'applist'));
     ctl.set('appinstall', this.get('appinstall'));
 
     var user = {};

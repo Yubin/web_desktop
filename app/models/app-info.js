@@ -14,5 +14,8 @@ export default DS.Model.extend({
   input_service_id: DS.attr('string'),
   censorship_date: DS.attr('string'),
   path: DS.attr('string'),
-  icon: DS.attr('string')
+  icon: DS.attr('string'),
+  screen: DS.attr('number', {defaultValue: 0}),
+  row: DS.attr('number', {defaultValue: 0}),
+  col: DS.attr('number', {defaultValue: 0})
 });

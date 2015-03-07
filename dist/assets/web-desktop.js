@@ -6,6 +6,8 @@ define('web-desktop/adapters/app-info', ['exports', 'web-desktop/adapters/base',
 
   'use strict';
 
+  var isEmpty = Ember.isEmpty;
+
   exports['default'] = Adapter['default'].extend({
     serializer: Serializer['default'].create(),
 
@@ -14,9 +16,9 @@ define('web-desktop/adapters/app-info', ['exports', 'web-desktop/adapters/base',
       // Get on id = 2 or id = 3
       var ids = query.ids;
       var onStr = '';
-      if (ids) {
-        if (ids.length) { // TBD Array
-
+      if (!isEmpty(ids)) {
+        if (ids.length && ids.length > 1) { // TBD Array
+          onStr = ids.map(function(i){return 'id='+i.id;}).join(' or ');
         } else { // only one
           onStr = 'id=' + ids.id;
         }
@@ -231,12 +233,19 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
       var installApps = this.get('installApps');
 
       if (!isEmpty(installApps)) {
-        var ids = installApps.findBy('id');
+        var ids = installApps.filterBy('id');
+
         this.store.findQuery('app-info', {ids: ids}).then(function (res) {
           var apps = res.get('content');
           if (apps) {
             apps.forEach(function (app) {
-              console.log(app);
+              var obj = installApps.findBy('id', parseInt(app.get('id')));
+              if (obj && obj.location) {
+                var array = obj.location.split(',');
+                app.set('screen', parseInt(array[0]));
+                app.set('row', parseInt(array[1]));
+                app.set('col', parseInt(array[2]));
+              }
               this.get('model').pushObject(app);
             }.bind(this));
           }
@@ -261,7 +270,8 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
         });
 
         if (!find) {
-          var viewType = 'app.' + get(item, 'viewName');
+          var viewName = get(item, 'viewName') || 'customer';
+          var viewType = 'app.' + viewName;
           var klass = this.container.lookupFactory('view:' + viewType);
           var length = this.get('openApps').length;
           var top = 125 + 30 * length;
@@ -405,7 +415,21 @@ define('web-desktop/controllers/search-bar', ['exports', 'ember'], function (exp
   'use strict';
 
   exports['default'] = Ember['default'].Controller.extend({
-    resultDivHeight: 0
+    resultDivHeight: 0,
+    actions: {
+      getSearchContent: function (query) {
+        this.store.findQuery('app-info', {ids: []}).then(function (res) {
+          var apps = res.get('content').map(function(u){return u._data;});
+          var searchResults = [];
+          if (apps) {
+            searchResults = apps.filter(function (app) {
+              return Ember['default'].get(app, 'app_name').toLowerCase().indexOf(query.toLowerCase()) >=0;
+            });
+          }
+          this.set('searchContent', searchResults);
+        }.bind(this));
+      }
+    }
   });
 
 });
@@ -650,7 +674,10 @@ define('web-desktop/models/app-info', ['exports', 'ember-data'], function (expor
     input_service_id: DS['default'].attr('string'),
     censorship_date: DS['default'].attr('string'),
     path: DS['default'].attr('string'),
-    icon: DS['default'].attr('string')
+    icon: DS['default'].attr('string'),
+    screen: DS['default'].attr('number', {defaultValue: 0}),
+    row: DS['default'].attr('number', {defaultValue: 0}),
+    col: DS['default'].attr('number', {defaultValue: 0})
   });
 
 });
@@ -697,13 +724,13 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
       return {
         applist:[
           {
-            name: "ASA API",
+            app_name: "ASA API",
             icon: "img/icon_17.png",
             viewName: 'customer',
-            url: 'http://tianjiasun.github.io/ASA_api/app/index.html',
+            path: 'http://tianjiasun.github.io/ASA_api/app/index.html',
             screen: 0,
             col: 0,
-            row: 0
+            row: 4
           }
         ]
       };
@@ -712,7 +739,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
     setupController: function (controller, model) {
       var ctl = this.controllerFor('applist');
       ctl.reset();
-      ctl.set('model', get(model, 'applist'));
+      ctl.set('model', get(model , 'applist'));
       ctl.set('appinstall', this.get('appinstall'));
 
       var user = {};
@@ -908,7 +935,7 @@ define('web-desktop/templates/app/customer', ['exports', 'ember'], function (exp
 
     data.buffer.push("<iframe ");
     data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
-      'src': ("view.content.url")
+      'src': ("view.content.path")
     },hashTypes:{'src': "ID"},hashContexts:{'src': depth0},contexts:[],types:[],data:data})));
     data.buffer.push(" width=\"100%\" height=\"100%\" frameBorder=\"0\"></iframe>\n");
     return buffer;
@@ -987,8 +1014,8 @@ define('web-desktop/templates/appicon', ['exports', 'ember'], function (exports,
 
 
     data.buffer.push("<div class=\"effect fadeIn fadeIn-50ms fadeIn-Delay-100ms\"></div>\n<div class=\"app-edge fadeIn fadeIn-50ms fadeIn-Delay-100ms\"></div>\n<div class=\"app-img fadeIn fadeIn-50ms fadeIn-Delay-100ms\"></div>\n<div class=\"app-text fadeIn fadeIn-50ms fadeIn-Delay-100ms\">");
-    data.buffer.push(escapeExpression(helpers.unbound.call(depth0, "view.content.name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data})));
-    data.buffer.push("</div>");
+    data.buffer.push(escapeExpression(helpers.unbound.call(depth0, "view.content.app_name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data})));
+    data.buffer.push("</div>\n");
     return buffer;
     
   });
@@ -1393,7 +1420,7 @@ define('web-desktop/templates/search-bar', ['exports', 'ember'], function (expor
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
     data.buffer.push(">Cancel</a>\n    <div class=\"container\">\n    ");
     data.buffer.push(escapeExpression(helpers.view.call(depth0, "search-results", {hash:{
-      'content': ("view.searchContent")
+      'content': ("view.controller.searchContent")
     },hashTypes:{'content': "ID"},hashContexts:{'content': depth0},contexts:[depth0],types:["STRING"],data:data})));
     data.buffer.push("\n\n    ");
     data.buffer.push(escapeExpression(helpers.view.call(depth0, "scroll-bar", {hash:{
@@ -1449,7 +1476,7 @@ define('web-desktop/templates/search-results-item', ['exports', 'ember'], functi
       'src': ("view.content.icon")
     },hashTypes:{'src': "ID"},hashContexts:{'src': depth0},contexts:[],types:[],data:data})));
     data.buffer.push(" />\n</div>\n<div class=\"detail\">\n  <a class=\"name\">");
-    stack1 = helpers._triageMustache.call(depth0, "view.content.name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+    stack1 = helpers._triageMustache.call(depth0, "view.content.app_name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
     data.buffer.push("</a>\n  <a class=\"star-rating\"> ");
     data.buffer.push(escapeExpression((helper = helpers['star-rating'] || (depth0 && depth0['star-rating']),options={hash:{
@@ -1462,7 +1489,7 @@ define('web-desktop/templates/search-results-item', ['exports', 'ember'], functi
     stack1 = helpers._triageMustache.call(depth0, "view.content.freeDay", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
     data.buffer.push(" days free trail, $");
-    stack1 = helpers._triageMustache.call(depth0, "view.content.price", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+    stack1 = helpers._triageMustache.call(depth0, "view.content.pricing_by_month", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
     data.buffer.push(" /month</a>\n</div>\n");
     stack1 = helpers['if'].call(depth0, "view.content.installed", {hash:{},hashTypes:{},hashContexts:{},inverse:self.program(3, program3, data),fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],data:data});
@@ -1513,7 +1540,7 @@ define('web-desktop/tests/adapters/app-info.jshint', function () {
 
   module('JSHint - adapters');
   test('adapters/app-info.js should pass jshint', function() { 
-    ok(true, 'adapters/app-info.js should pass jshint.'); 
+    ok(false, 'adapters/app-info.js should pass jshint.\nadapters/app-info.js: line 4, col 15, \'Ember\' is not defined.\n\n1 error'); 
   });
 
 });
@@ -1947,7 +1974,7 @@ define('web-desktop/tests/views/search-bar.jshint', function () {
 
   module('JSHint - views');
   test('views/search-bar.js should pass jshint', function() { 
-    ok(true, 'views/search-bar.js should pass jshint.'); 
+    ok(false, 'views/search-bar.js should pass jshint.\nviews/search-bar.js: line 3, col 5, \'get\' is defined but never used.\n\n1 error'); 
   });
 
 });
@@ -2945,61 +2972,20 @@ define('web-desktop/views/search-bar', ['exports', 'ember'], function (exports, 
         viewName: 'customer',
         url: 'http://127.0.0.1/',
         installed: false
-      },
-      // {
-      //   name: 'Aplus',
-      //   rating: 5,
-      //   category: 'Inventory Management',
-      //   price: 8,
-      //   freeDays: 30,
-      //   icon: 'img/icon_1.png',
-      //   installed: false
-      // }, {
-      //   name: 'Docs',
-      //   rating: 4,
-      //   category: 'Inventory Management',
-      //   price: 6,
-      //   freeDays: 30,
-      //   icon: 'img/icon_3.png',
-      //   installed: false
-      // }, {
-      //   name: 'Report',
-      //   rating: 4,
-      //   category: 'Inventory Management',
-      //   price: 2,
-      //   freeDays: 30,
-      //   icon: 'img/icon_8.png',
-      //   installed: false
-      // }, {
-      //   name: 'Match',
-      //   rating: 3,
-      //   category: 'Inventory Management',
-      //   price: 8,
-      //   freeDays: 30,
-      //   icon: 'img/icon_4.png',
-      //   installed: false
-      // }, {
-      //   name: 'Scan',
-      //   rating: 5,
-      //   category: 'Inventory Management',
-      //   price: 4,
-      //   freeDays: 30,
-      //   icon: 'img/icon_5.png',
-      //   installed: false
-      // }
+      }
     ],
 
-    searchContent: function () {
-      var array = [];
+    queryUpdate: function () {
       var query = this.get('query');
+
       if (query) {
-        query = query.toLowerCase();
-        array = this.get('all').filter(function (item) {
-          return get(item, 'name').toLowerCase().indexOf(query) !== -1 || get(item, 'category').toLowerCase() === query;
-        });
+        Ember['default'].run.debounce(function () {
+          this.get('controller').send('getSearchContent', query);
+        }.bind(this), 500);
+      } else {
+        this.get('controller').set('searchContent', []);
       }
-      return array;
-    }.property('query'),
+    }.observes('query'),
 
     keyUp: function (evt) {
       if (evt.keyCode === 27) {

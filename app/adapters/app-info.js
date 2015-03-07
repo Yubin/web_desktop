@@ -1,6 +1,8 @@
 import Adapter from './base';
 import Serializer from '../serializers/app-info';
 
+var isEmpty = Ember.isEmpty;
+
 export default Adapter.extend({
   serializer: Serializer.create(),
 
@@ -9,9 +11,9 @@ export default Adapter.extend({
     // Get on id = 2 or id = 3
     var ids = query.ids;
     var onStr = '';
-    if (ids) {
-      if (ids.length) { // TBD Array
-
+    if (!isEmpty(ids)) {
+      if (ids.length && ids.length > 1) { // TBD Array
+        onStr = ids.map(function(i){return 'id='+i.id;}).join(' or ');
       } else { // only one
         onStr = 'id=' + ids.id;
       }

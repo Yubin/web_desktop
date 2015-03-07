@@ -53,12 +53,19 @@ export default Ember.Controller.extend({
     var installApps = this.get('installApps');
 
     if (!isEmpty(installApps)) {
-      var ids = installApps.findBy('id');
+      var ids = installApps.filterBy('id');
+
       this.store.findQuery('app-info', {ids: ids}).then(function (res) {
         var apps = res.get('content');
         if (apps) {
           apps.forEach(function (app) {
-            console.log(app);
+            var obj = installApps.findBy('id', parseInt(app.get('id')));
+            if (obj && obj.location) {
+              var array = obj.location.split(',');
+              app.set('screen', parseInt(array[0]));
+              app.set('row', parseInt(array[1]));
+              app.set('col', parseInt(array[2]));
+            }
             this.get('model').pushObject(app);
           }.bind(this));
         }
@@ -83,7 +90,8 @@ export default Ember.Controller.extend({
       });
 
       if (!find) {
-        var viewType = 'app.' + get(item, 'viewName');
+        var viewName = get(item, 'viewName') || 'customer';
+        var viewType = 'app.' + viewName;
         var klass = this.container.lookupFactory('view:' + viewType);
         var length = this.get('openApps').length;
         var top = 125 + 30 * length;
