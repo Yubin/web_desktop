@@ -116,7 +116,7 @@ export default Ember.Mixin.create({
 
   actions: {
     maximizeApp: function () {
-      var max_height = this.$(document).height() - 75;
+      var max_height = this.$(document).height() - 77;
       console.log(max_height);
       if (this.get('isFullSize')) {
         this.$().animate({ // image follow
@@ -127,7 +127,7 @@ export default Ember.Mixin.create({
         });
       } else {
         this.$().animate({ // image follow
-          'top': 45,
+          'top': 47,
           'left': 0,
           'width': '100%',
           'height': max_height

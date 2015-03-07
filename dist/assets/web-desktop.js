@@ -561,7 +561,7 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
 
     actions: {
       maximizeApp: function () {
-        var max_height = this.$(document).height() - 75;
+        var max_height = this.$(document).height() - 77;
         console.log(max_height);
         if (this.get('isFullSize')) {
           this.$().animate({ // image follow
@@ -572,7 +572,7 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
           });
         } else {
           this.$().animate({ // image follow
-            'top': 45,
+            'top': 47,
             'left': 0,
             'width': '100%',
             'height': max_height
@@ -928,7 +928,7 @@ define('web-desktop/templates/application', ['exports', 'ember'], function (expo
   function program1(depth0,data) {
     
     var buffer = '', helper, options;
-    data.buffer.push("\r\n");
+    data.buffer.push("\r\n	");
     data.buffer.push(escapeExpression((helper = helpers.render || (depth0 && depth0.render),options={hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data},helper ? helper.call(depth0, "header", options) : helperMissing.call(depth0, "render", "header", options))));
     data.buffer.push("\r\n");
     return buffer;
@@ -1054,7 +1054,7 @@ define('web-desktop/templates/components/trash-can', ['exports', 'ember'], funct
     
 
 
-    data.buffer.push("\r\n<div class=\"trash fadeIn fadeIn-50ms fadeIn-Delay-20ms\">DELETE</div>\r\n");
+    data.buffer.push("\r\n<div class=\"trash fadeIn fadeIn-50ms fadeIn-Delay-20ms fadeOut fadeOut-50ms\">DELETE</div>\r\n");
     
   });
 
