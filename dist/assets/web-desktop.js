@@ -2,11 +2,11 @@
 
 /* jshint ignore:end */
 
-define('web-desktop/adapters/app-info', ['exports', 'web-desktop/adapters/base', 'web-desktop/serializers/app-info'], function (exports, Adapter, Serializer) {
+define('web-desktop/adapters/app-info', ['exports', 'web-desktop/adapters/base', 'web-desktop/serializers/app-info', 'ember'], function (exports, Adapter, Serializer, Ember) {
 
   'use strict';
 
-  var isEmpty = Ember.isEmpty;
+  var isEmpty = Ember['default'].isEmpty;
 
   exports['default'] = Adapter['default'].extend({
     serializer: Serializer['default'].create(),
@@ -263,10 +263,10 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
         this.set('appTouch', show);
       },
       openApp: function (item) { console.log(item);
-        var name = get(item, 'name');
+        var name = get(item, 'app_name');
         var icon = get(item, 'icon');
         var find = this.get('openApps').any(function (it) {
-          return get(it, 'name') === name;
+          return get(it, 'app_name') === name;
         });
 
         if (!find) {
@@ -284,10 +284,10 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
               parentView: this,
               container:  this.container
             }).appendTo('body');
-            this.get('openApps').pushObject({name: name, icon: icon, instant: instant});
+            this.get('openApps').pushObject({app_name: name, icon: icon, instant: instant});
           }
         } else {
-            var obj = this.get('openApps').findBy('name', name);
+            var obj = this.get('openApps').findBy('app_name', name);
             // if user clicks a app icon and the app has been minimized
             if (obj.instant.get('isMinSize')) {
               obj.instant.showMinimizedApp();
@@ -298,8 +298,8 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
       },
 
       closeApp: function (item) {
-        var name = get(item, 'name');
-        var obj = this.get('openApps').findBy('name', name);
+        var name = get(item, 'app_name');
+        var obj = this.get('openApps').findBy('app_name', name);
 
         if (Ember['default'].isEmpty(obj)) {
           return;
@@ -529,7 +529,7 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
           });
         }
         else { // for windows that originally is NOT full sized.
-          this.$().animate({ 
+          this.$().animate({
             'top': this.get('top'),
             'left': this.get('left'),
             'width': this.get('width'),
@@ -538,9 +538,9 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
         }
         this.$().css({
           'boxShadow': '0px 0px 10px 1px black'
-        })
+        });
         this.isMinSize = false;
-      } 
+      }
       else { // minimize the windows to dock
         if (this.$().hasClass('active')) { // only minimize those are already activated
           this.$().animate({
@@ -551,7 +551,7 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
           });
           this.$().css({
             'boxShadow': '0px 0px 0px 0px black'
-          })
+          });
           this.isMinSize = true;
         }
       }
@@ -583,7 +583,7 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
         // update position info, so when show app from minimize, it goes original place
         var window_position=this.$().position();
         console.log("window-x:" + window_position.left + ", window-y:" + window_position.top);
-        this.top = window_position.top; 
+        this.top = window_position.top;
         this.left = window_position.left;
         this.width = this.$().width();
         this.height = this.$().height();
@@ -594,7 +594,7 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
         // update position info, so when show app from minimize, it goes original place
         var window_position=this.$().position();
         console.log("window-x:" + window_position.left + ", window-y:" + window_position.top);
-        this.top = window_position.top; 
+        this.top = window_position.top;
         this.left = window_position.left;
         this.width = this.$().width();
         this.height = this.$().height();
@@ -637,7 +637,7 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
           });
           this.$().css({
             'boxShadow': '0px 0px 10px 1px black'
-          })
+          });
         } else {
           this.$().animate({ // image follow
             'top': 45,
@@ -647,7 +647,7 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
           });
           this.$().css({
             'boxShadow': '0px 0px 0px 0px black'
-          })
+          });
         }
         this.toggleProperty('isMinSize');
       }
@@ -1177,7 +1177,7 @@ define('web-desktop/templates/header-dock-item', ['exports', 'ember'], function 
     data.buffer.push("<div class=\"app-img fadeIn fadeIn-50ms\" style=\"background-image: url(");
     data.buffer.push(escapeExpression(helpers.unbound.call(depth0, "view.content.icon", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data})));
     data.buffer.push(");\"></div>\n<em><span>");
-    data.buffer.push(escapeExpression(helpers.unbound.call(depth0, "view.content.name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data})));
+    data.buffer.push(escapeExpression(helpers.unbound.call(depth0, "view.content.app_name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data})));
     data.buffer.push("</span></em>\n");
     return buffer;
     
@@ -1511,7 +1511,7 @@ define('web-desktop/templates/window', ['exports', 'ember'], function (exports, 
 
 
     data.buffer.push("<div class=\"header\">\n  <span class=\"titleInside\">");
-    stack1 = helpers._triageMustache.call(depth0, "view.content.name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+    stack1 = helpers._triageMustache.call(depth0, "view.content.app_name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
     data.buffer.push("</span>\n</div>\n<nav class=\"control-window\">\n  <a href=\"#\" class=\"minimize\" ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "minimizeApp", {hash:{
@@ -1540,7 +1540,7 @@ define('web-desktop/tests/adapters/app-info.jshint', function () {
 
   module('JSHint - adapters');
   test('adapters/app-info.js should pass jshint', function() { 
-    ok(false, 'adapters/app-info.js should pass jshint.\nadapters/app-info.js: line 4, col 15, \'Ember\' is not defined.\n\n1 error'); 
+    ok(true, 'adapters/app-info.js should pass jshint.'); 
   });
 
 });
@@ -1721,7 +1721,7 @@ define('web-desktop/tests/mixins/window-view.jshint', function () {
 
   module('JSHint - mixins');
   test('mixins/window-view.js should pass jshint', function() { 
-    ok(false, 'mixins/window-view.js should pass jshint.\nmixins/window-view.js: line 50, col 9, Missing semicolon.\nmixins/window-view.js: line 63, col 11, Missing semicolon.\nmixins/window-view.js: line 149, col 11, Missing semicolon.\nmixins/window-view.js: line 159, col 11, Missing semicolon.\n\n4 errors'); 
+    ok(true, 'mixins/window-view.js should pass jshint.'); 
   });
 
 });
@@ -2699,7 +2699,7 @@ define('web-desktop/views/header', ['exports', 'ember'], function (exports, Embe
       var id = this.get('controller.user.current_compony_id');
       if (!Ember['default'].isEmpty(companies) && !Ember['default'].isEmpty(id)) {
         var obj = companies.findBy('id', parseInt(id));
-        name = Ember['default'].get(obj, 'name');
+        name = Ember['default'].get(obj, 'app_name');
       }
 
       return name;
@@ -2927,53 +2927,6 @@ define('web-desktop/views/search-bar', ['exports', 'ember'], function (exports, 
         }
       }.bind(this));
     },
-
-    all: [
-      {
-        name: 'Customer',
-        rating: 5,
-        category: 'Base',
-        price: 4,
-        freeDays: 30,
-        icon: 'http://asa.static.gausian.com/user_app/Customers/icon.png',
-        viewName: 'customer',
-        installed: false,
-        url: 'http://localhost/user-app-template5/app/'
-      },
-      {
-        name: 'Pixlr',
-        rating: 5,
-        category: 'Creative',
-        price: 4,
-        freeDays: 15,
-        icon: 'img/pixlr.png',
-        viewName: 'customer',
-        installed: false,
-        url: 'http://pixlr.com/editor/?loc=zh-cn'
-      },
-      {
-        name: 'HipChat',
-        rating: 5,
-        category: 'Collaboration',
-        price: 4,
-        freeDays: 15,
-        icon: 'img/hipchat.jpg',
-        viewName: 'customer',
-        installed: false,
-        url: 'https://gausian.hipchat.com/chat'
-      },
-      {
-        name: 'Test',
-        rating: 5,
-        category: 'Inventory Management',
-        price: 4,
-        freeDays: 30,
-        icon: 'http://asa.static.gausian.com/user_app/Customers/icon.png',
-        viewName: 'customer',
-        url: 'http://127.0.0.1/',
-        installed: false
-      }
-    ],
 
     queryUpdate: function () {
       var query = this.get('query');

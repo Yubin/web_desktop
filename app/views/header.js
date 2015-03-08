@@ -14,7 +14,7 @@ export default Ember.View.extend({
     var id = this.get('controller.user.current_compony_id');
     if (!Ember.isEmpty(companies) && !Ember.isEmpty(id)) {
       var obj = companies.findBy('id', parseInt(id));
-      name = Ember.get(obj, 'name');
+      name = Ember.get(obj, 'app_name');
     }
 
     return name;

@@ -1,5 +1,6 @@
 import Adapter from './base';
 import Serializer from '../serializers/app-info';
+import Ember from 'ember';
 
 var isEmpty = Ember.isEmpty;
 

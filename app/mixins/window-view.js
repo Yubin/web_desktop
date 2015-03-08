@@ -38,7 +38,7 @@ export default Ember.Mixin.create({
         });
       }
       else { // for windows that originally is NOT full sized.
-        this.$().animate({ 
+        this.$().animate({
           'top': this.get('top'),
           'left': this.get('left'),
           'width': this.get('width'),
@@ -47,9 +47,9 @@ export default Ember.Mixin.create({
       }
       this.$().css({
         'boxShadow': '0px 0px 10px 1px black'
-      })
+      });
       this.isMinSize = false;
-    } 
+    }
     else { // minimize the windows to dock
       if (this.$().hasClass('active')) { // only minimize those are already activated
         this.$().animate({
@@ -60,7 +60,7 @@ export default Ember.Mixin.create({
         });
         this.$().css({
           'boxShadow': '0px 0px 0px 0px black'
-        })
+        });
         this.isMinSize = true;
       }
     }
@@ -92,7 +92,7 @@ export default Ember.Mixin.create({
       // update position info, so when show app from minimize, it goes original place
       var window_position=this.$().position();
       console.log("window-x:" + window_position.left + ", window-y:" + window_position.top);
-      this.top = window_position.top; 
+      this.top = window_position.top;
       this.left = window_position.left;
       this.width = this.$().width();
       this.height = this.$().height();
@@ -103,7 +103,7 @@ export default Ember.Mixin.create({
       // update position info, so when show app from minimize, it goes original place
       var window_position=this.$().position();
       console.log("window-x:" + window_position.left + ", window-y:" + window_position.top);
-      this.top = window_position.top; 
+      this.top = window_position.top;
       this.left = window_position.left;
       this.width = this.$().width();
       this.height = this.$().height();
@@ -146,7 +146,7 @@ export default Ember.Mixin.create({
         });
         this.$().css({
           'boxShadow': '0px 0px 10px 1px black'
-        })
+        });
       } else {
         this.$().animate({ // image follow
           'top': 45,
@@ -156,7 +156,7 @@ export default Ember.Mixin.create({
         });
         this.$().css({
           'boxShadow': '0px 0px 0px 0px black'
-        })
+        });
       }
       this.toggleProperty('isMinSize');
     }

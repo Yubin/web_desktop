@@ -83,10 +83,10 @@ export default Ember.Controller.extend({
       this.set('appTouch', show);
     },
     openApp: function (item) { console.log(item);
-      var name = get(item, 'name');
+      var name = get(item, 'app_name');
       var icon = get(item, 'icon');
       var find = this.get('openApps').any(function (it) {
-        return get(it, 'name') === name;
+        return get(it, 'app_name') === name;
       });
 
       if (!find) {
@@ -104,10 +104,10 @@ export default Ember.Controller.extend({
             parentView: this,
             container:  this.container
           }).appendTo('body');
-          this.get('openApps').pushObject({name: name, icon: icon, instant: instant});
+          this.get('openApps').pushObject({app_name: name, icon: icon, instant: instant});
         }
       } else {
-          var obj = this.get('openApps').findBy('name', name);
+          var obj = this.get('openApps').findBy('app_name', name);
           // if user clicks a app icon and the app has been minimized
           if (obj.instant.get('isMinSize')) {
             obj.instant.showMinimizedApp();
@@ -118,8 +118,8 @@ export default Ember.Controller.extend({
     },
 
     closeApp: function (item) {
-      var name = get(item, 'name');
-      var obj = this.get('openApps').findBy('name', name);
+      var name = get(item, 'app_name');
+      var obj = this.get('openApps').findBy('app_name', name);
 
       if (Ember.isEmpty(obj)) {
         return;

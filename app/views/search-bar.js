@@ -41,53 +41,6 @@ export default Ember.View.extend({
     }.bind(this));
   },
 
-  all: [
-    {
-      name: 'Customer',
-      rating: 5,
-      category: 'Base',
-      price: 4,
-      freeDays: 30,
-      icon: 'http://asa.static.gausian.com/user_app/Customers/icon.png',
-      viewName: 'customer',
-      installed: false,
-      url: 'http://localhost/user-app-template5/app/'
-    },
-    {
-      name: 'Pixlr',
-      rating: 5,
-      category: 'Creative',
-      price: 4,
-      freeDays: 15,
-      icon: 'img/pixlr.png',
-      viewName: 'customer',
-      installed: false,
-      url: 'http://pixlr.com/editor/?loc=zh-cn'
-    },
-    {
-      name: 'HipChat',
-      rating: 5,
-      category: 'Collaboration',
-      price: 4,
-      freeDays: 15,
-      icon: 'img/hipchat.jpg',
-      viewName: 'customer',
-      installed: false,
-      url: 'https://gausian.hipchat.com/chat'
-    },
-    {
-      name: 'Test',
-      rating: 5,
-      category: 'Inventory Management',
-      price: 4,
-      freeDays: 30,
-      icon: 'http://asa.static.gausian.com/user_app/Customers/icon.png',
-      viewName: 'customer',
-      url: 'http://127.0.0.1/',
-      installed: false
-    }
-  ],
-
   queryUpdate: function () {
     var query = this.get('query');
 
