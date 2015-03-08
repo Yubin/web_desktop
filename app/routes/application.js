@@ -35,6 +35,9 @@ export default Ember.Route.extend({
       console.error(e);
     }
     console.log(user);
+    if (user && get(user, 'id')) {
+      this.store.find('employee', get(user, 'id'));
+    }
     this.get('controller').set('user', user);
   },
 

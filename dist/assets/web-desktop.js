@@ -99,6 +99,44 @@ define('web-desktop/adapters/base', ['exports', 'ember-data', 'ember'], function
   });
 
 });
+define('web-desktop/adapters/employee', ['exports', 'web-desktop/adapters/base', 'web-desktop/serializers/employee', 'ember'], function (exports, Adapter, Serializer, Ember) {
+
+  'use strict';
+
+  var isEmpty = Ember['default'].isEmpty;
+
+  exports['default'] = Adapter['default'].extend({
+    serializer: Serializer['default'].create(),
+
+    findQuery: function (store, type, query) {
+      var url = this.buildURL();
+      // Get on id = 2 or id = 3
+      var ids = query.ids;
+      var onStr = '';
+      if (!isEmpty(ids)) {
+        if (ids.length && ids.length > 1) { // TBD Array
+          onStr = ids.map(function(i){return 'id='+i.id;}).join(' or ');
+        } else { // only one
+          onStr = 'id=' + ids.id;
+        }
+      } else { // Get All!
+
+      }
+
+      onStr = onStr ? 'ON ' + onStr : '';
+      console.log(onStr);
+
+      var requestStr = 'GET ' + onStr;
+      return this.ajax(url, 'POST', {
+        data: {requestString: requestStr},
+        serviceAppName: 'UserAppInfo',
+        userAppId: 'Fl2GDgDECXcbmJsBAJVayUhuLwkAAAA'
+      });
+    }
+
+  });
+
+});
 define('web-desktop/adapters/login', ['exports', 'web-desktop/adapters/base', 'web-desktop/serializers/login'], function (exports, Adapter, Serializer) {
 
   'use strict';
@@ -681,6 +719,28 @@ define('web-desktop/models/app-info', ['exports', 'ember-data'], function (expor
   });
 
 });
+define('web-desktop/models/employee', ['exports', 'ember-data'], function (exports, DS) {
+
+  'use strict';
+
+  exports['default'] = DS['default'].Model.extend({
+    name: DS['default'].attr('string'),
+    user_id: DS['default'].attr('number'),
+    first: DS['default'].attr('string'),
+    last: DS['default'].attr('string'),
+    email: DS['default'].attr('string'),
+    type: DS['default'].attr('string'),
+    from: DS['default'].attr('string'),
+    report_to_id: DS['default'].attr('number'),
+    installed_app: DS['default'].attr('string'),
+    active: DS['default'].attr('boolean'),
+
+    didLoad: function(){
+      setInterval(function() {self.reload();console.log('employee reload')}, 10*1000); //every 10s
+    }
+  });
+
+});
 define('web-desktop/models/login', ['exports', 'ember-data'], function (exports, DS) {
 
   'use strict';
@@ -749,6 +809,9 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
         console.error(e);
       }
       console.log(user);
+      if (user && get(user, 'id')) {
+        this.store.find('employee', get(user, 'id'));
+      }
       this.get('controller').set('user', user);
     },
 
@@ -869,8 +932,6 @@ define('web-desktop/serializers/app-info', ['exports', 'ember', 'ember-data'], f
   'use strict';
 
   exports['default'] = DS['default'].RESTSerializer.extend({
-
-
     extract: function (store, type, payload/*, id, requestType*/) {
       var response = Ember['default'].get(payload, 'response');
       var code = Ember['default'].get(payload, 'response_code');
@@ -886,13 +947,29 @@ define('web-desktop/serializers/app-info', ['exports', 'ember', 'ember-data'], f
       console.log(obj);
       return obj;
     }
-    // serializeIntoHash: function (hash, type, record, options) {
-    //   var oldHash = this.serialize(record, options);
-    //   oldHash.seatId = parseInt(record.get('seatId.id'), 10);
-    //   oldHash.id = parseInt(record.get('id'), 10);
-    //
-    //   Ember.merge(hash, oldHash);
-    // }
+  });
+
+});
+define('web-desktop/serializers/employee', ['exports', 'ember', 'ember-data'], function (exports, Ember, DS) {
+
+  'use strict';
+
+  exports['default'] = DS['default'].RESTSerializer.extend({
+    extract: function (store, type, payload/*, id, requestType*/) {
+      var response = Ember['default'].get(payload, 'response');
+      var code = Ember['default'].get(payload, 'response_code');
+
+      var obj = [];
+      if (code === 1 && response) {
+        try {
+          obj = JSON.parse(response);
+        } catch (e) {
+          console.error('serializer - app-info failed to parse response: ' +response);
+        }
+      }
+      console.log(obj);
+      return obj;
+    }
   });
 
 });
@@ -1554,6 +1631,16 @@ define('web-desktop/tests/adapters/base.jshint', function () {
   });
 
 });
+define('web-desktop/tests/adapters/employee.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - adapters');
+  test('adapters/employee.js should pass jshint', function() { 
+    ok(true, 'adapters/employee.js should pass jshint.'); 
+  });
+
+});
 define('web-desktop/tests/adapters/login.jshint', function () {
 
   'use strict';
@@ -1735,6 +1822,16 @@ define('web-desktop/tests/models/app-info.jshint', function () {
   });
 
 });
+define('web-desktop/tests/models/employee.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - models');
+  test('models/employee.js should pass jshint', function() { 
+    ok(false, 'models/employee.js should pass jshint.\nmodels/employee.js: line 16, col 73, Missing semicolon.\nmodels/employee.js: line 16, col 29, \'self\' is not defined.\n\n2 errors'); 
+  });
+
+});
 define('web-desktop/tests/models/login.jshint', function () {
 
   'use strict';
@@ -1761,7 +1858,7 @@ define('web-desktop/tests/routes/application.jshint', function () {
 
   module('JSHint - routes');
   test('routes/application.js should pass jshint', function() { 
-    ok(false, 'routes/application.js should pass jshint.\nroutes/application.js: line 9, col 20, \'params\' is defined but never used.\nroutes/application.js: line 56, col 27, \'content\' is defined but never used.\nroutes/application.js: line 60, col 24, \'content\' is defined but never used.\nroutes/application.js: line 87, col 13, \'responseCode\' is defined but never used.\n\n4 errors'); 
+    ok(false, 'routes/application.js should pass jshint.\nroutes/application.js: line 9, col 20, \'params\' is defined but never used.\nroutes/application.js: line 59, col 27, \'content\' is defined but never used.\nroutes/application.js: line 63, col 24, \'content\' is defined but never used.\nroutes/application.js: line 90, col 13, \'responseCode\' is defined but never used.\n\n4 errors'); 
   });
 
 });
@@ -1772,6 +1869,16 @@ define('web-desktop/tests/serializers/app-info.jshint', function () {
   module('JSHint - serializers');
   test('serializers/app-info.js should pass jshint', function() { 
     ok(true, 'serializers/app-info.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/serializers/employee.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - serializers');
+  test('serializers/employee.js should pass jshint', function() { 
+    ok(true, 'serializers/employee.js should pass jshint.'); 
   });
 
 });
@@ -1984,7 +2091,7 @@ define('web-desktop/tests/views/search-results-item.jshint', function () {
 
   module('JSHint - views');
   test('views/search-results-item.js should pass jshint', function() { 
-    ok(false, 'views/search-results-item.js should pass jshint.\nviews/search-results-item.js: line 22, col 7, \'$\' is not defined.\nviews/search-results-item.js: line 23, col 7, \'$\' is not defined.\n\n2 errors'); 
+    ok(true, 'views/search-results-item.js should pass jshint.'); 
   });
 
 });
@@ -3010,8 +3117,8 @@ define('web-desktop/views/search-results-item', ['exports', 'ember'], function (
 
       openApp: function () {
         this.get('controller').send('openApp', this.get('content'));
-        $('.overlay').hide();
-        $('.search').show();
+        Ember['default'].$('.overlay').hide();
+        Ember['default'].$('.search').show();
       }
     }
   });
