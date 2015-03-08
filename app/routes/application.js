@@ -81,6 +81,15 @@ export default Ember.Route.extend({
           col: 3,
           row: 1
         },
+        {
+          app_name: "LiveCAM",
+          icon: 'http://asa.static.gausian.com/user_app/LiveCAM/icon.png',
+          viewName: 'customer',
+          path: 'http://trafficcam.santaclaraca.gov/TrafficCamera.aspx?CID=GA101',
+          screen: 2,
+          col: 0,
+          row: 2
+        },
       ]
     };
   },
