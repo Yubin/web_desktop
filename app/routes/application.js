@@ -72,6 +72,15 @@ export default Ember.Route.extend({
           col: 2,
           row: 1
         },
+        {
+          app_name: "EasyInvoice",
+          icon: 'http://asa.static.gausian.com/user_app/EasyInvoice/icon.png',
+          viewName: 'customer',
+          path: 'http://invoiceto.me/',
+          screen: 2,
+          col: 3,
+          row: 1
+        },
       ]
     };
   },
