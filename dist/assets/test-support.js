@@ -260,7 +260,7 @@ define('ember-test-helpers/test-module-for-component', ['exports', 'ember-test-h
           return subject;
         });
 
-        _this.teardownSteps.unshift(function() {
+        _this.teardownSteps.push(function() {
           Ember['default'].run(function() {
             Ember['default'].tryInvoke(containerView, 'destroy');
           });
@@ -397,14 +397,13 @@ define('ember-test-helpers/test-module', ['exports', 'ember-test-helpers/isolate
         delete this.callbacks.teardown;
       }
 
-      this.teardownSteps.push(this.teardownSubject);
       this.teardownSteps.push(this.teardownContainer);
       this.teardownSteps.push(this.teardownContext);
       this.teardownSteps.push(this.teardownTestElements);
 
       if (this.callbacks.afterTeardown) {
         this.teardownSteps.push( this.callbacks.afterTeardown );
-        delete this.callbacks.afterTeardown;
+        delete this.callbacks.beforeTeardown;
       }
     },
 
@@ -455,16 +454,6 @@ define('ember-test-helpers/test-module', ['exports', 'ember-test-helpers/isolate
     setupTestElements: function() {
       if (Ember.$('#ember-testing').length === 0) {
         Ember.$('<div id="ember-testing"/>').appendTo(document.body);
-      }
-    },
-
-    teardownSubject: function() {
-      var subject = this.cache.subject;
-
-      if (subject) {
-        Ember.run(function() {
-          Ember.tryInvoke(subject, 'destroy');
-        });
       }
     },
 
@@ -703,13 +692,11 @@ define('qunit', ['exports'], function (exports) {
 
 	var module = QUnit.module;
 	var test = QUnit.test;
-	var skip = QUnit.skip;
 
 	exports['default'] = QUnit;
 
 	exports.module = module;
 	exports.test = test;
-	exports.skip = skip;
 
 });
 /*!
