@@ -62,7 +62,16 @@ export default Ember.Route.extend({
           screen: 2,
           col: 1,
           row: 1
-        }
+        },
+        {
+          app_name: "TakaBreak",
+          icon: 'http://asa.static.gausian.com/user_app/TakaBreak/icon.png',
+          viewName: 'customer',
+          path: 'http://www.earbits.com/',
+          screen: 2,
+          col: 2,
+          row: 1
+        },
       ]
     };
   },

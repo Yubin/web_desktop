@@ -248,7 +248,7 @@
   display: none;
 }
 .window.active .header {
-  background-color: #D28800;
+  background-color: #ff9d00;
   box-shadow: 0 0 10px black;
   z-index: 1;
 }
