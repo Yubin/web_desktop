@@ -804,6 +804,33 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
             col: 0,
             row: 2
           },
+          {
+            app_name: "Math",
+            icon: 'http://asa.static.gausian.com/user_app/Math/icon.png',
+            viewName: 'customer',
+            path: 'https://www.mathway.com/graph',
+            screen: 2,
+            col: 1,
+            row: 2
+          },
+          {
+            app_name: "Withholding",
+            icon: 'http://asa.static.gausian.com/user_app/Withholding/icon.png',
+            viewName: 'customer',
+            path: 'http://apps.irs.gov/app/withholdingcalculator/',
+            screen: 2,
+            col: 2,
+            row: 2
+          },
+          {
+            app_name: "JSON Viewer",
+            icon: 'http://asa.static.gausian.com/user_app/JSON/icon.png',
+            viewName: 'customer',
+            path: 'http://jsonviewer.stack.hu/',
+            screen: 2,
+            col: 3,
+            row: 2
+          },
         ]
       };
     },
@@ -1833,7 +1860,7 @@ define('web-desktop/tests/routes/application.jshint', function () {
 
   module('JSHint - routes');
   test('routes/application.js should pass jshint', function() { 
-    ok(false, 'routes/application.js should pass jshint.\nroutes/application.js: line 9, col 20, \'params\' is defined but never used.\nroutes/application.js: line 128, col 27, \'content\' is defined but never used.\nroutes/application.js: line 132, col 24, \'content\' is defined but never used.\nroutes/application.js: line 159, col 13, \'responseCode\' is defined but never used.\n\n4 errors'); 
+    ok(false, 'routes/application.js should pass jshint.\nroutes/application.js: line 9, col 20, \'params\' is defined but never used.\nroutes/application.js: line 155, col 27, \'content\' is defined but never used.\nroutes/application.js: line 159, col 24, \'content\' is defined but never used.\nroutes/application.js: line 186, col 13, \'responseCode\' is defined but never used.\n\n4 errors'); 
   });
 
 });

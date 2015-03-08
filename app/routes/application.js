@@ -90,6 +90,33 @@ export default Ember.Route.extend({
           col: 0,
           row: 2
         },
+        {
+          app_name: "Math",
+          icon: 'http://asa.static.gausian.com/user_app/Math/icon.png',
+          viewName: 'customer',
+          path: 'https://www.mathway.com/graph',
+          screen: 2,
+          col: 1,
+          row: 2
+        },
+        {
+          app_name: "Withholding",
+          icon: 'http://asa.static.gausian.com/user_app/Withholding/icon.png',
+          viewName: 'customer',
+          path: 'http://apps.irs.gov/app/withholdingcalculator/',
+          screen: 2,
+          col: 2,
+          row: 2
+        },
+        {
+          app_name: "JSON Viewer",
+          icon: 'http://asa.static.gausian.com/user_app/JSON/icon.png',
+          viewName: 'customer',
+          path: 'http://jsonviewer.stack.hu/',
+          screen: 2,
+          col: 3,
+          row: 2
+        },
       ]
     };
   },
