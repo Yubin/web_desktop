@@ -19,14 +19,50 @@ export default Ember.Route.extend({
           row: 0
         },
         {
-          app_name: "Google Map",
-          icon: 'http://asa.static.gausian.com/user_app/GoogleMap/icon.png',
+          app_name: "Map",
+          icon: 'http://asa.static.gausian.com/user_app/Map/icon.png',
           viewName: 'customer',
           path: 'https://www.google.com/maps/embed/v1/place?key=AIzaSyBrTaOSXSiXT1o7mUCjnJZSeRcSz0vnglw&q=silicon+valley',
           screen: 2,
+          col: 3,
+          row: 0
+        },
+        {
+          app_name: "Customers",
+          icon: 'http://asa.static.gausian.com/user_app/Customers/icon.png',
+          viewName: 'customer',
+          path: 'http://gausian-developers.github.io/user-app-template5/app/index.html',
+          screen: 2,
           col: 1,
           row: 0
-        } 
+        },
+        {
+          app_name: "Quotes",
+          icon: 'http://asa.static.gausian.com/user_app/Quotes/icon.png',
+          viewName: 'customer',
+          path: 'http://gausian-developers.github.io/user-app-template5/app/index.html',
+          screen: 2,
+          col: 2,
+          row: 0
+        },
+        {
+          app_name: "HipChat",
+          icon: 'http://asa.static.gausian.com/user_app/HipChat/icon.png',
+          viewName: 'customer',
+          path: 'https://gausian.hipchat.com/chat',
+          screen: 2,
+          col: 0,
+          row: 1
+        },
+        {
+          app_name: "Pixlr",
+          icon: 'http://asa.static.gausian.com/user_app/Pixlr/icon.png',
+          viewName: 'customer',
+          path: 'http://pixlr.com/editor/?loc=zh-cn',
+          screen: 2,
+          col: 1,
+          row: 1
+        }
       ]
     };
   },
