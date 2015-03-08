@@ -10,14 +10,23 @@ export default Ember.Route.extend({
     return {
       applist:[
         {
-          app_name: "ASA API",
-          icon: "img/icon_17.png",
+          app_name: "ASA",
+          icon: 'http://asa.static.gausian.com/user_app/ASA/icon.png',
           viewName: 'customer',
           path: 'http://tianjiasun.github.io/ASA_api/app/index.html',
-          screen: 0,
+          screen: 2,
           col: 0,
-          row: 4
-        }
+          row: 0
+        },
+        {
+          app_name: "Google Map",
+          icon: 'http://asa.static.gausian.com/user_app/GoogleMap/icon.png',
+          viewName: 'customer',
+          path: 'https://www.google.com/maps/embed/v1/place?key=AIzaSyBrTaOSXSiXT1o7mUCjnJZSeRcSz0vnglw&q=silicon+valley',
+          screen: 2,
+          col: 1,
+          row: 0
+        } 
       ]
     };
   },
