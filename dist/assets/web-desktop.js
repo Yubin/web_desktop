@@ -831,6 +831,69 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
             col: 3,
             row: 2
           },
+          { 
+            app_name: "Weather",
+            icon: 'http://asa.static.gausian.com/user_app/Weather/icon.png',
+            viewName: 'customer',
+            path: 'http://chrome.wunderground.com/auto/chrome/geo/wx/index.html?query=95054',
+            screen: 2,
+            col: 0, 
+            row: 3
+          },
+          { 
+            app_name: "FloorPlans",
+            icon: 'http://asa.static.gausian.com/user_app/FloorPlans/icon.png',
+            viewName: 'customer',
+            path: 'https://planner5d.com/app-chrome/?key=3a95cf1e2b3c5c74ff7ee00871a49c8b',
+            screen: 2,
+            col: 1, 
+            row: 3
+          },
+          { 
+            app_name: "Draw",
+            icon: 'http://asa.static.gausian.com/user_app/Draw/icon.png',
+            viewName: 'customer',
+            path: 'http://www.ratemydrawings.com/canvasdraw/',
+            screen: 2,
+            col: 2, 
+            row: 3
+          },
+          { 
+            app_name: "3D",
+            icon: 'http://asa.static.gausian.com/user_app/3D/icon.png',
+            viewName: 'customer',
+            path: 'http://www.3dtin.com/2cwe',
+            screen: 2,
+            col: 3, 
+            row: 3
+          },
+          { 
+            app_name: "Calculator",
+            icon: 'http://asa.static.gausian.com/user_app/Calculator/icon.png',
+            viewName: 'customer',
+            path: 'http://scientific-calculator.appspot.com/',
+            screen: 2,
+            col: 0, 
+            row: 4
+          },
+          { 
+            app_name: "Developer",
+            icon: 'http://asa.static.gausian.com/user_app/Developer/icon.png',
+            viewName: 'customer',
+            path: 'http://tianjiasun.github.io/ASA_website/',
+            screen: 2,
+            col: 1, 
+            row: 4
+          },
+          { 
+            app_name: "SimpleToDo",
+            icon: 'http://asa.static.gausian.com/user_app/SimpleToDo/icon.png',
+            viewName: 'customer',
+            path: 'http://scrumy.com/husks11rubbish',
+            screen: 2,
+            col: 2, 
+            row: 4
+          }
         ]
       };
     },
@@ -1860,7 +1923,7 @@ define('web-desktop/tests/routes/application.jshint', function () {
 
   module('JSHint - routes');
   test('routes/application.js should pass jshint', function() { 
-    ok(false, 'routes/application.js should pass jshint.\nroutes/application.js: line 9, col 20, \'params\' is defined but never used.\nroutes/application.js: line 155, col 27, \'content\' is defined but never used.\nroutes/application.js: line 159, col 24, \'content\' is defined but never used.\nroutes/application.js: line 186, col 13, \'responseCode\' is defined but never used.\n\n4 errors'); 
+    ok(false, 'routes/application.js should pass jshint.\nroutes/application.js: line 9, col 20, \'params\' is defined but never used.\nroutes/application.js: line 218, col 27, \'content\' is defined but never used.\nroutes/application.js: line 222, col 24, \'content\' is defined but never used.\nroutes/application.js: line 249, col 13, \'responseCode\' is defined but never used.\n\n4 errors'); 
   });
 
 });
