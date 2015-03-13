@@ -31,7 +31,7 @@ export default Ember.Route.extend({
           app_name: "Customers",
           icon: 'http://asa.static.gausian.com/user_app/Customers/icon.png',
           viewName: 'customer',
-          path: 'http://gausian-developers.github.io/user-app-template5/app/index.html',
+          path: 'http://localhost/user-app-template5/app/index.html',
           screen: 2,
           col: 1,
           row: 0
@@ -40,7 +40,7 @@ export default Ember.Route.extend({
           app_name: "Quotes",
           icon: 'http://asa.static.gausian.com/user_app/Quotes/icon.png',
           viewName: 'customer',
-          path: 'http://gausian-developers.github.io/user-app-template5/app/index.html',
+          path: 'http://localhost/user-app-template6/app/index.html',
           screen: 2,
           col: 2,
           row: 0
@@ -81,6 +81,105 @@ export default Ember.Route.extend({
           col: 3,
           row: 1
         },
+        {
+          app_name: "LiveCAM",
+          icon: 'http://asa.static.gausian.com/user_app/LiveCAM/icon.png',
+          viewName: 'customer',
+          path: 'http://trafficcam.santaclaraca.gov/TrafficCamera.aspx?CID=GA101',
+          screen: 2,
+          col: 0,
+          row: 2
+        },
+        {
+          app_name: "Math",
+          icon: 'http://asa.static.gausian.com/user_app/Math/icon.png',
+          viewName: 'customer',
+          path: 'https://www.mathway.com/graph',
+          screen: 2,
+          col: 1,
+          row: 2
+        },
+        {
+          app_name: "Withholding",
+          icon: 'http://asa.static.gausian.com/user_app/Withholding/icon.png',
+          viewName: 'customer',
+          path: 'http://apps.irs.gov/app/withholdingcalculator/',
+          screen: 2,
+          col: 2,
+          row: 2
+        },
+        {
+          app_name: "JSON Viewer",
+          icon: 'http://asa.static.gausian.com/user_app/JSON/icon.png',
+          viewName: 'customer',
+          path: 'http://jsonviewer.stack.hu/',
+          screen: 2,
+          col: 3,
+          row: 2
+        },
+        {
+          app_name: "Weather",
+          icon: 'http://asa.static.gausian.com/user_app/Weather/icon.png',
+          viewName: 'customer',
+          path: 'http://chrome.wunderground.com/auto/chrome/geo/wx/index.html?query=95054',
+          screen: 2,
+          col: 0,
+          row: 3
+        },
+        {
+          app_name: "FloorPlans",
+          icon: 'http://asa.static.gausian.com/user_app/FloorPlans/icon.png',
+          viewName: 'customer',
+          path: 'https://planner5d.com/app-chrome/?key=3a95cf1e2b3c5c74ff7ee00871a49c8b',
+          screen: 2,
+          col: 1,
+          row: 3
+        },
+        {
+          app_name: "Draw",
+          icon: 'http://asa.static.gausian.com/user_app/Draw/icon.png',
+          viewName: 'customer',
+          path: 'http://www.ratemydrawings.com/canvasdraw/',
+          screen: 2,
+          col: 2,
+          row: 3
+        },
+        {
+          app_name: "3D",
+          icon: 'http://asa.static.gausian.com/user_app/3D/icon.png',
+          viewName: 'customer',
+          path: 'http://www.3dtin.com/2cwe',
+          screen: 2,
+          col: 3,
+          row: 3
+        },
+        {
+          app_name: "Calculator",
+          icon: 'http://asa.static.gausian.com/user_app/Calculator/icon.png',
+          viewName: 'customer',
+          path: 'http://scientific-calculator.appspot.com/',
+          screen: 2,
+          col: 0,
+          row: 4
+        },
+        {
+          app_name: "Developer",
+          icon: 'http://asa.static.gausian.com/user_app/Developer/icon.png',
+          viewName: 'customer',
+          path: 'http://tianjiasun.github.io/ASA_website/',
+          screen: 2,
+          col: 1,
+          row: 4
+        },
+        {
+          app_name: "SimpleToDo",
+          icon: 'http://asa.static.gausian.com/user_app/SimpleToDo/icon.png',
+          viewName: 'customer',
+          path: 'http://scrumy.com/husks11rubbish',
+          screen: 2,
+          col: 2,
+          row: 4
+        }
       ]
     };
   },
@@ -98,9 +197,9 @@ export default Ember.Route.extend({
       console.error(e);
     }
     console.log(user);
-    if (user && get(user, 'id')) {
-      this.store.find('employee', get(user, 'id'));
-    }
+    // if (user && get(user, 'id')) {
+    //   this.store.find('employee', get(user, 'id'));
+    // }
     this.get('controller').set('user', user);
   },
 
