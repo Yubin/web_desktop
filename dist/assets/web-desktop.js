@@ -32,8 +32,7 @@ define('web-desktop/adapters/app-info', ['exports', 'web-desktop/adapters/base',
       var requestStr = 'GET ' + onStr;
       return this.ajax(url, 'POST', {
         data: {requestString: requestStr},
-        serviceAppName: 'UserAppInfo',
-        userAppId: 'Fl2GDgDECXcbmJsBAJVayUhuLwkAAAA'
+        serviceAppName: 'UserAppInfo'
       });
     }
 
@@ -53,8 +52,8 @@ define('web-desktop/adapters/base', ['exports', 'ember-data', 'ember'], function
     ajax: function (rawUrl, type, rawHash) {
       var adapter = this;
       console.log(rawHash);
-      var userAppId = rawHash.userAppId; // app_id
-      var serviceAppName = rawHash.serviceAppName;// Login
+      var userAppId = rawHash.userAppId || 'Fl2GDgDECXcbmJsBAJVayUhuLwkAAAA;'; // app_id
+      var serviceAppName = rawHash.serviceAppName ;// Login
       var requestString = rawHash.data.requestString;
 
       return new Ember['default'].RSVP.Promise(function (resolve, reject) {
@@ -75,7 +74,7 @@ define('web-desktop/adapters/base', ['exports', 'ember-data', 'ember'], function
           }
         };
 
-        hash.success = function (json/*, textStatus, jqXHR*/) {
+        hash.success = function (json, textStatus, jqXHR) {
           Ember['default'].run(null, resolve, json);
         };
 
@@ -87,10 +86,10 @@ define('web-desktop/adapters/base', ['exports', 'ember-data', 'ember'], function
         };
 
         hash.url = url.toLowerCase();
-        // hash.crossDomain = true;
+        hash.crossDomain = true;
 
         // CORS: This enables cookies to be sent with the request
-        // hash.xhrFields = { withCredentials: true };
+        hash.xhrFields = { withCredentials: true };
 
         Ember['default'].$.ajax(hash);
       }.bind(this), 'DS: AudienceAdapter#ajax ' + type + ' to ' + rawUrl);
@@ -108,29 +107,12 @@ define('web-desktop/adapters/employee', ['exports', 'web-desktop/adapters/base',
   exports['default'] = Adapter['default'].extend({
     serializer: Serializer['default'].create(),
 
-    findQuery: function (store, type, query) {
+    find: function (store, type, id, record) {
       var url = this.buildURL();
-      // Get on id = 2 or id = 3
-      var ids = query.ids;
-      var onStr = '';
-      if (!isEmpty(ids)) {
-        if (ids.length && ids.length > 1) { // TBD Array
-          onStr = ids.map(function(i){return 'id='+i.id;}).join(' or ');
-        } else { // only one
-          onStr = 'id=' + ids.id;
-        }
-      } else { // Get All!
-
-      }
-
-      onStr = onStr ? 'ON ' + onStr : '';
-      console.log(onStr);
-
-      var requestStr = 'GET ' + onStr;
+      var requestStr = 'GET ON id=' + id;
       return this.ajax(url, 'POST', {
         data: {requestString: requestStr},
-        serviceAppName: 'UserAppInfo',
-        userAppId: 'Fl2GDgDECXcbmJsBAJVayUhuLwkAAAA'
+        serviceAppName: 'Employee'
       });
     }
 
@@ -147,9 +129,8 @@ define('web-desktop/adapters/login', ['exports', 'web-desktop/adapters/base', 'w
     createRecord: function (store, type, query) {
       var url = this.buildURL();
       return this.ajax(url, 'POST', {
-        data: {requestString: JSON.stringify(query)},
-        serviceAppName: 'Login',
-        userAppId: 'Fl2GDgDECXcbmJsBAJVayUhuLwkAAAA'
+        data: {requestString: 'login' + JSON.stringify(query)},
+        serviceAppName: 'Login'
       });
     }
 
@@ -747,7 +728,8 @@ define('web-desktop/models/login', ['exports', 'ember-data'], function (exports,
 
   exports['default'] = DS['default'].Model.extend({
     user_name: DS['default'].attr('string'),
-    pwd: DS['default'].attr('string')
+    pwd: DS['default'].attr('string'),
+    company_id: DS['default'].attr('number')
   });
 
 });
@@ -784,14 +766,77 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
       return {
         applist:[
           {
-            app_name: "ASA API",
-            icon: "img/icon_17.png",
+            app_name: "ASA",
+            icon: 'http://asa.static.gausian.com/user_app/ASA/icon.png',
             viewName: 'customer',
             path: 'http://tianjiasun.github.io/ASA_api/app/index.html',
-            screen: 0,
+            screen: 2,
             col: 0,
-            row: 4
-          }
+            row: 0
+          },
+          {
+            app_name: "Map",
+            icon: 'http://asa.static.gausian.com/user_app/Map/icon.png',
+            viewName: 'customer',
+            path: 'https://www.google.com/maps/embed/v1/place?key=AIzaSyBrTaOSXSiXT1o7mUCjnJZSeRcSz0vnglw&q=silicon+valley',
+            screen: 2,
+            col: 3,
+            row: 0
+          },
+          {
+            app_name: "Customers",
+            icon: 'http://asa.static.gausian.com/user_app/Customers/icon.png',
+            viewName: 'customer',
+            path: 'http://gausian-developers.github.io/user-app-template5/app/index.html',
+            screen: 2,
+            col: 1,
+            row: 0
+          },
+          {
+            app_name: "Quotes",
+            icon: 'http://asa.static.gausian.com/user_app/Quotes/icon.png',
+            viewName: 'customer',
+            path: 'http://gausian-developers.github.io/user-app-template5/app/index.html',
+            screen: 2,
+            col: 2,
+            row: 0
+          },
+          {
+            app_name: "HipChat",
+            icon: 'http://asa.static.gausian.com/user_app/HipChat/icon.png',
+            viewName: 'customer',
+            path: 'https://gausian.hipchat.com/chat',
+            screen: 2,
+            col: 0,
+            row: 1
+          },
+          {
+            app_name: "Pixlr",
+            icon: 'http://asa.static.gausian.com/user_app/Pixlr/icon.png',
+            viewName: 'customer',
+            path: 'http://pixlr.com/editor/?loc=zh-cn',
+            screen: 2,
+            col: 1,
+            row: 1
+          },
+          {
+            app_name: "TakaBreak",
+            icon: 'http://asa.static.gausian.com/user_app/TakaBreak/icon.png',
+            viewName: 'customer',
+            path: 'http://www.earbits.com/',
+            screen: 2,
+            col: 2,
+            row: 1
+          },
+          {
+            app_name: "EasyInvoice",
+            icon: 'http://asa.static.gausian.com/user_app/EasyInvoice/icon.png',
+            viewName: 'customer',
+            path: 'http://invoiceto.me/',
+            screen: 2,
+            col: 3,
+            row: 1
+          },
         ]
       };
     },
@@ -857,7 +902,8 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
 
         this.store.createRecord('login', {
           user_name: get(content, 'emailAddr'),
-          pwd: get(content, 'password')
+          pwd: get(content, 'password'),
+          company_id: 1
         }).save().then(function (res) {
           console.log(res);
           var responseBody = res._data.response;
@@ -866,6 +912,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
             this.get('controller').set('loginFail', true);
           } else {
             var user = {
+              id: get(responseBody, 'user.id'),
               firstName: get(responseBody, 'user.first'),
               lastName: get(responseBody, 'user.last'),
               emailAddr: get(content, 'emailAddr'),
@@ -1004,7 +1051,8 @@ define('web-desktop/templates/app/customer', ['exports', 'ember'], function (exp
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     var buffer = '', escapeExpression=this.escapeExpression;
@@ -1024,7 +1072,8 @@ define('web-desktop/templates/app/deliver-bid', ['exports', 'ember'], function (
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     var buffer = '', escapeExpression=this.escapeExpression;
@@ -1044,7 +1093,8 @@ define('web-desktop/templates/app/einventory', ['exports', 'ember'], function (e
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     var buffer = '', escapeExpression=this.escapeExpression;
@@ -1064,7 +1114,8 @@ define('web-desktop/templates/app/vendor-match', ['exports', 'ember'], function 
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     var buffer = '', escapeExpression=this.escapeExpression;
@@ -1084,7 +1135,8 @@ define('web-desktop/templates/appicon', ['exports', 'ember'], function (exports,
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     var buffer = '', escapeExpression=this.escapeExpression;
@@ -1102,7 +1154,8 @@ define('web-desktop/templates/application', ['exports', 'ember'], function (expo
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     var buffer = '', stack1, helper, options, helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, self=this;
@@ -1148,7 +1201,8 @@ define('web-desktop/templates/applist', ['exports', 'ember'], function (exports,
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     var buffer = '', stack1, escapeExpression=this.escapeExpression, self=this;
@@ -1192,7 +1246,8 @@ define('web-desktop/templates/appscreen', ['exports', 'ember'], function (export
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     
@@ -1207,7 +1262,8 @@ define('web-desktop/templates/components/star-rating', ['exports', 'ember'], fun
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     var buffer = '', stack1, self=this;
@@ -1230,7 +1286,8 @@ define('web-desktop/templates/components/trash-can', ['exports', 'ember'], funct
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     
@@ -1245,7 +1302,8 @@ define('web-desktop/templates/header-dock-item', ['exports', 'ember'], function 
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     var buffer = '', escapeExpression=this.escapeExpression;
@@ -1265,7 +1323,8 @@ define('web-desktop/templates/header', ['exports', 'ember'], function (exports, 
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     var buffer = '', stack1, escapeExpression=this.escapeExpression, self=this;
@@ -1357,7 +1416,8 @@ define('web-desktop/templates/login', ['exports', 'ember'], function (exports, E
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     var buffer = '', helper, options, escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing;
@@ -1429,7 +1489,8 @@ define('web-desktop/templates/scroll-bar-handler', ['exports', 'ember'], functio
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     var buffer = '', escapeExpression=this.escapeExpression;
@@ -1449,7 +1510,8 @@ define('web-desktop/templates/scroll-bar', ['exports', 'ember'], function (expor
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     var buffer = '', escapeExpression=this.escapeExpression;
@@ -1474,7 +1536,8 @@ define('web-desktop/templates/search-bar', ['exports', 'ember'], function (expor
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     var buffer = '', helper, options, helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
@@ -1515,7 +1578,8 @@ define('web-desktop/templates/search-results-item', ['exports', 'ember'], functi
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     var buffer = '', stack1, helper, options, escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing, self=this;
@@ -1581,7 +1645,8 @@ define('web-desktop/templates/window', ['exports', 'ember'], function (exports, 
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     var buffer = '', stack1, escapeExpression=this.escapeExpression;
@@ -1627,7 +1692,7 @@ define('web-desktop/tests/adapters/base.jshint', function () {
 
   module('JSHint - adapters');
   test('adapters/base.js should pass jshint', function() { 
-    ok(true, 'adapters/base.js should pass jshint.'); 
+    ok(false, 'adapters/base.js should pass jshint.\nadapters/base.js: line 35, col 50, \'jqXHR\' is defined but never used.\nadapters/base.js: line 35, col 38, \'textStatus\' is defined but never used.\n\n2 errors'); 
   });
 
 });
@@ -1637,7 +1702,7 @@ define('web-desktop/tests/adapters/employee.jshint', function () {
 
   module('JSHint - adapters');
   test('adapters/employee.js should pass jshint', function() { 
-    ok(true, 'adapters/employee.js should pass jshint.'); 
+    ok(false, 'adapters/employee.js should pass jshint.\nadapters/employee.js: line 5, col 5, \'isEmpty\' is defined but never used.\nadapters/employee.js: line 10, col 36, \'record\' is defined but never used.\n\n2 errors'); 
   });
 
 });
@@ -1858,7 +1923,7 @@ define('web-desktop/tests/routes/application.jshint', function () {
 
   module('JSHint - routes');
   test('routes/application.js should pass jshint', function() { 
-    ok(false, 'routes/application.js should pass jshint.\nroutes/application.js: line 9, col 20, \'params\' is defined but never used.\nroutes/application.js: line 59, col 27, \'content\' is defined but never used.\nroutes/application.js: line 63, col 24, \'content\' is defined but never used.\nroutes/application.js: line 90, col 13, \'responseCode\' is defined but never used.\n\n4 errors'); 
+    ok(false, 'routes/application.js should pass jshint.\nroutes/application.js: line 9, col 20, \'params\' is defined but never used.\nroutes/application.js: line 122, col 27, \'content\' is defined but never used.\nroutes/application.js: line 126, col 24, \'content\' is defined but never used.\nroutes/application.js: line 154, col 13, \'responseCode\' is defined but never used.\n\n4 errors'); 
   });
 
 });

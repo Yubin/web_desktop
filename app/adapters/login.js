@@ -7,9 +7,8 @@ export default Adapter.extend({
   createRecord: function (store, type, query) {
     var url = this.buildURL();
     return this.ajax(url, 'POST', {
-      data: {requestString: JSON.stringify(query)},
-      serviceAppName: 'Login',
-      userAppId: 'Fl2GDgDECXcbmJsBAJVayUhuLwkAAAA'
+      data: {requestString: 'login' + JSON.stringify(query)},
+      serviceAppName: 'Login'
     });
   }
 

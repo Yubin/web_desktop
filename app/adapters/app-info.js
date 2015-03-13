@@ -28,8 +28,7 @@ export default Adapter.extend({
     var requestStr = 'GET ' + onStr;
     return this.ajax(url, 'POST', {
       data: {requestString: requestStr},
-      serviceAppName: 'UserAppInfo',
-      userAppId: 'Fl2GDgDECXcbmJsBAJVayUhuLwkAAAA'
+      serviceAppName: 'UserAppInfo'
     });
   }
 

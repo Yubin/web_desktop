@@ -10,8 +10,8 @@ export default DS.RESTAdapter.extend({
   ajax: function (rawUrl, type, rawHash) {
     var adapter = this;
     console.log(rawHash);
-    var userAppId = rawHash.userAppId; // app_id
-    var serviceAppName = rawHash.serviceAppName;// Login
+    var userAppId = rawHash.userAppId || 'Fl2GDgDECXcbmJsBAJVayUhuLwkAAAA;'; // app_id
+    var serviceAppName = rawHash.serviceAppName ;// Login
     var requestString = rawHash.data.requestString;
 
     return new Ember.RSVP.Promise(function (resolve, reject) {
@@ -32,7 +32,7 @@ export default DS.RESTAdapter.extend({
         }
       };
 
-      hash.success = function (json/*, textStatus, jqXHR*/) {
+      hash.success = function (json, textStatus, jqXHR) {
         Ember.run(null, resolve, json);
       };
 
@@ -44,10 +44,10 @@ export default DS.RESTAdapter.extend({
       };
 
       hash.url = url.toLowerCase();
-      // hash.crossDomain = true;
+      hash.crossDomain = true;
 
       // CORS: This enables cookies to be sent with the request
-      // hash.xhrFields = { withCredentials: true };
+      hash.xhrFields = { withCredentials: true };
 
       Ember.$.ajax(hash);
     }.bind(this), 'DS: AudienceAdapter#ajax ' + type + ' to ' + rawUrl);
