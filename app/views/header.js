@@ -14,7 +14,7 @@ export default Ember.View.extend({
     var id = this.get('controller.user.current_compony_id');
     if (!Ember.isEmpty(companies) && !Ember.isEmpty(id)) {
       var obj = companies.findBy('id', parseInt(id));
-      name = Ember.get(obj, 'app_name');
+      name = Ember.get(obj, 'name');
     }
 
     return name;
@@ -35,11 +35,22 @@ export default Ember.View.extend({
     Ember.$(window).bind('resize', function () {
       this.adjustSize();
     }.bind(this));
+    Ember.$(document).on('click.' + this.elementId, Ember.run.bind(this, function (event) {
+      if(this.get('showProfile') || this.get('showProfile_comp')) {
+        var $target = Ember.$(event.target);
+        if(this.$().find($target).length === 0) {
+          this.set('showProfile', false);
+          this.set('showProfile_comp', false);
+        }
+      }
+    }));
   },
   didInsertElement: function () {
     this.adjustSize();
   },
-
+  willDestroyElement: function() {
+		Ember.$(document).off('click.' + this.elementId);
+	},
   actions: {
     showProfile: function () {
       this.toggleProperty('showProfile');

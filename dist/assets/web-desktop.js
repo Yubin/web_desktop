@@ -2974,7 +2974,7 @@ define('web-desktop/views/header', ['exports', 'ember'], function (exports, Embe
       var id = this.get('controller.user.current_compony_id');
       if (!Ember['default'].isEmpty(companies) && !Ember['default'].isEmpty(id)) {
         var obj = companies.findBy('id', parseInt(id));
-        name = Ember['default'].get(obj, 'app_name');
+        name = Ember['default'].get(obj, 'name');
       }
 
       return name;
@@ -2995,11 +2995,22 @@ define('web-desktop/views/header', ['exports', 'ember'], function (exports, Embe
       Ember['default'].$(window).bind('resize', function () {
         this.adjustSize();
       }.bind(this));
+      Ember['default'].$(document).on('click.' + this.elementId, Ember['default'].run.bind(this, function (event) {
+        if(this.get('showProfile') || this.get('showProfile_comp')) {
+          var $target = Ember['default'].$(event.target);
+          if(this.$().find($target).length === 0) {
+            this.set('showProfile', false);
+            this.set('showProfile_comp', false);
+          }
+        }
+      }));
     },
     didInsertElement: function () {
       this.adjustSize();
     },
-
+    willDestroyElement: function() {
+  		Ember['default'].$(document).off('click.' + this.elementId);
+  	},
     actions: {
       showProfile: function () {
         this.toggleProperty('showProfile');

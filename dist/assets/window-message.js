@@ -1,5 +1,4 @@
 function receiveMessage(event) {
-  console.log(event);
   var origin = event.origin;
   var data = event.data;
 
@@ -20,8 +19,8 @@ function receiveMessage(event) {
       var payload = {
        op: 'selectLink',
        targetApp: {
-         id: 'quoteApp',
-         name: 'Quote',
+         id: 'Quotes',
+         name: 'Quotes',
          icon: '123123/icon.png'
        }
      };
