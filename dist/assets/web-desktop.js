@@ -780,6 +780,15 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
       return {
         applist:[
           {
+           app_name: "Store",
+           icon: 'http://asa.static.gausian.com/user_app/Store/icon.png',
+           viewName: 'customer',
+           path: 'http://tianjiasun.github.io/APP_store/app/',
+           screen: 2,
+           col: 3,
+           row: 4
+         },
+         {
             app_name: "ASA",
             icon: 'http://asa.static.gausian.com/user_app/ASA/icon.png',
             viewName: 'customer',
@@ -2018,7 +2027,7 @@ define('web-desktop/tests/routes/application.jshint', function () {
 
   module('JSHint - routes');
   test('routes/application.js should pass jshint', function() { 
-    ok(false, 'routes/application.js should pass jshint.\nroutes/application.js: line 9, col 20, \'params\' is defined but never used.\nroutes/application.js: line 216, col 27, \'content\' is defined but never used.\nroutes/application.js: line 221, col 24, \'content\' is defined but never used.\nroutes/application.js: line 235, col 13, \'responseCode\' is defined but never used.\n\n4 errors'); 
+    ok(false, 'routes/application.js should pass jshint.\nroutes/application.js: line 9, col 20, \'params\' is defined but never used.\nroutes/application.js: line 225, col 27, \'content\' is defined but never used.\nroutes/application.js: line 230, col 24, \'content\' is defined but never used.\nroutes/application.js: line 244, col 13, \'responseCode\' is defined but never used.\n\n4 errors'); 
   });
 
 });

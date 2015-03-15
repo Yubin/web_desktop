@@ -17,13 +17,13 @@ module.exports = function(environment) {
       // when it is created
     },
     contentSecurityPolicy: {
-      'default-src': "'none'",
+      'default-src': "asa.static.gausian.com",
       'script-src': "'self' 'unsafe-inline' 'unsafe-eval' dev.gausian.com connect.facebook.net maps.googleapis.com maps.gstatic.com",
       'font-src': "'self' data: use.typekit.net",
       'connect-src': "'self' dev.gausian.com asa.gausian.com",
       'img-src': "'self' data: asa.static.gausian.com",
       'style-src': "'self' 'unsafe-inline' use.typekit.net",
-      'frame-src': "s-static.ak.facebook.com static.ak.facebook.com asa.static.gausian.com gausian-developers.github.io"
+      'frame-src': "asa.static.gausian.com gausian-developers.github.io tianjiasun.github.io"
     }
   };
 
