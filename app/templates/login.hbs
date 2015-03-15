@@ -1,100 +1,98 @@
-<div class="overlay fadeIn fadeIn-50ms">
-  <i class="icon-remove modal-close" {{action 'loginClose'}}></i>
-  <div class="blur-image"></div>
-  <div class="flip-container fadeIn fadeIn-100ms">
-    <div id="flipper" class="">
-      <div class="front">
-        <div class="badge_band_right"></div>
-        <div class="badge_band_left"></div>
-        <div class="badge_band_left_shadow"></div>
-        <div class="badge_band_end"></div>
-        <a href="http://www.gausian.com">
-          <div class="badge_buckle">
-            <img class="logo_img" src="assets/img/GAUSIAN_logo.png">
-          </div>
-        </a>
-        <div class="badge_buckle_shadow"></div>
-        <div {{bind-attr class=":badge_container loginFail:has-error loginFail"}}>
-          <div class="up_container">
-            <img class="up_img" src="assets/img/einstein.png" onclick="
-              flipper.classList.toggle('flipped');
-              document.getElementById('visitor_container').style.opacity=0;
-              document.getElementById('sign_container').style.opacity=0;
-              document.getElementById('portrait_container').style.opacity=1;
-              ">
-            <div id="up_hole"></div>
-          </div>
-          <div class="down_container">
-            <div class="company_name"> Your Company Name </div>
-            {{input type="text" value=view.emailAddr class="email_input visitor_input" placeholder="Email"}}
-            {{input type="password" value=view.password class="pw_input" placeholder="Password"}}
-            <button {{action "login" target=view}} class="login_bn">Login</button>
+<i class="icon-remove modal-close" {{action 'loginClose'}}></i>
+<div {{bind-attr class=":blur-image :animated loginShow:fadeIn"}}></div>
+<div {{bind-attr class=":flip-container :animated loginShow:bounceInDown:bounceOutUp"}}>
+  <div id="flipper" class="">
+    <div class="front">
+      <div class="badge_band_right"></div>
+      <div class="badge_band_left"></div>
+      <div class="badge_band_left_shadow"></div>
+      <div class="badge_band_end"></div>
+      <a href="http://www.gausian.com">
+        <div class="badge_buckle">
+          <img class="logo_img" src="assets/img/GAUSIAN_logo.png">
+        </div>
+      </a>
+      <div class="badge_buckle_shadow"></div>
+      <div {{bind-attr class=":badge_container loginFail:has-error loginFail"}}>
+        <div class="up_container">
+          <img class="up_img" src="assets/img/einstein.png" onclick="
+            flipper.classList.toggle('flipped');
+            document.getElementById('visitor_container').style.opacity=0;
+            document.getElementById('sign_container').style.opacity=0;
+            document.getElementById('portrait_container').style.opacity=1;
+            ">
+          <div id="up_hole"></div>
+        </div>
+        <div class="down_container">
+          <div class="company_name"> Your Company Name </div>
+          {{input type="text" value=view.emailAddr class="email_input visitor_input" placeholder="Email"}}
+          {{input type="password" value=view.password class="pw_input" placeholder="Password"}}
+          <button {{action "login" target=view}} class="login_bn">Login</button>
 
-            <div class="sign_bn fadeIn fadeIn-100ms fadeIn-Delay-50ms" onclick="
-              flipper.classList.toggle('flipped');
-              document.getElementById('visitor_container').style.opacity=0;
-              document.getElementById('sign_container').style.opacity=1;
-              document.getElementById('portrait_container').style.opacity=0;
-              ">
-              Sign up
-            </div>
-            <div class="visitor_bn fadeIn fadeIn-100ms fadeIn-Delay-50ms" onclick="
-              flipper.classList.toggle('flipped');
-              document.getElementById('visitor_container').style.opacity=1;
-              document.getElementById('sign_container').style.opacity=0;
-              document.getElementById('portrait_container').style.opacity=0;
-              ">
-              I'm a Visitor
-            </div>
+          <div class="sign_bn fadeIn fadeIn-100ms fadeIn-Delay-50ms" onclick="
+            flipper.classList.toggle('flipped');
+            document.getElementById('visitor_container').style.opacity=0;
+            document.getElementById('sign_container').style.opacity=1;
+            document.getElementById('portrait_container').style.opacity=0;
+            ">
+            Sign up
+          </div>
+          <div class="visitor_bn fadeIn fadeIn-100ms fadeIn-Delay-50ms" onclick="
+            flipper.classList.toggle('flipped');
+            document.getElementById('visitor_container').style.opacity=1;
+            document.getElementById('sign_container').style.opacity=0;
+            document.getElementById('portrait_container').style.opacity=0;
+            ">
+            I'm a Visitor
           </div>
         </div>
       </div>
-      <div class="back">
-        <div class="badge_band_right"></div>
-        <div class="badge_band_left"></div>
-        <div class="badge_band_left_shadow"></div>
-        <div class="badge_band_end"></div>
-        <div class="badge_buckle"></div>
-        <div class="badge_buckle_back"></div>
-        <div class="badge_buckle_shadow"></div>
-        <div class="badge_container">
-          <div class="up_container">
-            <img class="up_img" src="assets/img/empty.png">
-            <div id="up_hole"></div>
-          </div>
-          <img class="return_icon" src="assets/img/return.png" onclick="flipper.classList.toggle('flipped');">
-          <div class="down_container"></div>
-          <div id="sign_container" style="opacity: 0;">
-            <div class="back_container_header">Sign up</div>
-            <input class="back_container_input_first" type="text" placeholder="First">
-            <input class="back_container_input_last" type="text" placeholder="Last">
-            <input class="back_container_input_email" type="text" placeholder="Email">
-            <input class="back_container_input_company" type="text" placeholder="Full Company Name">
-            <input class="back_container_input_pw" type="password" placeholder="Password">
-            <a href="http://yubin.github.io/web_desktop">
-              <div class="back_container_sign">Sign</div>
-            </a>
-            <div class="back_container_invite">Invite</div>
-          </div>
-          <div id="visitor_container" style="opacity: 0;">
-            <div class="back_container_header">Visitor to</div>
-            <div class="visitor_input_company_name">You Company Name</div>
+    </div>
+    <div class="back">
+      <div class="badge_band_right"></div>
+      <div class="badge_band_left"></div>
+      <div class="badge_band_left_shadow"></div>
+      <div class="badge_band_end"></div>
+      <div class="badge_buckle"></div>
+      <div class="badge_buckle_back"></div>
+      <div class="badge_buckle_shadow"></div>
+      <div class="badge_container">
+        <div class="up_container">
+          <img class="up_img" src="assets/img/empty.png">
+          <div id="up_hole"></div>
+        </div>
+        <img class="return_icon" src="assets/img/return.png" onclick="flipper.classList.toggle('flipped');">
+        <div class="down_container"></div>
+        <div id="sign_container" style="opacity: 0;">
+          <div class="back_container_header">Sign up</div>
+          <input class="back_container_input_first" type="text" placeholder="First">
+          <input class="back_container_input_last" type="text" placeholder="Last">
+          <input class="back_container_input_email" type="text" placeholder="Email">
+          <input class="back_container_input_company" type="text" placeholder="Full Company Name">
+          <input class="back_container_input_pw" type="password" placeholder="Password">
+          <a href="http://yubin.github.io/web_desktop">
+            <div class="back_container_sign">Sign</div>
+          </a>
+          <div class="back_container_invite">Invite</div>
+        </div>
+        <div id="visitor_container" style="opacity: 0;">
+          <div class="back_container_header">Visitor to</div>
+          <div class="visitor_input_company_name">You Company Name</div>
 
-            {{input type="text" value=view.firstName class="visitor_input_first visitor_input" placeholder="First"}}
-            {{input type="text" value=view.lastName class="visitor_input_last visitor_input" placeholder="Last"}}
-            {{input type="text" value=view.emailAddr class="visitor_input_email visitor_input" placeholder="Email"}}
-            {{input type="text" value=view.invCode class="visitor_input_security visitor_input" placeholder="Invitation Code"}}
-            <button {{action "visitor" target=view}} class="back_container_enter">Enter</button>
+          {{input type="text" value=view.firstName class="visitor_input_first visitor_input" placeholder="First"}}
+          {{input type="text" value=view.lastName class="visitor_input_last visitor_input" placeholder="Last"}}
+          {{input type="text" value=view.emailAddr class="visitor_input_email visitor_input" placeholder="Email"}}
+          {{input type="text" value=view.invCode class="visitor_input_security visitor_input" placeholder="Invitation Code"}}
+          <button {{action "visitor" target=view}} class="back_container_enter">Enter</button>
+        </div>
+        <div id="portrait_container" style="opacity: 1;">
+          <div class="back_container_header">Change Portrait</div>
+          <div class="portrait_container">
+            <img class="portrait_img" src="assets/img/einstein_5.png">
           </div>
-          <div id="portrait_container" style="opacity: 1;">
-            <div class="back_container_header">Change Portrait</div>
-            <div class="portrait_container">
-              <img class="portrait_img" src="assets/img/einstein_5.png">
-            </div>
-            <input class="portrait_email" type="text" placeholder="Email">
-            <input class="portrait_pw" type="password" placeholder="Password">
-            <div class="portrait_apply">Apply New Portrait</div>
-          </div>
+          <input class="portrait_email" type="text" placeholder="Email">
+          <input class="portrait_pw" type="password" placeholder="Password">
+          <div class="portrait_apply">Apply New Portrait</div>
         </div>
       </div>
     </div>

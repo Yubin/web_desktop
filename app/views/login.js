@@ -3,13 +3,25 @@ import Ember from 'ember';
 export default Ember.View.extend({
   templateName: 'login',
   classNames: ['login-badge'],
+  isVisible: false,
+
+  updateVisible: function () {
+    var flag = this.get('controller.loginShow');
+    if (flag) {
+      this.set('isVisible', true);
+    } else { // delay the dispear process
+      Ember.run.later(function () {
+        this.set('isVisible', false);
+      }.bind(this), 600);
+    }
+  }.observes('controller.loginShow'),
 
   shake: function () {
     if (this._state === 'inDOM' && this.get('controller.loginFail')) {
-      var badge = this.$('.front .badge_container');
-      badge.addClass('shake');
+      var badge = this.$('.front');
+      badge.addClass('animated swing');
       Ember.run.later(function () {
-        badge.removeClass('shake');
+        badge.removeClass('animated swing');
       }, 1000);
     } else {
 

@@ -79,9 +79,13 @@ export default Ember.Controller.extend({
   }.observes('appinstall'),
 
   actions: {
-    showTrash: function (show) {
-      this.set('appTouch', show);
+    appMoving: function () {
+      this.set('controllers.application.appMoving', true);
     },
+    appStop: function () {
+      this.set('controllers.application.appMoving', false);
+    },
+
     openApp: function (item) { console.log(item);
       var name = get(item, 'app_name');
       var icon = get(item, 'icon');

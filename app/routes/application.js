@@ -212,33 +212,15 @@ export default Ember.Route.extend({
   },
 
   actions: {
-    appMoving: function () {
-      this.set('controller.appMoving', true);
-    },
-    appStop: function () {
-      this.set('controller.appMoving', false);
-    },
+
     installApp: function (content) {
       var ctrl = this.controllerFor('applist');
       ctrl._actions['addApp'].apply(ctrl, arguments);
     },
+
     openApp: function (content) {
       var ctrl = this.controllerFor('applist');
       ctrl._actions['openApp'].apply(ctrl, arguments);
-    },
-    loginShow: function () {
-      this.render('login', {
-        outlet: 'login',
-        into: 'application'
-      });
-    },
-    loginClose: function () {
-      Ember.$('.login-badge > .overlay').fadeOut( "slow", function() {
-        this.disconnectOutlet({
-          outlet: 'login',
-          parentView: 'application'
-        });
-      }.bind(this));
     },
 
     loginUser: function (content) {
@@ -269,12 +251,6 @@ export default Ember.Route.extend({
           };
           this.get('controller').set('user', user);
           localStorage.setItem('gausian-user', JSON.stringify(user));
-          Ember.$('.login-badge > .overlay').fadeOut( "slow", function() {
-            this.disconnectOutlet({
-              outlet: 'login',
-              parentView: 'application'
-            });
-          }.bind(this));
         }
       }.bind(this));
     },
@@ -292,13 +268,7 @@ export default Ember.Route.extend({
       };
       this.get('controller').set('user', user);
       localStorage.setItem('gausian-user', JSON.stringify(user));
-
-      Ember.$('.login-badge > .overlay').fadeOut( "slow", function() {
-        this.disconnectOutlet({
-          outlet: 'login',
-          parentView: 'application'
-        });
-      }.bind(this));
+      this.set('controller.loginShow', false);
     },
 
     changeCompany: function (id) {
