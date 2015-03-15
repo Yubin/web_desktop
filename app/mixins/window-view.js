@@ -1,7 +1,7 @@
 import Ember from 'ember';
 
 export default Ember.Mixin.create({
-  classNames: ['window', 'windows-vis', 'fadeIn', 'fadeIn-20ms'],
+  classNames: ['window', 'windows-vis', 'flipper', 'fliped', 'fadeIn', 'fadeIn-20ms'],
   classNameBindings: ['active'],
   active: true,
   width: 950,
@@ -159,6 +159,10 @@ export default Ember.Mixin.create({
         });
       }
       this.toggleProperty('isMinSize');
+    },
+
+    flipApp: function () {
+      this.$().toggleClass('fliped');
     }
   }
 

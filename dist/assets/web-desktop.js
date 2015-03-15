@@ -525,7 +525,7 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
   'use strict';
 
   exports['default'] = Ember['default'].Mixin.create({
-    classNames: ['window', 'windows-vis', 'fadeIn', 'fadeIn-20ms'],
+    classNames: ['window', 'windows-vis', 'flipper', 'fliped', 'fadeIn', 'fadeIn-20ms'],
     classNameBindings: ['active'],
     active: true,
     width: 950,
@@ -683,6 +683,10 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
           });
         }
         this.toggleProperty('isMinSize');
+      },
+
+      flipApp: function () {
+        this.$().toggleClass('fliped');
       }
     }
 
@@ -1747,25 +1751,29 @@ define('web-desktop/templates/window', ['exports', 'ember'], function (exports, 
     var buffer = '', stack1, escapeExpression=this.escapeExpression;
 
 
-    data.buffer.push("<div class=\"header\">\n  <span class=\"titleInside\">");
+    data.buffer.push("<div class=\"front\">\n  <div class=\"header\">\n    <span class=\"titleInside\">");
     stack1 = helpers._triageMustache.call(depth0, "view.content.app_name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("</span>\n</div>\n<nav class=\"control-window\">\n  <a href=\"#\" class=\"minimize\" ");
+    data.buffer.push("</span>\n  </div>\n  <nav class=\"control-window\">\n    <a href=\"#\" class=\"minimize\" ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "minimizeApp", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push(">minimize</a>\n  <a href=\"#\" class=\"maximize\" ");
+    data.buffer.push(">minimize</a>\n    <a href=\"#\" class=\"maximize\" ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "maximizeApp", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push(">maximize</a>\n  <a href=\"#\" class=\"close\" ");
+    data.buffer.push(">maximize</a>\n    <a href=\"#\" class=\"close\" ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "closeApp", "view.content", {hash:{
       'target': ("view.parentView")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0,depth0],types:["STRING","ID"],data:data})));
-    data.buffer.push(">close</a>\n</nav>\n<div class=\"container\">\n  ");
+    data.buffer.push(">close</a>\n  </nav>\n  <div class=\"container\">\n    ");
     stack1 = helpers._triageMustache.call(depth0, "yield", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\n</div>\n");
+    data.buffer.push("\n  </div>\n</div>\n<div class=\"back\">\n	<div class=\"back_edge\">\n		<div class=\"back_content\">\n			<img\n				class=\"return_icon\"\n				src=\"assets/img/return.png\"\n				");
+    data.buffer.push(escapeExpression(helpers.action.call(depth0, "flipApp", {hash:{
+      'target': ("view")
+    },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
+    data.buffer.push("\n			/>\n			<div class=\"back_shadow_decoration\"></div>\n			<div class=\"back_title\">Available Links on Desktop</div>\n			<div class=\"back_app_container\">\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/Map/icon.png\"/>\n					<div class=\"back_app_name\">Map</div>\n					<div class=\"back_app_linked\">\n						<img class=\"back_app_linked_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<div class=\"back_app_overlay_text\">Unlink</div>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/HipChat/icon.png\"/>\n					<div class=\"back_app_name\">HipChat</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<img class=\"back_app_overlay_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/Quotes/icon.png\"/>\n					<div class=\"back_app_name\">Quotes</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<img class=\"back_app_overlay_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/HipChat/icon.png\"/>\n					<div class=\"back_app_name\">HipChat</div>\n					<div class=\"back_app_linked\">\n						<img class=\"back_app_linked_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<div class=\"back_app_overlay_text\">Unlink</div>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/Pixlr/icon.png\"/>\n					<div class=\"back_app_name\">Pixlr</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<img class=\"back_app_overlay_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/TakaBreak/icon.png\"/>\n					<div class=\"back_app_name\">TakaBreak</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<img class=\"back_app_overlay_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/LiveCAM/icon.png\"/>\n					<div class=\"back_app_name\">LiveCAM</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<img class=\"back_app_overlay_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/Math/icon.png\"/>\n					<div class=\"back_app_name\">Math</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<img class=\"back_app_overlay_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/Withholding/icon.png\"/>\n					<div class=\"back_app_name\">Withholding</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<img class=\"back_app_overlay_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/Draw/icon.png\"/>\n					<div class=\"back_app_name\">Draw</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<img class=\"back_app_overlay_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n				</div>\n			</div>\n<!-- 						<div class=\"back_recommend\">Popular Links on Cloud</div>\n			<div class=\"back_recommend_container\">\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/Quotes/icon.png\"/>\n					<div class=\"back_app_name\">Quotes</div>\n					<div class=\"back_app_overlay\"></div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/HipChat/icon.png\"/>\n					<div class=\"back_app_name\">HipChat</div>\n					<div class=\"back_app_overlay\"></div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/Pixlr/icon.png\"/>\n					<div class=\"back_app_name\">Pixlr</div>\n					<div class=\"back_app_overlay\"></div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/Map/icon.png\"/>\n					<div class=\"back_app_name\">Map</div>\n					<div class=\"back_app_overlay\"></div>\n				</div>\n			</div> -->\n			<div class=\"back_notation\">Powered by GAUSIAN ASA</div>\n		</div>\n	</div>\n</div>\n");
     return buffer;
     
   });
