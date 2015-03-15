@@ -1,0 +1,75 @@
+
+.flipper {
+  -ms-transform: perspective(2000px);
+  -moz-transform: perspective(2000px);
+  -webkit-perspective:2000;
+     -moz-perspective:2000;
+      -ms-perspective:2000;
+       -o-perspective:2000;
+          perspective:2000;
+  -webkit-transform-origin: right center;
+
+	transition-timing-function: ease-in-out;
+	-webkit-transform-origin: right center;
+  width: inherit;
+  height: inherit;
+  .front, .back {
+  	/*backface-visibility*/
+  	-webkit-backface-visibility:hidden;
+  	   -moz-backface-visibility:hidden;
+  	    -ms-backface-visibility:hidden;
+  	     -o-backface-visibility:hidden;
+  	        backface-visibility:hidden;
+  	position:absolute;
+  	top:0;
+  	left:0;
+    width: inherit;
+    height: inherit;
+    -webkit-transition: all 4s ease-in-out;
+            transition: all 4s ease-in-out;
+    -webkit-transform-style: preserve-3d;
+       -moz-transform-style: preserve-3d;
+            transform-style: preserve-3d;
+    -webkit-backface-visibility: hidden;
+       -moz-backface-visibility: hidden;
+            backface-visibility: hidden;
+  }
+  .front {
+    -webkit-transform: rotateY(0deg);
+       -moz-transform: rotateY(0deg);
+         -o-transform: rotateY(0deg);
+        -ms-transform: rotateY(0deg);
+            transform: rotateY(0deg);
+  }
+  .back {
+    -webkit-transform: rotateY(180deg);
+       -moz-transform: rotateY(180deg);
+         -o-transform: rotateY(180deg);
+        -ms-transform: rotateY(180deg);
+            transform: rotateY(180deg);
+
+  }
+
+  &.fliped {
+    .front {
+      -webkit-transform: rotateY(180deg);
+         -moz-transform: rotateY(180deg);
+           -o-transform: rotateY(180deg);
+          -ms-transform: rotateY(180deg);
+              transform: rotateY(180deg);
+    }
+    .back {
+      -webkit-transform: rotateY(0deg);
+         -moz-transform: rotateY(0deg);
+           -o-transform: rotateY(0deg);
+          -ms-transform: rotateY(0deg);
+              transform: rotateY(0deg);
+    }
+  }
+}
+
+.window {
+  .front, .back {
+    box-shadow: 0 0 10px 1px black;
+  }
+}
