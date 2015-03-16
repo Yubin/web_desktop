@@ -10,6 +10,15 @@ export default Ember.Route.extend({
     return {
       applist:[
         {
+         app_name: "Store",
+         icon: 'http://asa.static.gausian.com/user_app/Store/icon.png',
+         viewName: 'customer',
+         path: 'http://tianjiasun.github.io/APP_store/app/',
+         screen: 2,
+         col: 3,
+         row: 4
+       },
+       {
           app_name: "ASA",
           icon: 'http://asa.static.gausian.com/user_app/ASA/icon.png',
           viewName: 'customer',
