@@ -525,13 +525,17 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
   'use strict';
 
   exports['default'] = Ember['default'].Mixin.create({
-    classNames: ['window', 'windows-vis', 'flipper', 'fliped', 'fadeIn', 'fadeIn-20ms'],
+    classNames: ['window', 'windows-vis', 'flipper', 'fadeIn', 'fadeIn-20ms'],
     classNameBindings: ['active'],
     active: true,
     width: 950,
     height: 600,
     left: 0,
     top: 0,
+
+    minWidth: 600,
+    minHeight: 450,
+
     layoutName: 'window',
     isFullSize: false,
     isMinSize: false,
@@ -595,9 +599,9 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
       this.changeZindex();
     },
 
-    // click: function () {
-    //   this.get('parentView').send('activateWindow', this.get('content'));
-    // },
+    click: function () {
+      this.get('parentView').send('activateWindow', this.get('content'));
+    },
 
     didInsertElement: function () {
       this.changeZindex();
@@ -607,30 +611,42 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
         left: this.get('left'),
         top: this.get('top')
       });
-      this.$().resizable();
-      this.$().draggable();
+      this.$().resizable({
+        minHeight: this.get('minHeight'),
+        minWidth: this.get('minWidth'),
+        stop: function( event, ui ) {
+          var size = ui.size;
+          this.setProperties({
+            width: size.width,
+            height: size.height
+          });
+        }.bind(this)
+      });
+      this.$().draggable({
+        stop: function(event, ui) {
+          var position = ui.position;
+          this.setProperties({
+            top: position.top,
+            left: position.left
+          });
+        }.bind(this)
+      });
+
       this.$('.header').on('dblclick', function () {
         this._actions['maximizeApp'].apply(this);
       }.bind(this));
-      this.$('.header').on('mouseup', function () {
-        // update position info, so when show app from minimize, it goes original place
-        var window_position=this.$().position();
-        console.log("window-x:" + window_position.left + ", window-y:" + window_position.top);
-        this.top = window_position.top;
-        this.left = window_position.left;
-        this.width = this.$().width();
-        this.height = this.$().height();
-        this.$(document).off('mousemove');
-      }.bind(this));
-      this.$().resize(function() {
-        console.log("resized");
-        // update position info, so when show app from minimize, it goes original place
-        var window_position=this.$().position();
-        console.log("window-x:" + window_position.left + ", window-y:" + window_position.top);
-        this.top = window_position.top;
-        this.left = window_position.left;
-        this.width = this.$().width();
-        this.height = this.$().height();
+
+      this.$(window).resize(function() {
+        Ember['default'].run.debounce(function () {
+          if (this.get('isFullSize')) {
+            var max_height = this.$(window).height() - 47;
+            var max_width = this.$(window).width();
+            this.$().css({ // image follow
+              'width': Math.max(max_width, this.get('minWidth')),
+              'height': Math.max(max_height, this.get('minHeight'))
+            });
+          }
+        }.bind(this), 500);
       }.bind(this));
     },
 
@@ -638,12 +654,23 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
       this.$('.header').off('dblclick');
     },
 
+    showFliped: function () {
+      var fliped = this.get('fliped');
+      if (fliped) {
+        // Get List
+        this.$().addClass('fliped');
+
+      } else {
+        this.$().removeClass('fliped');
+      }
+    }.observes('fliped'),
+
     actions: {
       maximizeApp: function () {
-        var max_height = this.$(document).height() - 77;
-        console.log(max_height);
+        var max_height = this.$(window).height() - 47;
+        var max_width = this.$(window).width();
         if (this.get('isFullSize')) {
-          this.$().animate({ // image follow
+          this.$().animate({
             'top': this.get('top'),
             'left': this.get('left'),
             'width': this.get('width'),
@@ -653,7 +680,7 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
           this.$().animate({ // image follow
             'top': 47,
             'left': 0,
-            'width': '100%',
+            'width': max_width,
             'height': max_height
           });
         }
@@ -686,7 +713,7 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
       },
 
       flipApp: function () {
-        this.$().toggleClass('fliped');
+        this.set('fliped', false);
       }
     }
 
@@ -803,9 +830,10 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
           },
           {
             app_name: "Customers",
+            app_id: "customerApp",
             icon: 'http://asa.static.gausian.com/user_app/Customers/icon.png',
             viewName: 'customer',
-            path: 'http://localhost/user-app-template5/app/index.html',
+            path: 'http://gausian-developers.github.io/user-app-template5/app/',
             screen: 2,
             col: 1,
             row: 0
@@ -814,7 +842,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
             app_name: "Quotes",
             icon: 'http://asa.static.gausian.com/user_app/Quotes/icon.png',
             viewName: 'customer',
-            path: 'http://localhost/user-app-template6/app/index.html',
+            path: 'http://gausian-developers.github.io/user-app-template6/app/',
             screen: 2,
             col: 2,
             row: 0
@@ -1751,7 +1779,7 @@ define('web-desktop/templates/window', ['exports', 'ember'], function (exports, 
     var buffer = '', stack1, escapeExpression=this.escapeExpression;
 
 
-    data.buffer.push("<div class=\"front\">\n  <div class=\"header\">\n    <span class=\"titleInside\">");
+    data.buffer.push("<div class=\"front shadow\">\n  <div class=\"header\">\n    <span class=\"titleInside\">");
     stack1 = helpers._triageMustache.call(depth0, "view.content.app_name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
     data.buffer.push("</span>\n  </div>\n  <nav class=\"control-window\">\n    <a href=\"#\" class=\"minimize\" ");
@@ -1769,7 +1797,7 @@ define('web-desktop/templates/window', ['exports', 'ember'], function (exports, 
     data.buffer.push(">close</a>\n  </nav>\n  <div class=\"container\">\n    ");
     stack1 = helpers._triageMustache.call(depth0, "yield", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\n  </div>\n</div>\n<div class=\"back\">\n	<div class=\"back_edge\">\n		<div class=\"back_content\">\n			<img\n				class=\"return_icon\"\n				src=\"assets/img/return.png\"\n				");
+    data.buffer.push("\n  </div>\n</div>\n<div class=\"back shadow\">\n	<div class=\"back_edge\">\n		<div class=\"back_content\">\n			<img\n				class=\"return_icon\"\n				src=\"assets/img/return.png\"\n				");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "flipApp", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
@@ -2026,7 +2054,7 @@ define('web-desktop/tests/routes/application.jshint', function () {
 
   module('JSHint - routes');
   test('routes/application.js should pass jshint', function() { 
-    ok(false, 'routes/application.js should pass jshint.\nroutes/application.js: line 9, col 20, \'params\' is defined but never used.\nroutes/application.js: line 216, col 27, \'content\' is defined but never used.\nroutes/application.js: line 221, col 24, \'content\' is defined but never used.\nroutes/application.js: line 235, col 13, \'responseCode\' is defined but never used.\n\n4 errors'); 
+    ok(false, 'routes/application.js should pass jshint.\nroutes/application.js: line 9, col 20, \'params\' is defined but never used.\nroutes/application.js: line 217, col 27, \'content\' is defined but never used.\nroutes/application.js: line 222, col 24, \'content\' is defined but never used.\nroutes/application.js: line 236, col 13, \'responseCode\' is defined but never used.\n\n4 errors'); 
   });
 
 });
@@ -2413,6 +2441,7 @@ define('web-desktop/views/app/customer', ['exports', 'ember', 'web-desktop/mixin
   'use strict';
 
   exports['default'] = Ember['default'].View.extend(WindowMixin['default'], {
+    classNameBindings: ['content.app_id'],
     templateName: 'app/customer'
   });
 

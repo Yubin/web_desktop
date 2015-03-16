@@ -25,8 +25,8 @@
   	left:0;
     width: inherit;
     height: inherit;
-    -webkit-transition: all 4s ease-in-out;
-            transition: all 4s ease-in-out;
+    -webkit-transition: -webkit-transform .5s ease-in-out;
+            transition: transform .5s ease-in-out;
     -webkit-transform-style: preserve-3d;
        -moz-transform-style: preserve-3d;
             transform-style: preserve-3d;
@@ -42,11 +42,11 @@
             transform: rotateY(0deg);
   }
   .back {
-    -webkit-transform: rotateY(180deg);
-       -moz-transform: rotateY(180deg);
-         -o-transform: rotateY(180deg);
-        -ms-transform: rotateY(180deg);
-            transform: rotateY(180deg);
+    -webkit-transform: rotateY(-179deg);
+       -moz-transform: rotateY(-179deg);
+         -o-transform: rotateY(-179deg);
+        -ms-transform: rotateY(-179deg);
+            transform: rotateY(-179deg);
 
   }
 
@@ -65,11 +65,5 @@
           -ms-transform: rotateY(0deg);
               transform: rotateY(0deg);
     }
-  }
-}
-
-.window {
-  .front, .back {
-    box-shadow: 0 0 10px 1px black;
   }
 }

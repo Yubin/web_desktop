@@ -1,13 +1,17 @@
 import Ember from 'ember';
 
 export default Ember.Mixin.create({
-  classNames: ['window', 'windows-vis', 'flipper', 'fliped', 'fadeIn', 'fadeIn-20ms'],
+  classNames: ['window', 'windows-vis', 'flipper', 'fadeIn', 'fadeIn-20ms'],
   classNameBindings: ['active'],
   active: true,
   width: 950,
   height: 600,
   left: 0,
   top: 0,
+
+  minWidth: 600,
+  minHeight: 450,
+
   layoutName: 'window',
   isFullSize: false,
   isMinSize: false,
@@ -71,9 +75,9 @@ export default Ember.Mixin.create({
     this.changeZindex();
   },
 
-  // click: function () {
-  //   this.get('parentView').send('activateWindow', this.get('content'));
-  // },
+  click: function () {
+    this.get('parentView').send('activateWindow', this.get('content'));
+  },
 
   didInsertElement: function () {
     this.changeZindex();
@@ -83,30 +87,42 @@ export default Ember.Mixin.create({
       left: this.get('left'),
       top: this.get('top')
     });
-    this.$().resizable();
-    this.$().draggable();
+    this.$().resizable({
+      minHeight: this.get('minHeight'),
+      minWidth: this.get('minWidth'),
+      stop: function( event, ui ) {
+        var size = ui.size;
+        this.setProperties({
+          width: size.width,
+          height: size.height
+        });
+      }.bind(this)
+    });
+    this.$().draggable({
+      stop: function(event, ui) {
+        var position = ui.position;
+        this.setProperties({
+          top: position.top,
+          left: position.left
+        });
+      }.bind(this)
+    });
+
     this.$('.header').on('dblclick', function () {
       this._actions['maximizeApp'].apply(this);
     }.bind(this));
-    this.$('.header').on('mouseup', function () {
-      // update position info, so when show app from minimize, it goes original place
-      var window_position=this.$().position();
-      console.log("window-x:" + window_position.left + ", window-y:" + window_position.top);
-      this.top = window_position.top;
-      this.left = window_position.left;
-      this.width = this.$().width();
-      this.height = this.$().height();
-      this.$(document).off('mousemove');
-    }.bind(this));
-    this.$().resize(function() {
-      console.log("resized");
-      // update position info, so when show app from minimize, it goes original place
-      var window_position=this.$().position();
-      console.log("window-x:" + window_position.left + ", window-y:" + window_position.top);
-      this.top = window_position.top;
-      this.left = window_position.left;
-      this.width = this.$().width();
-      this.height = this.$().height();
+
+    this.$(window).resize(function() {
+      Ember.run.debounce(function () {
+        if (this.get('isFullSize')) {
+          var max_height = this.$(window).height() - 47;
+          var max_width = this.$(window).width();
+          this.$().css({ // image follow
+            'width': Math.max(max_width, this.get('minWidth')),
+            'height': Math.max(max_height, this.get('minHeight'))
+          });
+        }
+      }.bind(this), 500);
     }.bind(this));
   },
 
@@ -114,12 +130,23 @@ export default Ember.Mixin.create({
     this.$('.header').off('dblclick');
   },
 
+  showFliped: function () {
+    var fliped = this.get('fliped');
+    if (fliped) {
+      // Get List
+      this.$().addClass('fliped');
+
+    } else {
+      this.$().removeClass('fliped');
+    }
+  }.observes('fliped'),
+
   actions: {
     maximizeApp: function () {
-      var max_height = this.$(document).height() - 77;
-      console.log(max_height);
+      var max_height = this.$(window).height() - 47;
+      var max_width = this.$(window).width();
       if (this.get('isFullSize')) {
-        this.$().animate({ // image follow
+        this.$().animate({
           'top': this.get('top'),
           'left': this.get('left'),
           'width': this.get('width'),
@@ -129,7 +156,7 @@ export default Ember.Mixin.create({
         this.$().animate({ // image follow
           'top': 47,
           'left': 0,
-          'width': '100%',
+          'width': max_width,
           'height': max_height
         });
       }
@@ -162,7 +189,7 @@ export default Ember.Mixin.create({
     },
 
     flipApp: function () {
-      this.$().toggleClass('fliped');
+      this.set('fliped', false);
     }
   }
 

@@ -15,14 +15,25 @@ function receiveMessage(event) {
       };
       iframeWin.postMessage(payload, 'http://localhost/user-app-template6/app/index.html');
 
-    } else {
-      var payload = {
-       op: 'selectLink',
-       targetApp: {
-         id: 'Quotes',
-         name: 'Quotes',
-         icon: '123123/icon.png'
-       }
+    } else if (data.op === 'addLink') {
+      var originAppId = data.originAppId;
+      console.log(originAppId);
+      var viewId = Ember.$('.window.' + originAppId).attr('id')
+      var view = Ember.View.views[viewId];
+      if (viewId) {
+        view.set('fliped', true);
+
+        // Get Ember view
+        var payload = {
+         op: 'selectLink',
+         targetApp: {
+           id: 'Quotes',
+           name: 'Quotes',
+           icon: '123123/icon.png'
+         }
+
+      }
+
      };
      event.source.postMessage(payload, origin);
 

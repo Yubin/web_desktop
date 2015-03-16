@@ -29,9 +29,10 @@ export default Ember.Route.extend({
         },
         {
           app_name: "Customers",
+          app_id: "customerApp",
           icon: 'http://asa.static.gausian.com/user_app/Customers/icon.png',
           viewName: 'customer',
-          path: 'http://localhost/user-app-template5/app/index.html',
+          path: 'http://gausian-developers.github.io/user-app-template5/app/',
           screen: 2,
           col: 1,
           row: 0
@@ -40,7 +41,7 @@ export default Ember.Route.extend({
           app_name: "Quotes",
           icon: 'http://asa.static.gausian.com/user_app/Quotes/icon.png',
           viewName: 'customer',
-          path: 'http://localhost/user-app-template6/app/index.html',
+          path: 'http://gausian-developers.github.io/user-app-template6/app/',
           screen: 2,
           col: 2,
           row: 0

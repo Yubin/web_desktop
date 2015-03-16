@@ -4,19 +4,19 @@
 
 .window {
   border-radius: 5px;
-  overflow: hidden;
   text-align: left;
   position:absolute;
   .header {
     background-color: gray;
     padding: 0px 100px 0 28px;
-    top: 0;
-    position: absolute;
-    width: 100%;
     box-shadow: 0 0 10px black;
     z-index: 1;
   }
-
+  .shadow {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 10px 1px black;
+  }
   .spinner {
     position: absolute;
     display: none;
@@ -254,51 +254,6 @@ h1.title-mac {
   margin:5px 0;
   font-size:12px;
   line-height:12px;
-}
-#about-this-mac .about-this ul.hardware {
-  margin:15px 0;
-  padding:0;
-}
-#about-this-mac .about-this ul.hardware li {
-  list-style:none;
-  font-size:11px;
-  font-weight:normal;
-  color:#000;
-  margin-bottom:15px;
-  text-align:left;
-}
-#about-this-mac .about-this ul.hardware li strong {
-  float:left;
-  text-align:right;
-  width:92px;
-  margin-right:15px;
-}
-#about-this-mac .container-inside .copyright {
-  margin-top:15px;
-  font-size:10px;
-  font-weight:normal;
-}
-#about-this-mac .container-inside .copyright p:first-child {
-  margin-bottom:6px;
-}
-
-#about-this-mac nav.control-window {
-  height:12px;
-  top:2px;
-}
-#about-this-mac nav.control-window a {
-  margin: 1px 0px 2px 1px;
-  width: 10px;
-  height: 10px;
-}
-#about-this-mac nav.control-window a:after {
-  top: 1px;
-}
-#about-this-mac nav.control-window:hover a.close {
-  background: #FD4E4E url(../img/buttons-hover.png) 0px -7px no-repeat;
-}
-#about-this-mac nav.control-window a.close:active {
-  background: #c72f2b url(../img/buttons-hover.png) 0px -7px no-repeat;
 }
 
 .window.warning {
