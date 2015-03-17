@@ -25,8 +25,8 @@
   	left:0;
     width: inherit;
     height: inherit;
-    -webkit-transition: -webkit-transform .5s ease-in-out;
-            transition: transform .5s ease-in-out;
+    -webkit-transition: -webkit-transform 1s ease-in-out;
+            transition: transform 1s ease-in-out;
     -webkit-transform-style: preserve-3d;
        -moz-transform-style: preserve-3d;
             transform-style: preserve-3d;
@@ -42,21 +42,21 @@
             transform: rotateY(0deg);
   }
   .back {
-    -webkit-transform: rotateY(-179deg);
-       -moz-transform: rotateY(-179deg);
-         -o-transform: rotateY(-179deg);
-        -ms-transform: rotateY(-179deg);
-            transform: rotateY(-179deg);
+    -webkit-transform: rotateY(180deg);
+       -moz-transform: rotateY(180deg);
+         -o-transform: rotateY(180deg);
+        -ms-transform: rotateY(180deg);
+            transform: rotateY(180deg);
 
   }
 
   &.fliped {
     .front {
-      -webkit-transform: rotateY(180deg);
-         -moz-transform: rotateY(180deg);
-           -o-transform: rotateY(180deg);
-          -ms-transform: rotateY(180deg);
-              transform: rotateY(180deg);
+      -webkit-transform: rotateY(-180deg);
+         -moz-transform: rotateY(-180deg);
+           -o-transform: rotateY(-180deg);
+          -ms-transform: rotateY(-180deg);
+              transform: rotateY(-180deg);
     }
     .back {
       -webkit-transform: rotateY(0deg);
