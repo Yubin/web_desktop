@@ -38,7 +38,9 @@ export default Ember.View.extend({
   }.observes('iconWidth', 'parentWidth','parentHeight'),
 
   didInsertElement: function () {
-    this.$().draggable();
+    this.$().draggable({
+      scroll: false,
+    });
     this.handleSize();
     this.position();
   },
@@ -98,18 +100,21 @@ export default Ember.View.extend({
     });
   },
 
-  mouseDown: function (event) {
-    var originEvt = event.originalEvent;
-    var offsetX = originEvt.offsetX ? originEvt.offsetX : originEvt.layerX;
-    var offsetY = originEvt.offsetY ? originEvt.offsetY : originEvt.layerY;
-
-    this.$().addClass('dragging');
-    this.get('parentView').onMouseDown(this, offsetX, offsetY);
-  },
-
-  mouseUp: function (evt) {
-    this.$().removeClass('dragging');
-    return true;
+  click: function () {
+    this.get('controller').send('openApp', this.get('content'));
   }
+  // mouseDown: function (event) {
+  //   var originEvt = event.originalEvent;
+  //   var offsetX = originEvt.offsetX ? originEvt.offsetX : originEvt.layerX;
+  //   var offsetY = originEvt.offsetY ? originEvt.offsetY : originEvt.layerY;
+  //
+  //   this.$().addClass('dragging');
+  //   this.get('parentView').onMouseDown(this, offsetX, offsetY);
+  // },
+  //
+  // mouseUp: function (evt) {
+  //   this.$().removeClass('dragging');
+  //   return true;
+  // }
 
 });

@@ -79,83 +79,83 @@ export default Ember.View.extend({
     newCol = newCol > 3 ? 3: newCol;
     return {row: newRow, col: newCol, scr: newScr};
   },
-
-  onMouseDown: function (app, offsetX, offsetY) { // this will be called by item
-    this.setProperties({
-      'activeApp': app,
-      'offsetX': offsetX,
-      'offsetY': offsetY
-    });
-
-    this.$(document).on('mousemove', this.onMouseMove.bind(this));
-    this.on('mouseUp', this.onMouseRelease);
-    //this.on('mouseLeave', this.onMouseRelease);
-  },
-
-  onMouseMove: function (event) {
-    this.get('controller').send('appMoving');
-    this.set('appTouch', true);
-    var node = this.get('activeApp');
-    var originEvt = event.originalEvent;
-    var offset = node.$().parent().offset(); // TBD
-    var x = originEvt.clientX - this.get('offsetX') - offset.left;
-    var y = originEvt.clientY - this.get('offsetY') - offset.top;
-
-    if (y < -100) {
-      console.log(this.get('deleting'));
-      if (this.get('deleting') >= 5) {
-        this.get('controller').send('deleteApp', node.get('content'));
-        this.set('deleting', 0);
-        this.set('deleted', true);
-      }
-      this.incrementProperty('deleting');
-    } else {
-      this.set('deleting', 0);
-      this.set('deleted', false);
-    }
-
-    if (this.get('deleted')) {
-      this.$(document).off('mousemove');
-      this.off('mouseUp', this.onMouseRelease);
-      this.set('deleted', false);
-      this.set('appTouch', false);
-      this.get('controller').send('appStop');
-      return;
-    }
-    node.$().css({ // image follow
-      'top': y,
-      'left': x,
-      'z-index': '100'
-    });
-    var rowCol = this.getScreenRowCol(x, y);
-    if (node.get('row') !== rowCol.row ||
-        node.get('col') !== rowCol.col ||
-        node.get('scr') !== rowCol.scr) {
-      this.shuffle({
-        row: node.get('row'),
-        col: node.get('col'),
-        scr: node.get('scr')
-      }, rowCol);
-    }
-  },
-
-  onMouseRelease: function () {
-    var node = this.get('activeApp');
-    node.$().removeClass('dragging');
-    this.$(document).off('mousemove');
-    this.off('mouseUp', this.onMouseRelease);
-    // this.off('mouseLeave', this.onMouseRelease);
-    node.position(node.get('row'), node.get('col'), node.get('scr'), 300);
-
-    node.$().css({
-      'z-index': 1
-    });
-    if (!this.get('appTouch')) {
-      this.get('controller').send('openApp', node.get('content'));
-    }
-    this.set('appTouch', false);
-    this.get('controller').send('appStop');
-  },
+  //
+  // onMouseDown: function (app, offsetX, offsetY) { // this will be called by item
+  //   this.setProperties({
+  //     'activeApp': app,
+  //     'offsetX': offsetX,
+  //     'offsetY': offsetY
+  //   });
+  //
+  //   this.$(document).on('mousemove', this.onMouseMove.bind(this));
+  //   this.on('mouseUp', this.onMouseRelease);
+  //   //this.on('mouseLeave', this.onMouseRelease);
+  // },
+  //
+  // onMouseMove: function (event) {
+  //   this.get('controller').send('appMoving');
+  //   this.set('appTouch', true);
+  //   var node = this.get('activeApp');
+  //   var originEvt = event.originalEvent;
+  //   var offset = node.$().parent().offset(); // TBD
+  //   var x = originEvt.clientX - this.get('offsetX') - offset.left;
+  //   var y = originEvt.clientY - this.get('offsetY') - offset.top;
+  //
+  //   if (y < -100) {
+  //     console.log(this.get('deleting'));
+  //     if (this.get('deleting') >= 5) {
+  //       this.get('controller').send('deleteApp', node.get('content'));
+  //       this.set('deleting', 0);
+  //       this.set('deleted', true);
+  //     }
+  //     this.incrementProperty('deleting');
+  //   } else {
+  //     this.set('deleting', 0);
+  //     this.set('deleted', false);
+  //   }
+  //
+  //   if (this.get('deleted')) {
+  //     this.$(document).off('mousemove');
+  //     this.off('mouseUp', this.onMouseRelease);
+  //     this.set('deleted', false);
+  //     this.set('appTouch', false);
+  //     this.get('controller').send('appStop');
+  //     return;
+  //   }
+  //   node.$().css({ // image follow
+  //     'top': y,
+  //     'left': x,
+  //     'z-index': '100'
+  //   });
+  //   var rowCol = this.getScreenRowCol(x, y);
+  //   if (node.get('row') !== rowCol.row ||
+  //       node.get('col') !== rowCol.col ||
+  //       node.get('scr') !== rowCol.scr) {
+  //     this.shuffle({
+  //       row: node.get('row'),
+  //       col: node.get('col'),
+  //       scr: node.get('scr')
+  //     }, rowCol);
+  //   }
+  // },
+  //
+  // onMouseRelease: function () {
+  //   var node = this.get('activeApp');
+  //   node.$().removeClass('dragging');
+  //   this.$(document).off('mousemove');
+  //   this.off('mouseUp', this.onMouseRelease);
+  //   // this.off('mouseLeave', this.onMouseRelease);
+  //   node.position(node.get('row'), node.get('col'), node.get('scr'), 300);
+  //
+  //   node.$().css({
+  //     'z-index': 1
+  //   });
+  //   if (!this.get('appTouch')) {
+  //     this.get('controller').send('openApp', node.get('content'));
+  //   }
+  //   this.set('appTouch', false);
+  //   this.get('controller').send('appStop');
+  // },
 
   shuffle: function (from, to) {  // TBD add screen constrain
     console.log(JSON.stringify(from) + ' -> ' + JSON.stringify(to));
