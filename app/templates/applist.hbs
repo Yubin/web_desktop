@@ -5,8 +5,9 @@
   {{view 'appscreen' index=id hasApp=hasApp}}
   {{/each}}
 
-  <ul>
+  {{!-- <ul> --}}
     {{#each app in view.controller.model}}
     {{view 'appicon' content=app}}
     {{/each}}
-  </ul>
+  {{!-- </ul> --}}
+  <div class='hint'></div>

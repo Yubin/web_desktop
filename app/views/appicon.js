@@ -1,12 +1,10 @@
 import Ember from 'ember';
 
 export default Ember.View.extend({
-  tagName: 'li',
   templateName: 'appicon',
+  classNames: ['appicon'],
   attributeBindings : [ 'draggable' ],
-  draggable         : 'true',
-
-
+  // draggable         : 'true',
   row: function () {
     return this.get('content.row');
   }.property('content.row'),
@@ -23,7 +21,6 @@ export default Ember.View.extend({
     return this.get('parentView.iconWidth');
   }.property('parentView.iconWidth'),
 
-
   parentWidth: function () {
     return this.get('parentView.screenWidth');
   }.property('parentView.screenWidth'),
@@ -39,7 +36,21 @@ export default Ember.View.extend({
 
   didInsertElement: function () {
     this.$().draggable({
-      scroll: false,
+      containment: 'body',
+      start: function(evt) {
+        this.$().addClass('dragging');
+        this.get('parentView').onDragStart(this, evt);
+      }.bind(this),
+      stop: function (evt) {
+        Ember.run.later(function () {
+          this.$().removeClass('dragging');
+          this.get('parentView').onDragStop(this, evt);
+        }.bind(this), 100);
+      }.bind(this),
+      drag: function (evt) {
+        this.get('parentView').onDraging(this, evt);
+      }.bind(this)
+
     });
     this.handleSize();
     this.position();
@@ -65,22 +76,33 @@ export default Ember.View.extend({
     });
   },
 
+  index2position: function (row, col, scr) {
+    var iconWidth = this.get('iconWidth');
+    var iconHeight = this.get('iconWidth') * 1.333;
+
+    var screenWidth = this.get('parentView.screenWidth');
+    var screenHeight = this.get('parentView.screenHeight');
+
+    var offsetWidth  = (screenWidth - iconWidth * 4) / 5;
+    var offsetHeight = (screenHeight - iconHeight * 5) / 6;
+
+    var widthOffset = this.get('parentView.widthOffset');
+    var screenLeft = scr * (screenWidth + widthOffset) + widthOffset;
+
+    return {
+      top: (iconHeight + offsetHeight) * row + offsetHeight,
+      left: (iconWidth + offsetWidth) * col + offsetWidth + screenLeft
+    };
+  },
 
   position: function (row, col, scr, duration) {
     row = !Ember.isEmpty(row) ? row : this.get('row');
     col = !Ember.isEmpty(col) ? col : this.get('col');
     scr = !Ember.isEmpty(scr) ? scr : this.get('scr');
-    var iconWidth = this.get('iconWidth');
-    var iconHeight = this.get('parentView.iconHeight');
-    var offsetHeight = this.get('parentView.offsetHeight');
-    var offsetWidth  = this.get('parentView.offsetWidth');
 
-    var screnWidth = this.get('parentView.screenWidth');
-    var widthOffset = this.get('parentView.widthOffset');
-    var screenLeft = scr * (screnWidth + widthOffset) + widthOffset;
-
-    var top  = (iconHeight + offsetHeight) * row + offsetHeight;
-    var left = (iconWidth + offsetWidth) * col + offsetWidth + screenLeft;
+    var position = this.index2position(row, col, scr);
+    var top = position.top;
+    var left = position.left;
 
     if (duration) {
       this.$().animate({
@@ -100,21 +122,38 @@ export default Ember.View.extend({
     });
   },
 
+  position2index: function (left, top) {
+    var iconWidth = this.get('iconWidth');
+    var iconHeight = this.get('iconWidth') * 1.333;
+    var screenWidth = this.get('parentView.screenWidth');
+    var screenHeight = this.get('parentView.screenHeight');
+    var offsetWidth  = (screenWidth - iconWidth * 4) / 5;
+    var offsetHeight = (screenHeight - iconHeight * 5) / 6;
+
+    var widthOffset = this.get('parentView.widthOffset');
+
+    var screenLeft = screenWidth + widthOffset;
+
+    var newScr = 0;
+    for (var i = 0 ; i < 3; i++) {
+      if (left + iconWidth/2 >= screenLeft * i + widthOffset && left + iconWidth/2 < screenLeft * (i + 1) + widthOffset) {
+        newScr = i;
+      }
+    }
+
+    var newCol = Math.round((left - offsetWidth/2 - newScr * screenLeft - widthOffset) * 4 / screenWidth);
+    var newRow = Math.round((top - offsetHeight/2) * 5 / screenHeight);
+
+    newCol = newCol < 0 ? 0: newCol;
+    newCol = newCol > 3 ? 3: newCol;
+    return {row: newRow, col: newCol, scr: newScr};
+  },
+
   click: function () {
-    this.get('controller').send('openApp', this.get('content'));
+    var dragging = this.$().hasClass('dragging');
+    if (!dragging) {
+      this.get('controller').send('openApp', this.get('content'));
+    }
   }
-  // mouseDown: function (event) {
-  //   var originEvt = event.originalEvent;
-  //   var offsetX = originEvt.offsetX ? originEvt.offsetX : originEvt.layerX;
-  //   var offsetY = originEvt.offsetY ? originEvt.offsetY : originEvt.layerY;
-  //
-  //   this.$().addClass('dragging');
-  //   this.get('parentView').onMouseDown(this, offsetX, offsetY);
-  // },
-  //
-  // mouseUp: function (evt) {
-  //   this.$().removeClass('dragging');
-  //   return true;
-  // }
 
 });

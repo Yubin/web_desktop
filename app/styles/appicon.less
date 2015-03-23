@@ -2,6 +2,17 @@
   position: absolute;
   top: 18%;
   z-index: -1;
+  .hint {
+    position: absolute;
+    background: white;
+    width: 60px;
+    height: 75px;
+    border-radius: 10px;
+    opacity: 0.6;
+    margin-top: -5px;
+    margin-left: -6px;
+    display: none;
+  }
   .appscreen {
     background: inherit;
     position: absolute;
@@ -34,10 +45,11 @@
       // filter:progid:DXImageTransform.Microsoft.Blur(PixelRadius='6');
     }
   }
-  ul {
-    position: absolute;
-    list-style: none;
-    li {
+  // ul {
+  //   position:relative;
+  //   // position: absolute;
+  //   list-style: none;
+    .appicon {
       -webkit-transition: opacity, -webkit-transform 0.2s ease-in-out;
       transition: opacity, transform 0.2s ease-in-out;
       cursor: pointer;
@@ -86,7 +98,7 @@
         transform: rotate(7deg);
       }
     }
-  }
+  // }
 
 
   li.placeholder {

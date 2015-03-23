@@ -1267,11 +1267,20 @@ define('web-desktop/templates/appicon', ['exports', 'ember'], function (exports,
   /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
-    var buffer = '', escapeExpression=this.escapeExpression;
+    var buffer = '', stack1, escapeExpression=this.escapeExpression;
 
 
     data.buffer.push("<div class=\"effect fadeIn fadeIn-50ms fadeIn-Delay-100ms\"></div>\n<div class=\"app-edge fadeIn fadeIn-50ms fadeIn-Delay-100ms\"></div>\n<div class=\"app-img fadeIn fadeIn-50ms fadeIn-Delay-100ms\"></div>\n<div class=\"app-text fadeIn fadeIn-50ms fadeIn-Delay-100ms\">");
     data.buffer.push(escapeExpression(helpers.unbound.call(depth0, "view.content.app_name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data})));
+    data.buffer.push(",");
+    stack1 = helpers._triageMustache.call(depth0, "view.col", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+    data.buffer.push(",");
+    stack1 = helpers._triageMustache.call(depth0, "view.row", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+    data.buffer.push(",");
+    stack1 = helpers._triageMustache.call(depth0, "view.scr", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
     data.buffer.push("</div>\n");
     return buffer;
     
@@ -1361,10 +1370,10 @@ define('web-desktop/templates/applist', ['exports', 'ember'], function (exports,
     data.buffer.push("\n\n\n  ");
     stack1 = helpers.each.call(depth0, "view.controller.screens", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\n\n  <ul>\n    ");
+    data.buffer.push("\n\n  \n    ");
     stack1 = helpers.each.call(depth0, "app", "in", "view.controller.model", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(3, program3, data),contexts:[depth0,depth0,depth0],types:["ID","ID","ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\n  </ul>\n");
+    data.buffer.push("\n  \n  <div class='hint'></div>\n");
     return buffer;
     
   });
@@ -2206,7 +2215,7 @@ define('web-desktop/tests/views/applist.jshint', function () {
 
   module('JSHint - views');
   test('views/applist.js should pass jshint', function() { 
-    ok(false, 'views/applist.js should pass jshint.\nviews/applist.js: line 4, col 5, \'KEYS\' is defined but never used.\n\n1 error'); 
+    ok(false, 'views/applist.js should pass jshint.\nviews/applist.js: line 141, col 33, Expected \'===\' and instead saw \'==\'.\nviews/applist.js: line 142, col 26, Expected \'===\' and instead saw \'==\'.\nviews/applist.js: line 143, col 26, Expected \'===\' and instead saw \'==\'.\nviews/applist.js: line 68, col 73, \'$\' is not defined.\nviews/applist.js: line 69, col 73, \'$\' is not defined.\nviews/applist.js: line 124, col 31, \'event\' is defined but never used.\n\n6 errors'); 
   });
 
 });
@@ -2628,12 +2637,10 @@ define('web-desktop/views/appicon', ['exports', 'ember'], function (exports, Emb
   'use strict';
 
   exports['default'] = Ember['default'].View.extend({
-    tagName: 'li',
     templateName: 'appicon',
+    classNames: ['appicon'],
     attributeBindings : [ 'draggable' ],
-    draggable         : 'true',
-
-
+    // draggable         : 'true',
     row: function () {
       return this.get('content.row');
     }.property('content.row'),
@@ -2650,7 +2657,6 @@ define('web-desktop/views/appicon', ['exports', 'ember'], function (exports, Emb
       return this.get('parentView.iconWidth');
     }.property('parentView.iconWidth'),
 
-
     parentWidth: function () {
       return this.get('parentView.screenWidth');
     }.property('parentView.screenWidth'),
@@ -2666,7 +2672,21 @@ define('web-desktop/views/appicon', ['exports', 'ember'], function (exports, Emb
 
     didInsertElement: function () {
       this.$().draggable({
-        scroll: false,
+        containment: 'body',
+        start: function(evt) {
+          this.$().addClass('dragging');
+          this.get('parentView').onDragStart(this, evt);
+        }.bind(this),
+        stop: function (evt) {
+          Ember['default'].run.later(function () {
+            this.$().removeClass('dragging');
+            this.get('parentView').onDragStop(this, evt);
+          }.bind(this), 100);
+        }.bind(this),
+        drag: function (evt) {
+          this.get('parentView').onDraging(this, evt);
+        }.bind(this)
+
       });
       this.handleSize();
       this.position();
@@ -2692,22 +2712,33 @@ define('web-desktop/views/appicon', ['exports', 'ember'], function (exports, Emb
       });
     },
 
+    index2position: function (row, col, scr) {
+      var iconWidth = this.get('iconWidth');
+      var iconHeight = this.get('iconWidth') * 1.333;
+
+      var screenWidth = this.get('parentView.screenWidth');
+      var screenHeight = this.get('parentView.screenHeight');
+
+      var offsetWidth  = (screenWidth - iconWidth * 4) / 5;
+      var offsetHeight = (screenHeight - iconHeight * 5) / 6;
+
+      var widthOffset = this.get('parentView.widthOffset');
+      var screenLeft = scr * (screenWidth + widthOffset) + widthOffset;
+
+      return {
+        top: (iconHeight + offsetHeight) * row + offsetHeight,
+        left: (iconWidth + offsetWidth) * col + offsetWidth + screenLeft
+      };
+    },
 
     position: function (row, col, scr, duration) {
       row = !Ember['default'].isEmpty(row) ? row : this.get('row');
       col = !Ember['default'].isEmpty(col) ? col : this.get('col');
       scr = !Ember['default'].isEmpty(scr) ? scr : this.get('scr');
-      var iconWidth = this.get('iconWidth');
-      var iconHeight = this.get('parentView.iconHeight');
-      var offsetHeight = this.get('parentView.offsetHeight');
-      var offsetWidth  = this.get('parentView.offsetWidth');
 
-      var screnWidth = this.get('parentView.screenWidth');
-      var widthOffset = this.get('parentView.widthOffset');
-      var screenLeft = scr * (screnWidth + widthOffset) + widthOffset;
-
-      var top  = (iconHeight + offsetHeight) * row + offsetHeight;
-      var left = (iconWidth + offsetWidth) * col + offsetWidth + screenLeft;
+      var position = this.index2position(row, col, scr);
+      var top = position.top;
+      var left = position.left;
 
       if (duration) {
         this.$().animate({
@@ -2727,22 +2758,39 @@ define('web-desktop/views/appicon', ['exports', 'ember'], function (exports, Emb
       });
     },
 
+    position2index: function (left, top) {
+      var iconWidth = this.get('iconWidth');
+      var iconHeight = this.get('iconWidth') * 1.333;
+      var screenWidth = this.get('parentView.screenWidth');
+      var screenHeight = this.get('parentView.screenHeight');
+      var offsetWidth  = (screenWidth - iconWidth * 4) / 5;
+      var offsetHeight = (screenHeight - iconHeight * 5) / 6;
+
+      var widthOffset = this.get('parentView.widthOffset');
+
+      var screenLeft = screenWidth + widthOffset;
+
+      var newScr = 0;
+      for (var i = 0 ; i < 3; i++) {
+        if (left + iconWidth/2 >= screenLeft * i + widthOffset && left + iconWidth/2 < screenLeft * (i + 1) + widthOffset) {
+          newScr = i;
+        }
+      }
+
+      var newCol = Math.round((left - offsetWidth/2 - newScr * screenLeft - widthOffset) * 4 / screenWidth);
+      var newRow = Math.round((top - offsetHeight/2) * 5 / screenHeight);
+
+      newCol = newCol < 0 ? 0: newCol;
+      newCol = newCol > 3 ? 3: newCol;
+      return {row: newRow, col: newCol, scr: newScr};
+    },
+
     click: function () {
-      this.get('controller').send('openApp', this.get('content'));
+      var dragging = this.$().hasClass('dragging');
+      if (!dragging) {
+        this.get('controller').send('openApp', this.get('content'));
+      }
     }
-    // mouseDown: function (event) {
-    //   var originEvt = event.originalEvent;
-    //   var offsetX = originEvt.offsetX ? originEvt.offsetX : originEvt.layerX;
-    //   var offsetY = originEvt.offsetY ? originEvt.offsetY : originEvt.layerY;
-    //
-    //   this.$().addClass('dragging');
-    //   this.get('parentView').onMouseDown(this, offsetX, offsetY);
-    // },
-    //
-    // mouseUp: function (evt) {
-    //   this.$().removeClass('dragging');
-    //   return true;
-    // }
 
   });
 
@@ -2756,11 +2804,10 @@ define('web-desktop/views/application', ['exports', 'ember'], function (exports,
   });
 
 });
-define('web-desktop/views/applist', ['exports', 'ember', 'web-desktop/utils/keys'], function (exports, Ember, keyUtils) {
+define('web-desktop/views/applist', ['exports', 'ember'], function (exports, Ember) {
 
   'use strict';
 
-  var KEYS = keyUtils['default'].KEYS;
   var get = Ember['default'].get;
 
   exports['default'] = Ember['default'].View.extend({
@@ -2777,7 +2824,6 @@ define('web-desktop/views/applist', ['exports', 'ember', 'web-desktop/utils/keys
 
     init: function () {
       this._super();
-      this.handleSize();
       Ember['default'].$(window).resize(function() {
         this.handleSize();
       }.bind(this));
@@ -2790,150 +2836,138 @@ define('web-desktop/views/applist', ['exports', 'ember', 'web-desktop/utils/keys
     handleSize: function () {
 
       var minWidthIcon = 48;
-      var minHeightWin = 600;
-      var minWidthWin = 800;
-      var winWidth  = Math.max(Ember['default'].$(window).width(), minWidthWin);
-      var winHeight = Math.max(Ember['default'].$(window).height()*0.85, minHeightWin);
+      // var minHeightWin = 600;
+      // var minWidthWin = 800;
+      var winWidth  = Ember['default'].$(window).width() ;
+      var winHeight = Ember['default'].$(window).height();
 
-      var height = (winHeight) * 0.9;
+      var paddingRate = 0.04;
+      var paddingTop = winHeight * paddingRate;
+
+      var top = Ember['default'].$('.ember-view.head').height() +
+        Ember['default'].$('.ember-view.search-bar .search').height() + 2 * paddingTop;
+
+      this.$().css({
+        top: top,
+        bottom: 0,
+        left: 0,
+        right: 0
+      });
+
+      var height = (winHeight - top) * (1 - 2 * paddingRate);
       var width = winWidth / 3 * 0.86 ;
       var widthOffset = (winWidth - 3 * (width)) / 4;
-
       var iconWidth = Math.max(width/4 * 0.6, minWidthIcon);
       var iconHeight = iconWidth * 4 / 3;
 
-      var offsetWidth  = (width - iconWidth * 4) / 5;
-      var offsetHeight = (height - iconHeight * 5) / 6;
 
       this.setProperties({
         screenWidth:  width,
         screenHeight: height,
-        screenTop:    0,
         widthOffset:  widthOffset,
         iconWidth:    iconWidth,
-        iconHeight:   iconHeight,
-        offsetHeight: offsetHeight,
-        offsetWidth:  offsetWidth
+        iconHeight:   iconHeight
       });
     },
 
-    getScreenRowCol: function (left, top) {
-      var offsetWidth = this.get('offsetWidth');
-      var offsetHeight = this.get('offsetHeight');
-      var screenWidth = this.get('screenWidth');
-      var widthOffset = this.get('widthOffset');
-      var screenLeft = screenWidth + widthOffset + 10;
-
-      var newScr = 0;
-      for (var i = 0 ; i < 3; i++) {
-        if (left >= screenLeft * i + widthOffset && left < screenLeft * (i + 1) + widthOffset) {
-          newScr = i;
-        }
-      }
-
-      var newCol = Math.round((left - offsetWidth/2 - newScr * screenLeft - widthOffset) * 4 / screenWidth);
-      var newRow = Math.round((top - offsetHeight/2) * 5 / this.get('screenHeight'));
-
-      newCol = newCol < 0 ? 0: newCol;
-      newCol = newCol > 3 ? 3: newCol;
-      return {row: newRow, col: newCol, scr: newScr};
+    onDragStart: function (node, evt) {
+      var originEvt = evt.originalEvent;
+      var offset = node.$().parent().offset();
+      var offsetX = originEvt.offsetX ? originEvt.offsetX : evt.clientX - $(evt.target).offset().left;
+      var offsetY = originEvt.offsetY ? originEvt.offsetY : evt.clientY - $(evt.target).offset().top;
+      var x = originEvt.clientX - offsetX - offset.left;
+      var y = originEvt.clientY - offsetY - offset.top;
+      this.setProperties({
+        'activeApp': node,
+        'offsetX': offsetX,
+        'offsetY': offsetY
+      });
+      this.$('.hint').css({ // image follow
+        'top': y,
+        'left': x,
+        'z-index': 99
+      });
+      this.$('.hint').show();
     },
     //
-    // onMouseDown: function (app, offsetX, offsetY) { // this will be called by item
-    //   this.setProperties({
-    //     'activeApp': app,
-    //     'offsetX': offsetX,
-    //     'offsetY': offsetY
-    //   });
-    //
-    //   this.$(document).on('mousemove', this.onMouseMove.bind(this));
-    //   this.on('mouseUp', this.onMouseRelease);
-    //   //this.on('mouseLeave', this.onMouseRelease);
-    // },
-    //
-    // onMouseMove: function (event) {
-    //   this.get('controller').send('appMoving');
-    //   this.set('appTouch', true);
-    //   var node = this.get('activeApp');
-    //   var originEvt = event.originalEvent;
-    //   var offset = node.$().parent().offset(); // TBD
-    //   var x = originEvt.clientX - this.get('offsetX') - offset.left;
-    //   var y = originEvt.clientY - this.get('offsetY') - offset.top;
-    //
-    //   if (y < -100) {
-    //     console.log(this.get('deleting'));
-    //     if (this.get('deleting') >= 5) {
-    //       this.get('controller').send('deleteApp', node.get('content'));
-    //       this.set('deleting', 0);
-    //       this.set('deleted', true);
-    //     }
-    //     this.incrementProperty('deleting');
-    //   } else {
-    //     this.set('deleting', 0);
-    //     this.set('deleted', false);
-    //   }
-    //
-    //   if (this.get('deleted')) {
-    //     this.$(document).off('mousemove');
-    //     this.off('mouseUp', this.onMouseRelease);
-    //     this.set('deleted', false);
-    //     this.set('appTouch', false);
-    //     this.get('controller').send('appStop');
-    //     return;
-    //   }
-    //   node.$().css({ // image follow
-    //     'top': y,
-    //     'left': x,
-    //     'z-index': '100'
-    //   });
-    //   var rowCol = this.getScreenRowCol(x, y);
-    //   if (node.get('row') !== rowCol.row ||
-    //       node.get('col') !== rowCol.col ||
-    //       node.get('scr') !== rowCol.scr) {
-    //     this.shuffle({
-    //       row: node.get('row'),
-    //       col: node.get('col'),
-    //       scr: node.get('scr')
-    //     }, rowCol);
-    //   }
-    // },
-    //
-    // onMouseRelease: function () {
-    //   var node = this.get('activeApp');
-    //   node.$().removeClass('dragging');
-    //   this.$(document).off('mousemove');
-    //   this.off('mouseUp', this.onMouseRelease);
-    //   // this.off('mouseLeave', this.onMouseRelease);
-    //   node.position(node.get('row'), node.get('col'), node.get('scr'), 300);
-    //
-    //   node.$().css({
-    //     'z-index': 1
-    //   });
-    //   if (!this.get('appTouch')) {
-    //     this.get('controller').send('openApp', node.get('content'));
-    //   }
-    //   this.set('appTouch', false);
-    //   this.get('controller').send('appStop');
-    // },
+    onDraging: function (node, event) {
+      this.get('controller').send('appMoving');
+      var originEvt = event.originalEvent;
+      var offset = node.$().parent().offset(); // TBD
+      var x = originEvt.clientX - this.get('offsetX') - offset.left;
+      var y = originEvt.clientY - this.get('offsetY') - offset.top;
+      node.$().css({ // image follow
+        'z-index': '100'
+      });
+      Ember['default'].run.debounce(function () {
+        var rowCol = node.position2index(x, y);
+        var row = rowCol.row;
+        var col = rowCol.col;
+        var scr = rowCol.scr;
+
+        if (row < -1) { // delete
+          this.set('toDelete', true);
+        } else if (row >= 0){
+          this.set('toDelete', false);
+          var position = node.index2position(row, col, scr);
+          this.$('.hint').css({ // image follow
+            'top': position.top,
+            'left': position.left,
+            'z-index': 99
+          });
+
+          if (node.get('row') !== row ||
+              node.get('col') !== col ||
+              node.get('scr') !== scr) {
+            this.shuffle({
+              row: node.get('row'),
+              col: node.get('col'),
+              scr: node.get('scr')
+            }, rowCol);
+          }
+        }
+      }.bind(this), 300);
+
+    },
+    onDragStop: function (node, event) {
+      if (this.get('toDelete')) {
+        this.get('controller').send('deleteApp', node.get('content'));
+        this.set('toDelete', false);
+      } else {
+        node.position(node.get('row'), node.get('col'), node.get('scr'), 300);
+        node.$().css({
+          'z-index': 1
+        });
+      }
+      this.$('.hint').hide();
+      this.get('controller').send('appStop');
+    },
 
     shuffle: function (from, to) {  // TBD add screen constrain
       console.log(JSON.stringify(from) + ' -> ' + JSON.stringify(to));
       var isSamePosition = function (pos1, pos2) {
-        return get(pos1, 'col') === get(pos2, 'col') &&
-        get(pos1, 'row') === get(pos2, 'row') &&
-        get(pos1, 'scr') === get(pos2, 'scr');
+        return get(pos1, 'col') == get(pos2, 'col') &&
+        get(pos1, 'row') == get(pos2, 'row') &&
+        get(pos1, 'scr') == get(pos2, 'scr');
       };
-      this.get('childViews').forEach(function (itemView) {
-        if (isSamePosition(itemView, to)) { // swap
-          itemView.position(get(from, 'row'), get(from, 'col'), get(from, 'scr'), 200);
-        } else if (isSamePosition(itemView, from)) { // target
-          itemView.setProperties({
-            col: get(to, 'col'),
-            row: get(to, 'row'),
-            scr: get(to, 'scr')
-          });
-        }
+      var itemTarget = this.get('childViews').find(function (itemView) {
+        return isSamePosition(itemView, to);
       });
+      var itemOrigin = this.get('childViews').find(function (itemView) {
+        return isSamePosition(itemView, from);
+      });
+
+      if (itemTarget) {
+        itemTarget.position(get(from, 'row'), get(from, 'col'), get(from, 'scr'), 200);
+      }
+      if (itemOrigin) {
+        itemOrigin.setProperties({
+          'content.col': get(to, 'col'),
+          'content.row': get(to, 'row'),
+          'content.screen': get(to, 'scr')
+        });
+      }
+
     },
   });
 
@@ -2958,18 +2992,25 @@ define('web-desktop/views/appscreen', ['exports', 'ember'], function (exports, E
       }.bind(this));
     },
 
+    didInsertElement: function () {
+      this.handleSize();
+    },
+
     handleSize: function () {
       var index = this.get('index') || 0;
       var width = this.get('parentView.screenWidth');
       var widthOffset = this.get('parentView.widthOffset');
       var left = index * (width + widthOffset) + widthOffset;
       this.$().css({
-        top: this.get('parentView.screenTop'),
+        top: 0,
         left: left,
         width: width,
         height: this.get('parentView.screenHeight')
       });
-    }.on('didInsertElement')
+    }.observes('parentView.screenWidth',
+      'parentView.screenHeight',
+      'parentView.screenTop',
+      'parentView.widthOffset')
 
 
   });

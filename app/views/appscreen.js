@@ -16,18 +16,25 @@ export default Ember.View.extend({
     }.bind(this));
   },
 
+  didInsertElement: function () {
+    this.handleSize();
+  },
+
   handleSize: function () {
     var index = this.get('index') || 0;
     var width = this.get('parentView.screenWidth');
     var widthOffset = this.get('parentView.widthOffset');
     var left = index * (width + widthOffset) + widthOffset;
     this.$().css({
-      top: this.get('parentView.screenTop'),
+      top: 0,
       left: left,
       width: width,
       height: this.get('parentView.screenHeight')
     });
-  }.on('didInsertElement')
+  }.observes('parentView.screenWidth',
+    'parentView.screenHeight',
+    'parentView.screenTop',
+    'parentView.widthOffset')
 
 
 });
