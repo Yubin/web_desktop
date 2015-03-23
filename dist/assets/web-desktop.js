@@ -170,11 +170,27 @@ define('web-desktop/components/star-rating', ['exports', 'ember'], function (exp
   });
 
 });
-define('web-desktop/components/trash-can', ['exports', 'ember', 'web-desktop/mixins/drag-n-drop-view'], function (exports, Ember, DragDrop) {
+define('web-desktop/components/trash-can', ['exports', 'ember'], function (exports, Ember) {
 
-	'use strict';
+  'use strict';
 
-	exports['default'] = Ember['default'].Component.extend(DragDrop['default'].Droppable,{});
+  exports['default'] = Ember['default'].Component.extend({
+    didInsertElement: function () {
+      var self = this;
+      this.$('.trash').droppable({
+        hoverClass: "ui-state-hover",
+        accept: ".appicon",
+        drop: function (event, ui) {
+          var id = Ember['default'].$(ui.draggable[0]).attr('id');
+          var view = Ember['default'].View.views[id];
+          if (view) {
+            self.sendAction('action', view.get('content'));
+          }
+        }
+      });
+    },
+
+  });
 
 });
 define('web-desktop/controllers/application', ['exports', 'ember'], function (exports, Ember) {
@@ -191,7 +207,6 @@ define('web-desktop/controllers/application', ['exports', 'ember'], function (ex
       loginClose: function () {
         this.set('loginShow', false);
       }
-
     }
   });
 
@@ -435,10 +450,9 @@ define('web-desktop/controllers/header', ['exports', 'ember'], function (exports
       return this.get('openApps').slice(0, 10);
     }.property('openApps.length'),
 
-    sendDock: function () {
+    subDock: function () {
       return this.get('openApps').slice(11);
     }.property('openApps.length')
-
 
   });
 
@@ -1034,6 +1048,11 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
         ctrl._actions['openApp'].apply(ctrl, arguments);
       },
 
+      deleteApp: function (content) {
+        var ctrl = this.controllerFor('applist');
+        ctrl._actions['deleteApp'].apply(ctrl, arguments);
+      },
+
       loginUser: function (content) {
 
         this.store.createRecord('login', {
@@ -1267,20 +1286,11 @@ define('web-desktop/templates/appicon', ['exports', 'ember'], function (exports,
   /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
-    var buffer = '', stack1, escapeExpression=this.escapeExpression;
+    var buffer = '', escapeExpression=this.escapeExpression;
 
 
     data.buffer.push("<div class=\"effect fadeIn fadeIn-50ms fadeIn-Delay-100ms\"></div>\n<div class=\"app-edge fadeIn fadeIn-50ms fadeIn-Delay-100ms\"></div>\n<div class=\"app-img fadeIn fadeIn-50ms fadeIn-Delay-100ms\"></div>\n<div class=\"app-text fadeIn fadeIn-50ms fadeIn-Delay-100ms\">");
     data.buffer.push(escapeExpression(helpers.unbound.call(depth0, "view.content.app_name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data})));
-    data.buffer.push(",");
-    stack1 = helpers._triageMustache.call(depth0, "view.col", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
-    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push(",");
-    stack1 = helpers._triageMustache.call(depth0, "view.row", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
-    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push(",");
-    stack1 = helpers._triageMustache.call(depth0, "view.scr", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
-    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
     data.buffer.push("</div>\n");
     return buffer;
     
@@ -1306,29 +1316,21 @@ define('web-desktop/templates/application', ['exports', 'ember'], function (expo
     return buffer;
     }
 
-  function program3(depth0,data) {
-    
-    var buffer = '', stack1;
-    data.buffer.push("\n  ");
-    stack1 = helpers._triageMustache.call(depth0, "trash-can", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
-    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\n");
-    return buffer;
-    }
-
     data.buffer.push("<!-- DESKTOP -->\n\n");
     stack1 = helpers.unless.call(depth0, "controller.appMoving", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+    data.buffer.push("\n\n");
+    data.buffer.push(escapeExpression((helper = helpers['trash-can'] || (depth0 && depth0['trash-can']),options={hash:{
+      'action': ("deleteApp"),
+      'isVisible': ("controller.appMoving")
+    },hashTypes:{'action': "STRING",'isVisible': "ID"},hashContexts:{'action': depth0,'isVisible': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "trash-can", options))));
     data.buffer.push("\n\n");
     data.buffer.push(escapeExpression((helper = helpers.render || (depth0 && depth0.render),options={hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data},helper ? helper.call(depth0, "searchBar", options) : helperMissing.call(depth0, "render", "searchBar", options))));
     data.buffer.push("\n\n");
     data.buffer.push(escapeExpression((helper = helpers.outlet || (depth0 && depth0.outlet),options={hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data},helper ? helper.call(depth0, "applist", options) : helperMissing.call(depth0, "outlet", "applist", options))));
     data.buffer.push("\n\n");
-    stack1 = helpers['if'].call(depth0, "controller.appMoving", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(3, program3, data),contexts:[depth0],types:["ID"],data:data});
-    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\n\n");
     data.buffer.push(escapeExpression(helpers.view.call(depth0, "login", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push("\n\n<svg version=\"1.1\" xmlns='http://www.w3.org/2000/svg'>\n  <filter id='blur'>\n    <feGaussianBlur stdDeviation='6' />\n  </filter>\n</svg>\n");
+    data.buffer.push("\n");
     return buffer;
     
   });
@@ -2072,7 +2074,7 @@ define('web-desktop/tests/routes/application.jshint', function () {
 
   module('JSHint - routes');
   test('routes/application.js should pass jshint', function() { 
-    ok(false, 'routes/application.js should pass jshint.\nroutes/application.js: line 9, col 20, \'params\' is defined but never used.\nroutes/application.js: line 226, col 27, \'content\' is defined but never used.\nroutes/application.js: line 231, col 24, \'content\' is defined but never used.\nroutes/application.js: line 245, col 13, \'responseCode\' is defined but never used.\n\n4 errors'); 
+    ok(false, 'routes/application.js should pass jshint.\nroutes/application.js: line 9, col 20, \'params\' is defined but never used.\nroutes/application.js: line 226, col 27, \'content\' is defined but never used.\nroutes/application.js: line 231, col 24, \'content\' is defined but never used.\nroutes/application.js: line 236, col 26, \'content\' is defined but never used.\nroutes/application.js: line 250, col 13, \'responseCode\' is defined but never used.\n\n5 errors'); 
   });
 
 });
@@ -2195,7 +2197,7 @@ define('web-desktop/tests/views/appicon.jshint', function () {
 
   module('JSHint - views');
   test('views/appicon.js should pass jshint', function() { 
-    ok(true, 'views/appicon.js should pass jshint.'); 
+    ok(false, 'views/appicon.js should pass jshint.\nviews/appicon.js: line 139, col 9, \'offsetWidth\' is defined but never used.\nviews/appicon.js: line 140, col 9, \'offsetHeight\' is defined but never used.\n\n2 errors'); 
   });
 
 });
@@ -2215,7 +2217,7 @@ define('web-desktop/tests/views/applist.jshint', function () {
 
   module('JSHint - views');
   test('views/applist.js should pass jshint', function() { 
-    ok(false, 'views/applist.js should pass jshint.\nviews/applist.js: line 141, col 33, Expected \'===\' and instead saw \'==\'.\nviews/applist.js: line 142, col 26, Expected \'===\' and instead saw \'==\'.\nviews/applist.js: line 143, col 26, Expected \'===\' and instead saw \'==\'.\nviews/applist.js: line 68, col 73, \'$\' is not defined.\nviews/applist.js: line 69, col 73, \'$\' is not defined.\nviews/applist.js: line 124, col 31, \'event\' is defined but never used.\n\n6 errors'); 
+    ok(false, 'views/applist.js should pass jshint.\nviews/applist.js: line 135, col 33, Expected \'===\' and instead saw \'==\'.\nviews/applist.js: line 136, col 26, Expected \'===\' and instead saw \'==\'.\nviews/applist.js: line 137, col 26, Expected \'===\' and instead saw \'==\'.\nviews/applist.js: line 68, col 73, \'$\' is not defined.\nviews/applist.js: line 69, col 73, \'$\' is not defined.\n\n5 errors'); 
   });
 
 });
@@ -2672,6 +2674,7 @@ define('web-desktop/views/appicon', ['exports', 'ember'], function (exports, Emb
 
     didInsertElement: function () {
       this.$().draggable({
+        scroll: false,
         containment: 'body',
         start: function(evt) {
           this.$().addClass('dragging');
@@ -2679,8 +2682,11 @@ define('web-desktop/views/appicon', ['exports', 'ember'], function (exports, Emb
         }.bind(this),
         stop: function (evt) {
           Ember['default'].run.later(function () {
-            this.$().removeClass('dragging');
-            this.get('parentView').onDragStop(this, evt);
+            var node = this.$();
+            if (node) {
+              node.removeClass('dragging');
+              this.get('parentView').onDragStop(this, evt);
+            }
           }.bind(this), 100);
         }.bind(this),
         drag: function (evt) {
@@ -2690,6 +2696,10 @@ define('web-desktop/views/appicon', ['exports', 'ember'], function (exports, Emb
       });
       this.handleSize();
       this.position();
+    },
+
+    willDestroyElement: function () {
+      this.get('parentView').onDragStop(null);
     },
 
     handleSize: function () {
@@ -2763,6 +2773,7 @@ define('web-desktop/views/appicon', ['exports', 'ember'], function (exports, Emb
       var iconHeight = this.get('iconWidth') * 1.333;
       var screenWidth = this.get('parentView.screenWidth');
       var screenHeight = this.get('parentView.screenHeight');
+
       var offsetWidth  = (screenWidth - iconWidth * 4) / 5;
       var offsetHeight = (screenHeight - iconHeight * 5) / 6;
 
@@ -2777,11 +2788,13 @@ define('web-desktop/views/appicon', ['exports', 'ember'], function (exports, Emb
         }
       }
 
-      var newCol = Math.round((left - offsetWidth/2 - newScr * screenLeft - widthOffset) * 4 / screenWidth);
-      var newRow = Math.round((top - offsetHeight/2) * 5 / screenHeight);
+      var newCol = Math.round((left - iconWidth/2 - newScr * screenLeft - widthOffset) * 4 / screenWidth);
+      var newRow = Math.round((top - iconHeight/2) * 5 / screenHeight);
 
       newCol = newCol < 0 ? 0: newCol;
       newCol = newCol > 3 ? 3: newCol;
+      newRow = newRow > 4 ? 4: newRow;
+      console.log(newRow);
       return {row: newRow, col: newCol, scr: newScr};
     },
 
@@ -2905,10 +2918,7 @@ define('web-desktop/views/applist', ['exports', 'ember'], function (exports, Emb
         var col = rowCol.col;
         var scr = rowCol.scr;
 
-        if (row < -1) { // delete
-          this.set('toDelete', true);
-        } else if (row >= 0){
-          this.set('toDelete', false);
+        if (row >= 0){
           var position = node.index2position(row, col, scr);
           this.$('.hint').css({ // image follow
             'top': position.top,
@@ -2929,11 +2939,8 @@ define('web-desktop/views/applist', ['exports', 'ember'], function (exports, Emb
       }.bind(this), 300);
 
     },
-    onDragStop: function (node, event) {
-      if (this.get('toDelete')) {
-        this.get('controller').send('deleteApp', node.get('content'));
-        this.set('toDelete', false);
-      } else {
+    onDragStop: function (node) {
+      if (node) {
         node.position(node.get('row'), node.get('col'), node.get('scr'), 300);
         node.$().css({
           'z-index': 1
@@ -2967,8 +2974,7 @@ define('web-desktop/views/applist', ['exports', 'ember'], function (exports, Emb
           'content.screen': get(to, 'scr')
         });
       }
-
-    },
+    }
   });
 
 });

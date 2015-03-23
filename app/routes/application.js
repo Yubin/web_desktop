@@ -233,6 +233,11 @@ export default Ember.Route.extend({
       ctrl._actions['openApp'].apply(ctrl, arguments);
     },
 
+    deleteApp: function (content) {
+      var ctrl = this.controllerFor('applist');
+      ctrl._actions['deleteApp'].apply(ctrl, arguments);
+    },
+
     loginUser: function (content) {
 
       this.store.createRecord('login', {

@@ -8,9 +8,8 @@ export default Ember.Controller.extend({
     return this.get('openApps').slice(0, 10);
   }.property('openApps.length'),
 
-  sendDock: function () {
+  subDock: function () {
     return this.get('openApps').slice(11);
   }.property('openApps.length')
-
 
 });

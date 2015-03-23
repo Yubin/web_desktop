@@ -10,6 +10,5 @@ export default Ember.Controller.extend({
     loginClose: function () {
       this.set('loginShow', false);
     }
-
   }
 });

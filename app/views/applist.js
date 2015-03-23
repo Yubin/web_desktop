@@ -97,10 +97,7 @@ export default Ember.View.extend({
       var col = rowCol.col;
       var scr = rowCol.scr;
 
-      if (row < -1) { // delete
-        this.set('toDelete', true);
-      } else if (row >= 0){
-        this.set('toDelete', false);
+      if (row >= 0){
         var position = node.index2position(row, col, scr);
         this.$('.hint').css({ // image follow
           'top': position.top,
@@ -121,11 +118,8 @@ export default Ember.View.extend({
     }.bind(this), 300);
 
   },
-  onDragStop: function (node, event) {
-    if (this.get('toDelete')) {
-      this.get('controller').send('deleteApp', node.get('content'));
-      this.set('toDelete', false);
-    } else {
+  onDragStop: function (node) {
+    if (node) {
       node.position(node.get('row'), node.get('col'), node.get('scr'), 300);
       node.$().css({
         'z-index': 1
@@ -159,6 +153,5 @@ export default Ember.View.extend({
         'content.screen': get(to, 'scr')
       });
     }
-
-  },
+  }
 });

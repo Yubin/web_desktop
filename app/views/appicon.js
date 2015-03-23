@@ -36,6 +36,7 @@ export default Ember.View.extend({
 
   didInsertElement: function () {
     this.$().draggable({
+      scroll: false,
       containment: 'body',
       start: function(evt) {
         this.$().addClass('dragging');
@@ -43,8 +44,11 @@ export default Ember.View.extend({
       }.bind(this),
       stop: function (evt) {
         Ember.run.later(function () {
-          this.$().removeClass('dragging');
-          this.get('parentView').onDragStop(this, evt);
+          var node = this.$();
+          if (node) {
+            node.removeClass('dragging');
+            this.get('parentView').onDragStop(this, evt);
+          }
         }.bind(this), 100);
       }.bind(this),
       drag: function (evt) {
@@ -54,6 +58,10 @@ export default Ember.View.extend({
     });
     this.handleSize();
     this.position();
+  },
+
+  willDestroyElement: function () {
+    this.get('parentView').onDragStop(null);
   },
 
   handleSize: function () {
@@ -127,6 +135,7 @@ export default Ember.View.extend({
     var iconHeight = this.get('iconWidth') * 1.333;
     var screenWidth = this.get('parentView.screenWidth');
     var screenHeight = this.get('parentView.screenHeight');
+
     var offsetWidth  = (screenWidth - iconWidth * 4) / 5;
     var offsetHeight = (screenHeight - iconHeight * 5) / 6;
 
@@ -141,11 +150,13 @@ export default Ember.View.extend({
       }
     }
 
-    var newCol = Math.round((left - offsetWidth/2 - newScr * screenLeft - widthOffset) * 4 / screenWidth);
-    var newRow = Math.round((top - offsetHeight/2) * 5 / screenHeight);
+    var newCol = Math.round((left - iconWidth/2 - newScr * screenLeft - widthOffset) * 4 / screenWidth);
+    var newRow = Math.round((top - iconHeight/2) * 5 / screenHeight);
 
     newCol = newCol < 0 ? 0: newCol;
     newCol = newCol > 3 ? 3: newCol;
+    newRow = newRow > 4 ? 4: newRow;
+    console.log(newRow);
     return {row: newRow, col: newCol, scr: newScr};
   },
 
