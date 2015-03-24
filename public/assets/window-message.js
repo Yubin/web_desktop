@@ -21,8 +21,11 @@ function receiveMessage(event) {
       var viewId = Ember.$('.window.' + originAppId).attr('id')
       var view = Ember.View.views[viewId];
       if (viewId) {
-        view.set('fliped', true);
-
+        view.setProperties({
+          'fliped': true,
+          'eventSource': event.source,
+          'eventOrigin': origin
+        });
         // Get Ember view
         var payload = {
          op: 'selectLink',
@@ -31,12 +34,9 @@ function receiveMessage(event) {
            name: 'Quotes',
            icon: '123123/icon.png'
          }
-
+        }
       }
-
-     };
-     event.source.postMessage(payload, origin);
-
+      event.source.postMessage(payload, origin);
     }
   }
 

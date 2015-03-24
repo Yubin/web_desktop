@@ -51,7 +51,6 @@ define('web-desktop/adapters/base', ['exports', 'ember-data', 'ember'], function
 
     ajax: function (rawUrl, type, rawHash) {
       var adapter = this;
-      console.log(rawHash);
       var userAppId = rawHash.userAppId || 'Fl2GDgDECXcbmJsBAJVayUhuLwkAAAA;'; // app_id
       var serviceAppName = rawHash.serviceAppName ;// Login
       var requestString = rawHash.data.requestString;
@@ -1843,7 +1842,7 @@ define('web-desktop/tests/adapters/base.jshint', function () {
 
   module('JSHint - adapters');
   test('adapters/base.js should pass jshint', function() { 
-    ok(false, 'adapters/base.js should pass jshint.\nadapters/base.js: line 35, col 50, \'jqXHR\' is defined but never used.\nadapters/base.js: line 35, col 38, \'textStatus\' is defined but never used.\n\n2 errors'); 
+    ok(false, 'adapters/base.js should pass jshint.\nadapters/base.js: line 34, col 50, \'jqXHR\' is defined but never used.\nadapters/base.js: line 34, col 38, \'textStatus\' is defined but never used.\n\n2 errors'); 
   });
 
 });
@@ -2197,7 +2196,7 @@ define('web-desktop/tests/views/appicon.jshint', function () {
 
   module('JSHint - views');
   test('views/appicon.js should pass jshint', function() { 
-    ok(false, 'views/appicon.js should pass jshint.\nviews/appicon.js: line 139, col 9, \'offsetWidth\' is defined but never used.\nviews/appicon.js: line 140, col 9, \'offsetHeight\' is defined but never used.\n\n2 errors'); 
+    ok(true, 'views/appicon.js should pass jshint.'); 
   });
 
 });
@@ -2774,9 +2773,6 @@ define('web-desktop/views/appicon', ['exports', 'ember'], function (exports, Emb
       var screenWidth = this.get('parentView.screenWidth');
       var screenHeight = this.get('parentView.screenHeight');
 
-      var offsetWidth  = (screenWidth - iconWidth * 4) / 5;
-      var offsetHeight = (screenHeight - iconHeight * 5) / 6;
-
       var widthOffset = this.get('parentView.widthOffset');
 
       var screenLeft = screenWidth + widthOffset;
@@ -2794,7 +2790,6 @@ define('web-desktop/views/appicon', ['exports', 'ember'], function (exports, Emb
       newCol = newCol < 0 ? 0: newCol;
       newCol = newCol > 3 ? 3: newCol;
       newRow = newRow > 4 ? 4: newRow;
-      console.log(newRow);
       return {row: newRow, col: newCol, scr: newScr};
     },
 
@@ -3017,7 +3012,6 @@ define('web-desktop/views/appscreen', ['exports', 'ember'], function (exports, E
       'parentView.screenHeight',
       'parentView.screenTop',
       'parentView.widthOffset')
-
 
   });
 

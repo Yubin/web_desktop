@@ -136,9 +136,6 @@ export default Ember.View.extend({
     var screenWidth = this.get('parentView.screenWidth');
     var screenHeight = this.get('parentView.screenHeight');
 
-    var offsetWidth  = (screenWidth - iconWidth * 4) / 5;
-    var offsetHeight = (screenHeight - iconHeight * 5) / 6;
-
     var widthOffset = this.get('parentView.widthOffset');
 
     var screenLeft = screenWidth + widthOffset;
@@ -156,7 +153,6 @@ export default Ember.View.extend({
     newCol = newCol < 0 ? 0: newCol;
     newCol = newCol > 3 ? 3: newCol;
     newRow = newRow > 4 ? 4: newRow;
-    console.log(newRow);
     return {row: newRow, col: newCol, scr: newScr};
   },
 

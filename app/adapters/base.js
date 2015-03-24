@@ -9,7 +9,6 @@ export default DS.RESTAdapter.extend({
 
   ajax: function (rawUrl, type, rawHash) {
     var adapter = this;
-    console.log(rawHash);
     var userAppId = rawHash.userAppId || 'Fl2GDgDECXcbmJsBAJVayUhuLwkAAAA;'; // app_id
     var serviceAppName = rawHash.serviceAppName ;// Login
     var requestString = rawHash.data.requestString;

@@ -36,5 +36,4 @@ export default Ember.View.extend({
     'parentView.screenTop',
     'parentView.widthOffset')
 
-
 });
