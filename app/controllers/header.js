@@ -4,6 +4,8 @@ export default Ember.Controller.extend({
   needs: ['applist', 'application'],
   openApps: Ember.computed.alias('controllers.applist.openApps'),
   user: Ember.computed.alias('controllers.application.user'),
+  headerShowing: Ember.computed.not('controllers.application.appMoving'),
+
   dock: function () {
     return this.get('openApps').slice(0, 10);
   }.property('openApps.length'),

@@ -4,8 +4,8 @@ var get = Ember.get;
 
 export default Ember.View.extend({
   // templateName: 'appscreen',
-  classNames: ['appscreen', 'appscreen-set', 'dropzone', 'fadeIn', 'fadeIn-50ms','fadeIn-Delay-50ms'],
-  classNameBindings: ['appTouch:background', 'hasApp'],
+  classNames: ['appscreen', 'appscreen-set', 'dropzone'],
+  classNameBindings: ['appTouch:background', 'hasApp', ':fadeIn-50ms', ':animated', 'hasApp:fadeIn:fadeOut'],
   appTouch: false,
   hasApp: false,
 
@@ -18,6 +18,12 @@ export default Ember.View.extend({
 
   didInsertElement: function () {
     this.handleSize();
+  },
+
+  willDestroyElement: function() {
+    var clone = this.$().clone();
+    this.$().parent().append(clone);
+    clone.fadeOut();
   },
 
   handleSize: function () {

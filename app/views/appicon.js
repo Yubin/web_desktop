@@ -86,7 +86,7 @@ export default Ember.View.extend({
 
   index2position: function (row, col, scr) {
     var iconWidth = this.get('iconWidth');
-    var iconHeight = this.get('iconWidth') * 1.333;
+    var iconHeight = this.get('iconWidth') * 1.3;
 
     var screenWidth = this.get('parentView.screenWidth');
     var screenHeight = this.get('parentView.screenHeight');
@@ -132,7 +132,7 @@ export default Ember.View.extend({
 
   position2index: function (left, top) {
     var iconWidth = this.get('iconWidth');
-    var iconHeight = this.get('iconWidth') * 1.333;
+    var iconHeight = this.get('iconWidth') * 1.3;
     var screenWidth = this.get('parentView.screenWidth');
     var screenHeight = this.get('parentView.screenHeight');
 
@@ -147,8 +147,8 @@ export default Ember.View.extend({
       }
     }
 
-    var newCol = Math.round((left - iconWidth/2 - newScr * screenLeft - widthOffset) * 4 / screenWidth);
-    var newRow = Math.round((top - iconHeight/2) * 5 / screenHeight);
+    var newCol = Math.floor((left + iconWidth/2 - newScr * screenLeft - widthOffset) * 4 / screenWidth);
+    var newRow = Math.floor((top + iconHeight/2) * 5 / screenHeight);
 
     newCol = newCol < 0 ? 0: newCol;
     newCol = newCol > 3 ? 3: newCol;

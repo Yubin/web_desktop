@@ -174,6 +174,7 @@ define('web-desktop/components/trash-can', ['exports', 'ember'], function (expor
   'use strict';
 
   exports['default'] = Ember['default'].Component.extend({
+    classNameBindings: [':fadeIn-100ms', ':animated', 'show:fadeIn:fadeOut'],
     didInsertElement: function () {
       var self = this;
       this.$('.trash').droppable({
@@ -187,8 +188,7 @@ define('web-desktop/components/trash-can', ['exports', 'ember'], function (expor
           }
         }
       });
-    },
-
+    }
   });
 
 });
@@ -445,6 +445,8 @@ define('web-desktop/controllers/header', ['exports', 'ember'], function (exports
     needs: ['applist', 'application'],
     openApps: Ember['default'].computed.alias('controllers.applist.openApps'),
     user: Ember['default'].computed.alias('controllers.application.user'),
+    headerShowing: Ember['default'].computed.not('controllers.application.appMoving'),
+
     dock: function () {
       return this.get('openApps').slice(0, 10);
     }.property('openApps.length'),
@@ -1304,25 +1306,18 @@ define('web-desktop/templates/application', ['exports', 'ember'], function (expo
   /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
-    var buffer = '', stack1, helper, options, helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, self=this;
+    var buffer = '', helper, options, helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
 
-  function program1(depth0,data) {
-    
-    var buffer = '', helper, options;
-    data.buffer.push("\n	");
-    data.buffer.push(escapeExpression((helper = helpers.render || (depth0 && depth0.render),options={hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data},helper ? helper.call(depth0, "header", options) : helperMissing.call(depth0, "render", "header", options))));
-    data.buffer.push("\n");
-    return buffer;
-    }
 
-    data.buffer.push("<!-- DESKTOP -->\n\n");
-    stack1 = helpers.unless.call(depth0, "controller.appMoving", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],data:data});
-    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+    data.buffer.push("<!-- DESKTOP -->\n");
+    data.buffer.push(escapeExpression((helper = helpers.render || (depth0 && depth0.render),options={hash:{
+      'isVisible': ("controller.headerShowing")
+    },hashTypes:{'isVisible': "ID"},hashContexts:{'isVisible': depth0},contexts:[depth0],types:["STRING"],data:data},helper ? helper.call(depth0, "header", options) : helperMissing.call(depth0, "render", "header", options))));
     data.buffer.push("\n\n");
     data.buffer.push(escapeExpression((helper = helpers['trash-can'] || (depth0 && depth0['trash-can']),options={hash:{
       'action': ("deleteApp"),
-      'isVisible': ("controller.appMoving")
-    },hashTypes:{'action': "STRING",'isVisible': "ID"},hashContexts:{'action': depth0,'isVisible': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "trash-can", options))));
+      'show': ("controller.appMoving")
+    },hashTypes:{'action': "STRING",'show': "ID"},hashContexts:{'action': depth0,'show': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "trash-can", options))));
     data.buffer.push("\n\n");
     data.buffer.push(escapeExpression((helper = helpers.render || (depth0 && depth0.render),options={hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data},helper ? helper.call(depth0, "searchBar", options) : helperMissing.call(depth0, "render", "searchBar", options))));
     data.buffer.push("\n\n");
@@ -1347,6 +1342,15 @@ define('web-desktop/templates/applist', ['exports', 'ember'], function (exports,
 
   function program1(depth0,data) {
     
+    var buffer = '', stack1;
+    data.buffer.push("\n  ");
+    stack1 = helpers['if'].call(depth0, "hasApp", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(2, program2, data),contexts:[depth0],types:["ID"],data:data});
+    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+    data.buffer.push("\n  ");
+    return buffer;
+    }
+  function program2(depth0,data) {
+    
     var buffer = '';
     data.buffer.push("\n  ");
     data.buffer.push(escapeExpression(helpers.view.call(depth0, "appscreen", {hash:{
@@ -1357,7 +1361,7 @@ define('web-desktop/templates/applist', ['exports', 'ember'], function (exports,
     return buffer;
     }
 
-  function program3(depth0,data) {
+  function program4(depth0,data) {
     
     var buffer = '';
     data.buffer.push("\n    ");
@@ -1372,7 +1376,7 @@ define('web-desktop/templates/applist', ['exports', 'ember'], function (exports,
     stack1 = helpers.each.call(depth0, "view.controller.screens", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
     data.buffer.push("\n\n  \n    ");
-    stack1 = helpers.each.call(depth0, "app", "in", "view.controller.model", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(3, program3, data),contexts:[depth0,depth0,depth0],types:["ID","ID","ID"],data:data});
+    stack1 = helpers.each.call(depth0, "app", "in", "view.controller.model", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(4, program4, data),contexts:[depth0,depth0,depth0],types:["ID","ID","ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
     data.buffer.push("\n  \n  <div class='hint'></div>\n");
     return buffer;
@@ -1470,7 +1474,7 @@ define('web-desktop/templates/header', ['exports', 'ember'], function (exports, 
   function program1(depth0,data) {
     
     
-    data.buffer.push("\n  <ul class=\"dropdown-menu-left\">\n    <li>\n      <a>Company Info</a>\n    </li>\n    <li>\n      <a>Create New Accounts</a>\n    </li>   \n  </ul>\n  ");
+    data.buffer.push("\n  <ul class=\"dropdown-menu-left\">\n    <li>\n      <a>Company Info</a>\n    </li>\n    <li>\n      <a>Create New Accounts</a>\n    </li>\n  </ul>\n  ");
     }
 
   function program3(depth0,data) {
@@ -1524,7 +1528,7 @@ define('web-desktop/templates/header', ['exports', 'ember'], function (exports, 
     return buffer;
     }
 
-    data.buffer.push("<ul class=\"nav fadeIn fadeIn-50ms fadeOut fadeOut-50ms\">\n  <li class=\"logo fadeIn fadeIn-50ms\">\n    <span>\n      <a ");
+    data.buffer.push("<ul class=\"nav fadeIn fadeIn-50ms animated fadeIn\">\n  <li class=\"logo fadeIn fadeIn-50ms\">\n    <span>\n      <a ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "showProfile_comp", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
@@ -2723,7 +2727,7 @@ define('web-desktop/views/appicon', ['exports', 'ember'], function (exports, Emb
 
     index2position: function (row, col, scr) {
       var iconWidth = this.get('iconWidth');
-      var iconHeight = this.get('iconWidth') * 1.333;
+      var iconHeight = this.get('iconWidth') * 1.3;
 
       var screenWidth = this.get('parentView.screenWidth');
       var screenHeight = this.get('parentView.screenHeight');
@@ -2769,7 +2773,7 @@ define('web-desktop/views/appicon', ['exports', 'ember'], function (exports, Emb
 
     position2index: function (left, top) {
       var iconWidth = this.get('iconWidth');
-      var iconHeight = this.get('iconWidth') * 1.333;
+      var iconHeight = this.get('iconWidth') * 1.3;
       var screenWidth = this.get('parentView.screenWidth');
       var screenHeight = this.get('parentView.screenHeight');
 
@@ -2784,8 +2788,8 @@ define('web-desktop/views/appicon', ['exports', 'ember'], function (exports, Emb
         }
       }
 
-      var newCol = Math.round((left - iconWidth/2 - newScr * screenLeft - widthOffset) * 4 / screenWidth);
-      var newRow = Math.round((top - iconHeight/2) * 5 / screenHeight);
+      var newCol = Math.floor((left + iconWidth/2 - newScr * screenLeft - widthOffset) * 4 / screenWidth);
+      var newRow = Math.floor((top + iconHeight/2) * 5 / screenHeight);
 
       newCol = newCol < 0 ? 0: newCol;
       newCol = newCol > 3 ? 3: newCol;
@@ -2931,12 +2935,12 @@ define('web-desktop/views/applist', ['exports', 'ember'], function (exports, Emb
             }, rowCol);
           }
         }
-      }.bind(this), 300);
+      }.bind(this), 100);
 
     },
     onDragStop: function (node) {
       if (node) {
-        node.position(node.get('row'), node.get('col'), node.get('scr'), 300);
+        node.position(node.get('row'), node.get('col'), node.get('scr'), 100);
         node.$().css({
           'z-index': 1
         });
@@ -2981,8 +2985,8 @@ define('web-desktop/views/appscreen', ['exports', 'ember'], function (exports, E
 
   exports['default'] = Ember['default'].View.extend({
     // templateName: 'appscreen',
-    classNames: ['appscreen', 'appscreen-set', 'dropzone', 'fadeIn', 'fadeIn-50ms','fadeIn-Delay-50ms'],
-    classNameBindings: ['appTouch:background', 'hasApp'],
+    classNames: ['appscreen', 'appscreen-set', 'dropzone'],
+    classNameBindings: ['appTouch:background', 'hasApp', ':fadeIn-50ms', ':animated', 'hasApp:fadeIn:fadeOut'],
     appTouch: false,
     hasApp: false,
 
@@ -2995,6 +2999,12 @@ define('web-desktop/views/appscreen', ['exports', 'ember'], function (exports, E
 
     didInsertElement: function () {
       this.handleSize();
+    },
+
+    willDestroyElement: function() {
+      var clone = this.$().clone();
+      this.$().parent().append(clone);
+      clone.fadeOut();
     },
 
     handleSize: function () {
@@ -3046,12 +3056,14 @@ define('web-desktop/views/header', ['exports', 'ember'], function (exports, Embe
 
   exports['default'] = Ember['default'].View.extend({
     classNames: ['head'],
+    classNameBindings: [':fadeIn-100ms', ':animated', 'show:fadeIn:fadeOut'],
     templateName: 'header',
     width_dock_icon: 52,
     width_dock_corner: 25,
     width_sync: 0,
     showProfile: false,
     showProfile_comp: false,
+    show: Ember['default'].computed.alias('controller.headerShowing'),
     companyName: function () {
       var name = 'Company Name';
       var companies = this.get('controller.user.companies');

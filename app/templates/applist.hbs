@@ -2,7 +2,9 @@
 
 
   {{#each view.controller.screens}}
+  {{#if hasApp}}
   {{view 'appscreen' index=id hasApp=hasApp}}
+  {{/if}}
   {{/each}}
 
   {{!-- <ul> --}}

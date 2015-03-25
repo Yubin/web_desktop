@@ -1,6 +1,7 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
+  classNameBindings: [':fadeIn-100ms', ':animated', 'show:fadeIn:fadeOut'],
   didInsertElement: function () {
     var self = this;
     this.$('.trash').droppable({
@@ -14,6 +15,5 @@ export default Ember.Component.extend({
         }
       }
     });
-  },
-
+  }
 });

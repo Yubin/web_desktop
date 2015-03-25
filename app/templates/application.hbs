@@ -1,10 +1,7 @@
 <!-- DESKTOP -->
+{{render "header" isVisible=controller.headerShowing}}
 
-{{#unless controller.appMoving}}
-	{{render "header"}}
-{{/unless}}
-
-{{trash-can action='deleteApp' isVisible=controller.appMoving}}
+{{trash-can action='deleteApp' show=controller.appMoving}}
 
 {{render "searchBar"}}
 

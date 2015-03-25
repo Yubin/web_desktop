@@ -2,12 +2,14 @@ import Ember from 'ember';
 
 export default Ember.View.extend({
   classNames: ['head'],
+  classNameBindings: [':fadeIn-100ms', ':animated', 'show:fadeIn:fadeOut'],
   templateName: 'header',
   width_dock_icon: 52,
   width_dock_corner: 25,
   width_sync: 0,
   showProfile: false,
   showProfile_comp: false,
+  show: Ember.computed.alias('controller.headerShowing'),
   companyName: function () {
     var name = 'Company Name';
     var companies = this.get('controller.user.companies');

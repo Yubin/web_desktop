@@ -115,12 +115,12 @@ export default Ember.View.extend({
           }, rowCol);
         }
       }
-    }.bind(this), 300);
+    }.bind(this), 100);
 
   },
   onDragStop: function (node) {
     if (node) {
-      node.position(node.get('row'), node.get('col'), node.get('scr'), 300);
+      node.position(node.get('row'), node.get('col'), node.get('scr'), 100);
       node.$().css({
         'z-index': 1
       });
