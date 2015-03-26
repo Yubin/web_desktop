@@ -573,7 +573,6 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
     },
 
     showMinimizedApp: function () {
-      console.log("showMinimizedApp:" + this.$().hasClass('active'));
       if (this.get('isMinSize')) {
         if (this.get('isFullSize')) { // for windows that originally is full sized.
           this.$().animate({
@@ -632,20 +631,36 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
       this.$().resizable({
         minHeight: this.get('minHeight'),
         minWidth: this.get('minWidth'),
+        start: function () {
+          Ember['default'].$('#ui_maskLayer_0').css({
+            display: 'block'
+          });
+        },
         stop: function( event, ui ) {
           var size = ui.size;
           this.setProperties({
             width: size.width,
             height: size.height
           });
+          Ember['default'].$('#ui_maskLayer_0').css({
+            display: 'none'
+          });
         }.bind(this)
       });
       this.$().draggable({
+        start: function () {
+          Ember['default'].$('#ui_maskLayer_0').css({
+            display: 'block'
+          });
+        },
         stop: function(event, ui) {
           var position = ui.position;
           this.setProperties({
             top: position.top,
             left: position.left
+          });
+          Ember['default'].$('#ui_maskLayer_0').css({
+            display: 'none'
           });
         }.bind(this)
       });
@@ -1322,7 +1337,7 @@ define('web-desktop/templates/application', ['exports', 'ember'], function (expo
     data.buffer.push(escapeExpression((helper = helpers.outlet || (depth0 && depth0.outlet),options={hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data},helper ? helper.call(depth0, "applist", options) : helperMissing.call(depth0, "outlet", "applist", options))));
     data.buffer.push("\n\n");
     data.buffer.push(escapeExpression(helpers.view.call(depth0, "login", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push("\n");
+    data.buffer.push("\n\n<div id=\"ui_maskLayer_0\" class=\"ui_maskLayer\">\n  <div id=\"ui_maskLayerBody_0\" class=\"ui_maskLayerBody\"></div>\n</div>\n");
     return buffer;
     
   });

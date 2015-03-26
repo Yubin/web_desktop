@@ -31,7 +31,6 @@ export default Ember.Mixin.create({
   },
 
   showMinimizedApp: function () {
-    console.log("showMinimizedApp:" + this.$().hasClass('active'));
     if (this.get('isMinSize')) {
       if (this.get('isFullSize')) { // for windows that originally is full sized.
         this.$().animate({
@@ -90,20 +89,36 @@ export default Ember.Mixin.create({
     this.$().resizable({
       minHeight: this.get('minHeight'),
       minWidth: this.get('minWidth'),
+      start: function () {
+        Ember.$('#ui_maskLayer_0').css({
+          display: 'block'
+        });
+      },
       stop: function( event, ui ) {
         var size = ui.size;
         this.setProperties({
           width: size.width,
           height: size.height
         });
+        Ember.$('#ui_maskLayer_0').css({
+          display: 'none'
+        });
       }.bind(this)
     });
     this.$().draggable({
+      start: function () {
+        Ember.$('#ui_maskLayer_0').css({
+          display: 'block'
+        });
+      },
       stop: function(event, ui) {
         var position = ui.position;
         this.setProperties({
           top: position.top,
           left: position.left
+        });
+        Ember.$('#ui_maskLayer_0').css({
+          display: 'none'
         });
       }.bind(this)
     });

@@ -39,3 +39,23 @@ div.application, div.applist {
     width: 36px;
   }
 }
+
+.ui_maskLayer {
+  opacity: 0;
+  z-index: 9000000;
+  display: none;
+  cursor: default;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background: black;
+  opacity: 0;
+  .ui_maskLayerBody {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+  }
+}
