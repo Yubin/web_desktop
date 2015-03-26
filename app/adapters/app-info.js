@@ -14,9 +14,9 @@ export default Adapter.extend({
     var onStr = '';
     if (!isEmpty(ids)) {
       if (ids.length && ids.length > 1) { // TBD Array
-        onStr = ids.map(function(i){return 'id='+i.id;}).join(' or ');
+        onStr = ids.map(function(i){return 'id='+i;}).join(' or ');
       } else { // only one
-        onStr = 'id=' + ids.id;
+        onStr = 'id=' + ids;
       }
     } else { // Get All!
 

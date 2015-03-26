@@ -9,7 +9,8 @@ export default Ember.Controller.extend({
         var searchResults = [];
         if (apps) {
           searchResults = apps.filter(function (app) {
-            return Ember.get(app, 'app_name').toLowerCase().indexOf(query.toLowerCase()) >=0;
+            console.log(app);
+            return Ember.get(app, 'name').toLowerCase().indexOf(query.toLowerCase()) >=0;
           });
         }
         this.set('searchContent', searchResults);

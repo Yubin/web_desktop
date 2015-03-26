@@ -18,7 +18,7 @@ export default Ember.Controller.extend({
 
   openApps: [],
 
-  installApps: Ember.computed.alias('controllers.application.user.installApps'),
+  installApps: Ember.computed.alias('controllers.application.employee.installed_app'),
 
   init: function () {
     this._super.apply(this, arguments);
@@ -53,7 +53,7 @@ export default Ember.Controller.extend({
     var installApps = this.get('installApps');
 
     if (!isEmpty(installApps)) {
-      var ids = installApps.filterBy('id');
+      var ids = installApps.getEach('id');
 
       this.store.findQuery('app-info', {ids: ids}).then(function (res) {
         var apps = res.get('content');
@@ -87,10 +87,10 @@ export default Ember.Controller.extend({
     },
 
     openApp: function (item) { console.log(item);
-      var name = get(item, 'app_name');
+      var name = get(item, 'name');
       var icon = get(item, 'icon');
       var find = this.get('openApps').any(function (it) {
-        return get(it, 'app_name') === name;
+        return get(it, 'name') === name;
       });
 
       if (!find) {
@@ -108,10 +108,10 @@ export default Ember.Controller.extend({
             parentView: this,
             container:  this.container
           }).appendTo('body');
-          this.get('openApps').pushObject({app_name: name, icon: icon, instant: instant});
+          this.get('openApps').pushObject({name: name, icon: icon, instant: instant});
         }
       } else {
-          var obj = this.get('openApps').findBy('app_name', name);
+          var obj = this.get('openApps').findBy('name', name);
           // if user clicks a app icon and the app has been minimized
           if (obj.instant.get('isMinSize')) {
             obj.instant.showMinimizedApp();
@@ -122,8 +122,8 @@ export default Ember.Controller.extend({
     },
 
     closeApp: function (item) {
-      var name = get(item, 'app_name');
-      var obj = this.get('openApps').findBy('app_name', name);
+      var name = get(item, 'name');
+      var obj = this.get('openApps').findBy('name', name);
 
       if (Ember.isEmpty(obj)) {
         return;

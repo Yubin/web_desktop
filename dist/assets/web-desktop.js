@@ -18,9 +18,9 @@ define('web-desktop/adapters/app-info', ['exports', 'web-desktop/adapters/base',
       var onStr = '';
       if (!isEmpty(ids)) {
         if (ids.length && ids.length > 1) { // TBD Array
-          onStr = ids.map(function(i){return 'id='+i.id;}).join(' or ');
+          onStr = ids.map(function(i){return 'id='+i;}).join(' or ');
         } else { // only one
-          onStr = 'id=' + ids.id;
+          onStr = 'id=' + ids;
         }
       } else { // Get All!
 
@@ -241,7 +241,7 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
 
     openApps: [],
 
-    installApps: Ember['default'].computed.alias('controllers.application.user.installApps'),
+    installApps: Ember['default'].computed.alias('controllers.application.employee.installed_app'),
 
     init: function () {
       this._super.apply(this, arguments);
@@ -276,7 +276,7 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
       var installApps = this.get('installApps');
 
       if (!isEmpty(installApps)) {
-        var ids = installApps.filterBy('id');
+        var ids = installApps.getEach('id');
 
         this.store.findQuery('app-info', {ids: ids}).then(function (res) {
           var apps = res.get('content');
@@ -310,10 +310,10 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
       },
 
       openApp: function (item) { console.log(item);
-        var name = get(item, 'app_name');
+        var name = get(item, 'name');
         var icon = get(item, 'icon');
         var find = this.get('openApps').any(function (it) {
-          return get(it, 'app_name') === name;
+          return get(it, 'name') === name;
         });
 
         if (!find) {
@@ -331,10 +331,10 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
               parentView: this,
               container:  this.container
             }).appendTo('body');
-            this.get('openApps').pushObject({app_name: name, icon: icon, instant: instant});
+            this.get('openApps').pushObject({name: name, icon: icon, instant: instant});
           }
         } else {
-            var obj = this.get('openApps').findBy('app_name', name);
+            var obj = this.get('openApps').findBy('name', name);
             // if user clicks a app icon and the app has been minimized
             if (obj.instant.get('isMinSize')) {
               obj.instant.showMinimizedApp();
@@ -345,8 +345,8 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
       },
 
       closeApp: function (item) {
-        var name = get(item, 'app_name');
-        var obj = this.get('openApps').findBy('app_name', name);
+        var name = get(item, 'name');
+        var obj = this.get('openApps').findBy('name', name);
 
         if (Ember['default'].isEmpty(obj)) {
           return;
@@ -473,7 +473,8 @@ define('web-desktop/controllers/search-bar', ['exports', 'ember'], function (exp
           var searchResults = [];
           if (apps) {
             searchResults = apps.filter(function (app) {
-              return Ember['default'].get(app, 'app_name').toLowerCase().indexOf(query.toLowerCase()) >=0;
+              console.log(app);
+              return Ember['default'].get(app, 'name').toLowerCase().indexOf(query.toLowerCase()) >=0;
             });
           }
           this.set('searchContent', searchResults);
@@ -743,7 +744,7 @@ define('web-desktop/models/app-info', ['exports', 'ember-data'], function (expor
 
   exports['default'] = DS['default'].Model.extend({
     owner: DS['default'].attr('string'),
-    app_name: DS['default'].attr('string'),
+    name: DS['default'].attr('string'),
     last_version: DS['default'].attr('string'),
     show_in_store: DS['default'].attr('boolean'),
     pricing_by_month: DS['default'].attr('number'),
@@ -828,7 +829,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
       return {
         applist:[
           {
-           app_name: "Store",
+           name: "Store",
            icon: 'http://asa.static.gausian.com/user_app/Store/icon.png',
            viewName: 'customer',
            path: 'http://tianjiasun.github.io/APP_store/app/',
@@ -837,7 +838,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
            row: 4
          },
          {
-            app_name: "ASA",
+            name: "ASA",
             icon: 'http://asa.static.gausian.com/user_app/ASA/icon.png',
             viewName: 'customer',
             path: 'http://tianjiasun.github.io/ASA_api/app/index.html',
@@ -846,7 +847,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
             row: 0
           },
           {
-            app_name: "Map",
+            name: "Map",
             icon: 'http://asa.static.gausian.com/user_app/Map/icon.png',
             viewName: 'customer',
             path: 'https://www.google.com/maps/embed/v1/place?key=AIzaSyBrTaOSXSiXT1o7mUCjnJZSeRcSz0vnglw&q=silicon+valley',
@@ -855,7 +856,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
             row: 0
           },
           {
-            app_name: "Customers",
+            name: "Customers",
             app_id: "customerApp",
             icon: 'http://asa.static.gausian.com/user_app/Customers/icon.png',
             viewName: 'customer',
@@ -865,7 +866,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
             row: 0
           },
           {
-            app_name: "Quotes",
+            name: "Quotes",
             icon: 'http://asa.static.gausian.com/user_app/Quotes/icon.png',
             viewName: 'customer',
             path: 'http://gausian-developers.github.io/user-app-template6/app/',
@@ -874,7 +875,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
             row: 0
           },
           {
-            app_name: "HipChat",
+            name: "HipChat",
             icon: 'http://asa.static.gausian.com/user_app/HipChat/icon.png',
             viewName: 'customer',
             path: 'https://gausian.hipchat.com/chat',
@@ -883,7 +884,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
             row: 1
           },
           {
-            app_name: "Pixlr",
+            name: "Pixlr",
             icon: 'http://asa.static.gausian.com/user_app/Pixlr/icon.png',
             viewName: 'customer',
             path: 'http://pixlr.com/editor/?loc=zh-cn',
@@ -892,7 +893,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
             row: 1
           },
           {
-            app_name: "TakaBreak",
+            name: "TakaBreak",
             icon: 'http://asa.static.gausian.com/user_app/TakaBreak/icon.png',
             viewName: 'customer',
             path: 'http://www.earbits.com/',
@@ -901,7 +902,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
             row: 1
           },
           {
-            app_name: "EasyInvoice",
+            name: "EasyInvoice",
             icon: 'http://asa.static.gausian.com/user_app/EasyInvoice/icon.png',
             viewName: 'customer',
             path: 'http://invoiceto.me/',
@@ -910,7 +911,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
             row: 1
           },
           {
-            app_name: "LiveCAM",
+            name: "LiveCAM",
             icon: 'http://asa.static.gausian.com/user_app/LiveCAM/icon.png',
             viewName: 'customer',
             path: 'http://trafficcam.santaclaraca.gov/TrafficCamera.aspx?CID=GA101',
@@ -919,7 +920,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
             row: 2
           },
           {
-            app_name: "Math",
+            name: "Math",
             icon: 'http://asa.static.gausian.com/user_app/Math/icon.png',
             viewName: 'customer',
             path: 'https://www.mathway.com/graph',
@@ -928,7 +929,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
             row: 2
           },
           {
-            app_name: "Withholding",
+            name: "Withholding",
             icon: 'http://asa.static.gausian.com/user_app/Withholding/icon.png',
             viewName: 'customer',
             path: 'http://apps.irs.gov/app/withholdingcalculator/',
@@ -937,7 +938,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
             row: 2
           },
           {
-            app_name: "JSON Viewer",
+            name: "JSON Viewer",
             icon: 'http://asa.static.gausian.com/user_app/JSON/icon.png',
             viewName: 'customer',
             path: 'http://jsonviewer.stack.hu/',
@@ -946,7 +947,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
             row: 2
           },
           {
-            app_name: "Weather",
+            name: "Weather",
             icon: 'http://asa.static.gausian.com/user_app/Weather/icon.png',
             viewName: 'customer',
             path: 'http://chrome.wunderground.com/auto/chrome/geo/wx/index.html?query=95054',
@@ -955,7 +956,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
             row: 3
           },
           {
-            app_name: "FloorPlans",
+            name: "FloorPlans",
             icon: 'http://asa.static.gausian.com/user_app/FloorPlans/icon.png',
             viewName: 'customer',
             path: 'https://planner5d.com/app-chrome/?key=3a95cf1e2b3c5c74ff7ee00871a49c8b',
@@ -964,7 +965,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
             row: 3
           },
           {
-            app_name: "Draw",
+            name: "Draw",
             icon: 'http://asa.static.gausian.com/user_app/Draw/icon.png',
             viewName: 'customer',
             path: 'http://www.ratemydrawings.com/canvasdraw/',
@@ -973,7 +974,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
             row: 3
           },
           {
-            app_name: "3D",
+            name: "3D",
             icon: 'http://asa.static.gausian.com/user_app/3D/icon.png',
             viewName: 'customer',
             path: 'http://www.3dtin.com/2cwe',
@@ -982,7 +983,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
             row: 3
           },
           {
-            app_name: "Calculator",
+            name: "Calculator",
             icon: 'http://asa.static.gausian.com/user_app/Calculator/icon.png',
             viewName: 'customer',
             path: 'http://scientific-calculator.appspot.com/',
@@ -991,7 +992,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
             row: 4
           },
           {
-            app_name: "Developer",
+            name: "Developer",
             icon: 'http://asa.static.gausian.com/user_app/Developer/icon.png',
             viewName: 'customer',
             path: 'http://tianjiasun.github.io/ASA_website/',
@@ -1000,7 +1001,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
             row: 4
           },
           {
-            app_name: "SimpleToDo",
+            name: "SimpleToDo",
             icon: 'http://asa.static.gausian.com/user_app/SimpleToDo/icon.png',
             viewName: 'customer',
             path: 'http://scrumy.com/husks11rubbish',
@@ -1205,7 +1206,7 @@ define('web-desktop/templates/app/customer', ['exports', 'ember'], function (exp
     },hashTypes:{'src': "ID"},hashContexts:{'src': depth0},contexts:[],types:[],data:data})));
     data.buffer.push(" ");
     data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
-      'id': ("view.content.app_name")
+      'id': ("view.content.name")
     },hashTypes:{'id': "ID"},hashContexts:{'id': depth0},contexts:[],types:[],data:data})));
     data.buffer.push(" width=\"100%\" height=\"100%\" frameBorder=\"0\"></iframe>\n");
     return buffer;
@@ -1288,7 +1289,7 @@ define('web-desktop/templates/appicon', ['exports', 'ember'], function (exports,
 
 
     data.buffer.push("<div class=\"effect\"></div>\n<div class=\"app-edge\"></div>\n<div class=\"app-img\"></div>\n<div class=\"app-text\">");
-    data.buffer.push(escapeExpression(helpers.unbound.call(depth0, "view.content.app_name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data})));
+    data.buffer.push(escapeExpression(helpers.unbound.call(depth0, "view.content.name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data})));
     data.buffer.push("</div>\n");
     return buffer;
     
@@ -1451,7 +1452,7 @@ define('web-desktop/templates/header-dock-item', ['exports', 'ember'], function 
     data.buffer.push("<div class=\"app-img fadeIn fadeIn-50ms\" style=\"background-image: url(");
     data.buffer.push(escapeExpression(helpers.unbound.call(depth0, "view.content.icon", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data})));
     data.buffer.push(");\"></div>\n<em><span>");
-    data.buffer.push(escapeExpression(helpers.unbound.call(depth0, "view.content.app_name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data})));
+    data.buffer.push(escapeExpression(helpers.unbound.call(depth0, "view.content.name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data})));
     data.buffer.push("</span></em>\n");
     return buffer;
     
@@ -1764,22 +1765,19 @@ define('web-desktop/templates/search-results-item', ['exports', 'ember'], functi
       'src': ("view.content.icon")
     },hashTypes:{'src': "ID"},hashContexts:{'src': depth0},contexts:[],types:[],data:data})));
     data.buffer.push(" />\n</div>\n<div class=\"detail\">\n  <a class=\"name\">");
-    stack1 = helpers._triageMustache.call(depth0, "view.content.app_name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+    stack1 = helpers._triageMustache.call(depth0, "view.content.name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
     data.buffer.push("</a>\n  <a class=\"star-rating\"> ");
     data.buffer.push(escapeExpression((helper = helpers['star-rating'] || (depth0 && depth0['star-rating']),options={hash:{
       'content': ("view.content.rating")
     },hashTypes:{'content': "ID"},hashContexts:{'content': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "star-rating", options))));
     data.buffer.push(" </a>\n  <a class=\"category\">");
-    stack1 = helpers._triageMustache.call(depth0, "view.content.category", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+    stack1 = helpers._triageMustache.call(depth0, "view.content.brief", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
     data.buffer.push("</a>\n  <a class=\"price\">");
-    stack1 = helpers._triageMustache.call(depth0, "view.content.freeDay", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+    stack1 = helpers._triageMustache.call(depth0, "view.content.catalog", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push(" days free trail, $");
-    stack1 = helpers._triageMustache.call(depth0, "view.content.pricing_by_month", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
-    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push(" /month</a>\n</div>\n");
+    data.buffer.push("</a>\n</div>\n");
     stack1 = helpers['if'].call(depth0, "view.content.installed", {hash:{},hashTypes:{},hashContexts:{},inverse:self.program(3, program3, data),fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
     data.buffer.push("\n");
@@ -1800,7 +1798,7 @@ define('web-desktop/templates/window', ['exports', 'ember'], function (exports, 
 
 
     data.buffer.push("<div class=\"front shadow\">\n  <div class=\"header\">\n    <span class=\"titleInside\">");
-    stack1 = helpers._triageMustache.call(depth0, "view.content.app_name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+    stack1 = helpers._triageMustache.call(depth0, "view.content.name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
     data.buffer.push("</span>\n  </div>\n  <nav class=\"control-window\">\n    <a href=\"#\" class=\"minimize\" ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "minimizeApp", {hash:{
@@ -1821,7 +1819,7 @@ define('web-desktop/templates/window', ['exports', 'ember'], function (exports, 
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "flipApp", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push("\n			/>\n			<div class=\"back_shadow_decoration\"></div>\n			<div class=\"back_title\">Available Links on Desktop</div>\n			<div class=\"back_app_container\">\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/Map/icon.png\"/>\n					<div class=\"back_app_name\">Map</div>\n					<div class=\"back_app_linked\">\n						<img class=\"back_app_linked_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<div class=\"back_app_overlay_text\">Unlink</div>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/HipChat/icon.png\"/>\n					<div class=\"back_app_name\">HipChat</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<img class=\"back_app_overlay_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/Quotes/icon.png\"/>\n					<div class=\"back_app_name\">Quotes</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<img class=\"back_app_overlay_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/HipChat/icon.png\"/>\n					<div class=\"back_app_name\">HipChat</div>\n					<div class=\"back_app_linked\">\n						<img class=\"back_app_linked_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<div class=\"back_app_overlay_text\">Unlink</div>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/Pixlr/icon.png\"/>\n					<div class=\"back_app_name\">Pixlr</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<img class=\"back_app_overlay_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/TakaBreak/icon.png\"/>\n					<div class=\"back_app_name\">TakaBreak</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<img class=\"back_app_overlay_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/LiveCAM/icon.png\"/>\n					<div class=\"back_app_name\">LiveCAM</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<img class=\"back_app_overlay_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/Math/icon.png\"/>\n					<div class=\"back_app_name\">Math</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<img class=\"back_app_overlay_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/Withholding/icon.png\"/>\n					<div class=\"back_app_name\">Withholding</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<img class=\"back_app_overlay_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/Draw/icon.png\"/>\n					<div class=\"back_app_name\">Draw</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<img class=\"back_app_overlay_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n				</div>\n			</div>\n<!-- 						<div class=\"back_recommend\">Popular Links on Cloud</div>\n			<div class=\"back_recommend_container\">\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/Quotes/icon.png\"/>\n					<div class=\"back_app_name\">Quotes</div>\n					<div class=\"back_app_overlay\"></div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/HipChat/icon.png\"/>\n					<div class=\"back_app_name\">HipChat</div>\n					<div class=\"back_app_overlay\"></div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/Pixlr/icon.png\"/>\n					<div class=\"back_app_name\">Pixlr</div>\n					<div class=\"back_app_overlay\"></div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/Map/icon.png\"/>\n					<div class=\"back_app_name\">Map</div>\n					<div class=\"back_app_overlay\"></div>\n				</div>\n			</div> -->\n			<div class=\"back_notation\">Powered by GAUSIAN ASA</div>\n		</div>\n	</div>\n</div>\n");
+    data.buffer.push("\n			/>\n			<div class=\"back_shadow_decoration\"></div>\n			<div class=\"back_title\">Available Links on Desktop</div>\n			<div class=\"back_app_container\">\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/Map/icon.png\"/>\n					<div class=\"back_name\">Map</div>\n					<div class=\"back_app_linked\">\n						<img class=\"back_app_linked_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<div class=\"back_app_overlay_text\">Unlink</div>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/HipChat/icon.png\"/>\n					<div class=\"back_name\">HipChat</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<img class=\"back_app_overlay_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/Quotes/icon.png\"/>\n					<div class=\"back_name\">Quotes</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<img class=\"back_app_overlay_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/HipChat/icon.png\"/>\n					<div class=\"back_name\">HipChat</div>\n					<div class=\"back_app_linked\">\n						<img class=\"back_app_linked_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<div class=\"back_app_overlay_text\">Unlink</div>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/Pixlr/icon.png\"/>\n					<div class=\"back_name\">Pixlr</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<img class=\"back_app_overlay_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/TakaBreak/icon.png\"/>\n					<div class=\"back_name\">TakaBreak</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<img class=\"back_app_overlay_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/LiveCAM/icon.png\"/>\n					<div class=\"back_name\">LiveCAM</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<img class=\"back_app_overlay_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/Math/icon.png\"/>\n					<div class=\"back_name\">Math</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<img class=\"back_app_overlay_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/Withholding/icon.png\"/>\n					<div class=\"back_name\">Withholding</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<img class=\"back_app_overlay_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/Draw/icon.png\"/>\n					<div class=\"back_name\">Draw</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<img class=\"back_app_overlay_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n				</div>\n			</div>\n<!-- 						<div class=\"back_recommend\">Popular Links on Cloud</div>\n			<div class=\"back_recommend_container\">\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/Quotes/icon.png\"/>\n					<div class=\"back_name\">Quotes</div>\n					<div class=\"back_app_overlay\"></div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/HipChat/icon.png\"/>\n					<div class=\"back_name\">HipChat</div>\n					<div class=\"back_app_overlay\"></div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/Pixlr/icon.png\"/>\n					<div class=\"back_name\">Pixlr</div>\n					<div class=\"back_app_overlay\"></div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/Map/icon.png\"/>\n					<div class=\"back_name\">Map</div>\n					<div class=\"back_app_overlay\"></div>\n				</div>\n			</div> -->\n			<div class=\"back_notation\">Powered by GAUSIAN ASA</div>\n		</div>\n	</div>\n</div>\n");
     return buffer;
     
   });

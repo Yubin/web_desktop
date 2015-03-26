@@ -2,7 +2,7 @@ import DS from 'ember-data';
 
 export default DS.Model.extend({
   owner: DS.attr('string'),
-  app_name: DS.attr('string'),
+  name: DS.attr('string'),
   last_version: DS.attr('string'),
   show_in_store: DS.attr('boolean'),
   pricing_by_month: DS.attr('number'),

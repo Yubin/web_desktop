@@ -2,10 +2,10 @@
   <img {{bind-attr src=view.content.icon}} />
 </div>
 <div class="detail">
-  <a class="name">{{view.content.app_name}}</a>
+  <a class="name">{{view.content.name}}</a>
   <a class="star-rating"> {{star-rating content=view.content.rating}} </a>
-  <a class="category">{{view.content.category}}</a>
-  <a class="price">{{view.content.freeDay}} days free trail, ${{view.content.pricing_by_month}} /month</a>
+  <a class="category">{{view.content.brief}}</a>
+  <a class="price">{{view.content.catalog}}</a>
 </div>
 {{#if view.content.installed}}
 <a class="action open" {{action "openApp" target=view}}>
