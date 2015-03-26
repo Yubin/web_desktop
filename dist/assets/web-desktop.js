@@ -446,6 +446,8 @@ define('web-desktop/controllers/header', ['exports', 'ember'], function (exports
     openApps: Ember['default'].computed.alias('controllers.applist.openApps'),
     user: Ember['default'].computed.alias('controllers.application.user'),
     headerShowing: Ember['default'].computed.not('controllers.application.appMoving'),
+    isLogin: Ember['default'].computed.alias('controllers.application.isLogin'),
+    companies: Ember['default'].computed.alias('controllers.application.companies'),
 
     dock: function () {
       return this.get('openApps').slice(0, 10);
@@ -1061,27 +1063,20 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
           pwd: get(content, 'password'),
           company_id: 1
         }).save().then(function (res) {
-          console.log(res);
           var responseBody = res._data.response;
           var responseCode = res._data.response_code;
+          console.log(responseBody);
           if (res._data.response_code !== 1) {
             this.get('controller').set('loginFail', true);
           } else {
-            var user = {
-              id: get(responseBody, 'user.id'),
-              firstName: get(responseBody, 'user.first'),
-              lastName: get(responseBody, 'user.last'),
-              emailAddr: get(content, 'emailAddr'),
+            this.get('controller').setProperties({
               isLogin: true,
-              loginType: 1,
-              signUpDate: get(res, 'signup_date'),
-              token: 'asdfasdfasdf',
-              companies: get(responseBody, 'companies'),
-              installApps: get(responseBody, 'installed_apps'),
-              current_compony_id: get(responseBody, 'current_login_company')
-            };
-            this.get('controller').set('user', user);
-            localStorage.setItem('gausian-user', JSON.stringify(user));
+              'companies': get(responseBody, 'companies'),
+              'user': get(responseBody, 'user'),
+              'employee': get(responseBody, 'employee_info')
+            });
+            // localStorage.setItem('gausian-user', JSON.stringify(user));
+            this.set('controller.loginShow', false);
           }
         }.bind(this));
       },
@@ -1089,15 +1084,17 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
       loginVisitor: function (content) {
 
         var user = {
-          firstName: get(content, 'firstName'),
-          lastName: get(content, 'lastName'),
+          first: get(content, 'firstName'),
+          last: get(content, 'lastName'),
           emailAddr: get(content, 'emailAddr'),
           invCode: get(content, 'invCode'),
-          isLogin: true,
           loginType: 2,
           token: 'asdfasdfasdf'
         };
-        this.get('controller').set('user', user);
+        this.get('controller').setProperties({
+          isLogin: true,
+          'user': user
+        });
         localStorage.setItem('gausian-user', JSON.stringify(user));
         this.set('controller.loginShow', false);
       },
@@ -1290,7 +1287,7 @@ define('web-desktop/templates/appicon', ['exports', 'ember'], function (exports,
     var buffer = '', escapeExpression=this.escapeExpression;
 
 
-    data.buffer.push("<div class=\"effect fadeIn fadeIn-50ms fadeIn-Delay-100ms\"></div>\n<div class=\"app-edge fadeIn fadeIn-50ms fadeIn-Delay-100ms\"></div>\n<div class=\"app-img fadeIn fadeIn-50ms fadeIn-Delay-100ms\"></div>\n<div class=\"app-text fadeIn fadeIn-50ms fadeIn-Delay-100ms\">");
+    data.buffer.push("<div class=\"effect\"></div>\n<div class=\"app-edge\"></div>\n<div class=\"app-img\"></div>\n<div class=\"app-text\">");
     data.buffer.push(escapeExpression(helpers.unbound.call(depth0, "view.content.app_name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data})));
     data.buffer.push("</div>\n");
     return buffer;
@@ -1485,10 +1482,10 @@ define('web-desktop/templates/header', ['exports', 'ember'], function (exports, 
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
     data.buffer.push(">");
-    stack1 = helpers._triageMustache.call(depth0, "user.firstName", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+    stack1 = helpers._triageMustache.call(depth0, "user.first", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
     data.buffer.push(" ");
-    stack1 = helpers._triageMustache.call(depth0, "user.lastName", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+    stack1 = helpers._triageMustache.call(depth0, "user.last", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
     data.buffer.push("</a>\n      </span>\n\n      ");
     return buffer;
@@ -1507,7 +1504,7 @@ define('web-desktop/templates/header', ['exports', 'ember'], function (exports, 
     
     var buffer = '', stack1;
     data.buffer.push("\n  <ul class=\"dropdown-menu pull-right\">\n    <li>\n      <a>My Account</a>\n    </li>\n    ");
-    stack1 = helpers.each.call(depth0, "user.companies", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(8, program8, data),contexts:[depth0],types:["ID"],data:data});
+    stack1 = helpers.each.call(depth0, "companies", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(8, program8, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
     data.buffer.push("\n    <li>\n      <a ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "SignOut", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
@@ -1543,7 +1540,7 @@ define('web-desktop/templates/header', ['exports', 'ember'], function (exports, 
       'content': ("dock")
     },hashTypes:{'content': "ID"},hashContexts:{'content': depth0},contexts:[depth0],types:["STRING"],data:data})));
     data.buffer.push("\n\n  <li class=\"login fadeIn fadeIn-50ms\">\n      ");
-    stack1 = helpers['if'].call(depth0, "user.isLogin", {hash:{},hashTypes:{},hashContexts:{},inverse:self.program(5, program5, data),fn:self.program(3, program3, data),contexts:[depth0],types:["ID"],data:data});
+    stack1 = helpers['if'].call(depth0, "isLogin", {hash:{},hashTypes:{},hashContexts:{},inverse:self.program(5, program5, data),fn:self.program(3, program3, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
     data.buffer.push("\n  </li>\n  ");
     stack1 = helpers['if'].call(depth0, "view.showProfile", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(7, program7, data),contexts:[depth0],types:["ID"],data:data});
@@ -2077,7 +2074,7 @@ define('web-desktop/tests/routes/application.jshint', function () {
 
   module('JSHint - routes');
   test('routes/application.js should pass jshint', function() { 
-    ok(false, 'routes/application.js should pass jshint.\nroutes/application.js: line 9, col 20, \'params\' is defined but never used.\nroutes/application.js: line 226, col 27, \'content\' is defined but never used.\nroutes/application.js: line 231, col 24, \'content\' is defined but never used.\nroutes/application.js: line 236, col 26, \'content\' is defined but never used.\nroutes/application.js: line 250, col 13, \'responseCode\' is defined but never used.\n\n5 errors'); 
+    ok(false, 'routes/application.js should pass jshint.\nroutes/application.js: line 9, col 20, \'params\' is defined but never used.\nroutes/application.js: line 226, col 27, \'content\' is defined but never used.\nroutes/application.js: line 231, col 24, \'content\' is defined but never used.\nroutes/application.js: line 236, col 26, \'content\' is defined but never used.\nroutes/application.js: line 249, col 13, \'responseCode\' is defined but never used.\n\n5 errors'); 
   });
 
 });
@@ -2220,7 +2217,7 @@ define('web-desktop/tests/views/applist.jshint', function () {
 
   module('JSHint - views');
   test('views/applist.js should pass jshint', function() { 
-    ok(false, 'views/applist.js should pass jshint.\nviews/applist.js: line 135, col 33, Expected \'===\' and instead saw \'==\'.\nviews/applist.js: line 136, col 26, Expected \'===\' and instead saw \'==\'.\nviews/applist.js: line 137, col 26, Expected \'===\' and instead saw \'==\'.\nviews/applist.js: line 68, col 73, \'$\' is not defined.\nviews/applist.js: line 69, col 73, \'$\' is not defined.\n\n5 errors'); 
+    ok(false, 'views/applist.js should pass jshint.\nviews/applist.js: line 136, col 33, Expected \'===\' and instead saw \'==\'.\nviews/applist.js: line 137, col 26, Expected \'===\' and instead saw \'==\'.\nviews/applist.js: line 138, col 26, Expected \'===\' and instead saw \'==\'.\nviews/applist.js: line 69, col 73, \'$\' is not defined.\nviews/applist.js: line 70, col 73, \'$\' is not defined.\n\n5 errors'); 
   });
 
 });
@@ -2643,7 +2640,7 @@ define('web-desktop/views/appicon', ['exports', 'ember'], function (exports, Emb
 
   exports['default'] = Ember['default'].View.extend({
     templateName: 'appicon',
-    classNames: ['appicon'],
+    classNames: ['appicon', 'fadeIn', 'fadeIn-50ms', 'fadeIn-Delay-100ms'],
     attributeBindings : [ 'draggable' ],
     // draggable         : 'true',
     row: function () {
@@ -2858,14 +2855,15 @@ define('web-desktop/views/applist', ['exports', 'ember'], function (exports, Emb
 
       var top = Ember['default'].$('.ember-view.head').height() +
         Ember['default'].$('.ember-view.search-bar .search').height() + 2 * paddingTop;
-
-      this.$().css({
-        top: top,
-        bottom: 0,
-        left: 0,
-        right: 0
-      });
-
+      var node = this.$();
+      if (node) {
+        this.$().css({
+          top: top,
+          bottom: 0,
+          left: 0,
+          right: 0
+        });
+      }
       var height = (winHeight - top) * (1 - 2 * paddingRate);
       var width = winWidth / 3 * 0.86 ;
       var widthOffset = (winWidth - 3 * (width)) / 4;
@@ -3008,16 +3006,19 @@ define('web-desktop/views/appscreen', ['exports', 'ember'], function (exports, E
     },
 
     handleSize: function () {
+      var node = this.$();
       var index = this.get('index') || 0;
       var width = this.get('parentView.screenWidth');
       var widthOffset = this.get('parentView.widthOffset');
       var left = index * (width + widthOffset) + widthOffset;
-      this.$().css({
-        top: 0,
-        left: left,
-        width: width,
-        height: this.get('parentView.screenHeight')
-      });
+      if (node) {
+        this.$().css({
+          top: 0,
+          left: left,
+          width: width,
+          height: this.get('parentView.screenHeight')
+        });
+      }
     }.observes('parentView.screenWidth',
       'parentView.screenHeight',
       'parentView.screenTop',
@@ -3066,15 +3067,14 @@ define('web-desktop/views/header', ['exports', 'ember'], function (exports, Embe
     show: Ember['default'].computed.alias('controller.headerShowing'),
     companyName: function () {
       var name = 'Company Name';
-      var companies = this.get('controller.user.companies');
+      var companies = this.get('controller.companies');
       var id = this.get('controller.user.current_compony_id');
       if (!Ember['default'].isEmpty(companies) && !Ember['default'].isEmpty(id)) {
         var obj = companies.findBy('id', parseInt(id));
         name = Ember['default'].get(obj, 'name');
       }
-
       return name;
-    }.property('controller.user.companies.[]', 'controller.user.current_compony_id'),
+    }.property('controller.companies.[]', 'controller.user.current_compony_id'),
 
     adjustSize: function () {
       var total_dock = this.get('content.dock.length');

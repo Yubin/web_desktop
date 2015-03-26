@@ -5,6 +5,8 @@ export default Ember.Controller.extend({
   openApps: Ember.computed.alias('controllers.applist.openApps'),
   user: Ember.computed.alias('controllers.application.user'),
   headerShowing: Ember.computed.not('controllers.application.appMoving'),
+  isLogin: Ember.computed.alias('controllers.application.isLogin'),
+  companies: Ember.computed.alias('controllers.application.companies'),
 
   dock: function () {
     return this.get('openApps').slice(0, 10);

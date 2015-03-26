@@ -38,14 +38,15 @@ export default Ember.View.extend({
 
     var top = Ember.$('.ember-view.head').height() +
       Ember.$('.ember-view.search-bar .search').height() + 2 * paddingTop;
-
-    this.$().css({
-      top: top,
-      bottom: 0,
-      left: 0,
-      right: 0
-    });
-
+    var node = this.$();
+    if (node) {
+      this.$().css({
+        top: top,
+        bottom: 0,
+        left: 0,
+        right: 0
+      });
+    }
     var height = (winHeight - top) * (1 - 2 * paddingRate);
     var width = winWidth / 3 * 0.86 ;
     var widthOffset = (winWidth - 3 * (width)) / 4;

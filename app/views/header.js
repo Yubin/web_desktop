@@ -12,15 +12,14 @@ export default Ember.View.extend({
   show: Ember.computed.alias('controller.headerShowing'),
   companyName: function () {
     var name = 'Company Name';
-    var companies = this.get('controller.user.companies');
+    var companies = this.get('controller.companies');
     var id = this.get('controller.user.current_compony_id');
     if (!Ember.isEmpty(companies) && !Ember.isEmpty(id)) {
       var obj = companies.findBy('id', parseInt(id));
       name = Ember.get(obj, 'name');
     }
-
     return name;
-  }.property('controller.user.companies.[]', 'controller.user.current_compony_id'),
+  }.property('controller.companies.[]', 'controller.user.current_compony_id'),
 
   adjustSize: function () {
     var total_dock = this.get('content.dock.length');

@@ -245,27 +245,20 @@ export default Ember.Route.extend({
         pwd: get(content, 'password'),
         company_id: 1
       }).save().then(function (res) {
-        console.log(res);
         var responseBody = res._data.response;
         var responseCode = res._data.response_code;
+        console.log(responseBody);
         if (res._data.response_code !== 1) {
           this.get('controller').set('loginFail', true);
         } else {
-          var user = {
-            id: get(responseBody, 'user.id'),
-            firstName: get(responseBody, 'user.first'),
-            lastName: get(responseBody, 'user.last'),
-            emailAddr: get(content, 'emailAddr'),
+          this.get('controller').setProperties({
             isLogin: true,
-            loginType: 1,
-            signUpDate: get(res, 'signup_date'),
-            token: 'asdfasdfasdf',
-            companies: get(responseBody, 'companies'),
-            installApps: get(responseBody, 'installed_apps'),
-            current_compony_id: get(responseBody, 'current_login_company')
-          };
-          this.get('controller').set('user', user);
-          localStorage.setItem('gausian-user', JSON.stringify(user));
+            'companies': get(responseBody, 'companies'),
+            'user': get(responseBody, 'user'),
+            'employee': get(responseBody, 'employee_info')
+          });
+          // localStorage.setItem('gausian-user', JSON.stringify(user));
+          this.set('controller.loginShow', false);
         }
       }.bind(this));
     },
@@ -273,15 +266,17 @@ export default Ember.Route.extend({
     loginVisitor: function (content) {
 
       var user = {
-        firstName: get(content, 'firstName'),
-        lastName: get(content, 'lastName'),
+        first: get(content, 'firstName'),
+        last: get(content, 'lastName'),
         emailAddr: get(content, 'emailAddr'),
         invCode: get(content, 'invCode'),
-        isLogin: true,
         loginType: 2,
         token: 'asdfasdfasdf'
       };
-      this.get('controller').set('user', user);
+      this.get('controller').setProperties({
+        isLogin: true,
+        'user': user
+      });
       localStorage.setItem('gausian-user', JSON.stringify(user));
       this.set('controller.loginShow', false);
     },

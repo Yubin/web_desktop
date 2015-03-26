@@ -2,7 +2,7 @@ import Ember from 'ember';
 
 export default Ember.View.extend({
   templateName: 'appicon',
-  classNames: ['appicon'],
+  classNames: ['appicon', 'fadeIn', 'fadeIn-50ms', 'fadeIn-Delay-100ms'],
   attributeBindings : [ 'draggable' ],
   // draggable         : 'true',
   row: function () {

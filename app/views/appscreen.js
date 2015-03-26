@@ -27,16 +27,19 @@ export default Ember.View.extend({
   },
 
   handleSize: function () {
+    var node = this.$();
     var index = this.get('index') || 0;
     var width = this.get('parentView.screenWidth');
     var widthOffset = this.get('parentView.widthOffset');
     var left = index * (width + widthOffset) + widthOffset;
-    this.$().css({
-      top: 0,
-      left: left,
-      width: width,
-      height: this.get('parentView.screenHeight')
-    });
+    if (node) {
+      this.$().css({
+        top: 0,
+        left: left,
+        width: width,
+        height: this.get('parentView.screenHeight')
+      });
+    }
   }.observes('parentView.screenWidth',
     'parentView.screenHeight',
     'parentView.screenTop',

@@ -18,9 +18,9 @@
   {{view 'header-dock' content=dock}}
 
   <li class="login fadeIn fadeIn-50ms">
-      {{#if user.isLogin}}
+      {{#if isLogin}}
       <span>
-        <a {{action 'showProfile' target=view}}>{{user.firstName}} {{user.lastName}}</a>
+        <a {{action 'showProfile' target=view}}>{{user.first}} {{user.last}}</a>
       </span>
 
       {{else}}
@@ -35,7 +35,7 @@
     <li>
       <a>My Account</a>
     </li>
-    {{#each user.companies}}
+    {{#each companies}}
     <li>
       <a {{action 'changeCompany' id target=view}}>{{name}}</a>
     </li>
