@@ -430,7 +430,6 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
       },
 
       activateWindow: function (/*content*/) {
-        console.log('activateWindow');
       }
 
     }
@@ -559,18 +558,30 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
     isMinSize: false,
 
     changeZindex: function () {
+      this.set('active', true);
+
       var zindex = -1;
-      Ember['default'].$('.window').each(function () {
-        var z = parseInt(Ember['default'].$(this).css('z-index'));
+      Ember['default'].$('.window').each(function (index, item) {
+        var node = Ember['default'].$(item);
+        var z = parseInt(node.css('z-index'));
         if (z > zindex) {
           zindex = z;
         }
-        Ember['default'].$(this).removeClass('active');
-      });
+        var view = Ember['default'].View.views[node.attr('id')];
+        if (view !== this) {
+          view.set('active', false);
+        }
+      }.bind(this));
 
       this.$().css('z-index', zindex + 1);
-      this.$().addClass('active');
     },
+
+    onActiveChange: function () {
+      var display = this.get('active') ? 'none' : 'block';
+      this.$('.iframeDragResizeMask').css({
+        display: display
+      });
+    }.observes('active'),
 
     showMinimizedApp: function () {
       if (this.get('isMinSize')) {
@@ -612,11 +623,8 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
   /*    this.toggleProperty('isMinSize');*/
     },
 
-    mouseDown: function () {
-      this.changeZindex();
-    },
-
     click: function () {
+      this.changeZindex();
       this.get('parentView').send('activateWindow', this.get('content'));
     },
 
@@ -632,34 +640,34 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
         minHeight: this.get('minHeight'),
         minWidth: this.get('minWidth'),
         start: function () {
-          Ember['default'].$('#ui_maskLayer_0').css({
+          this.$('.iframeDragResizeMask').css({
             display: 'block'
           });
-        },
+        }.bind(this),
         stop: function( event, ui ) {
           var size = ui.size;
           this.setProperties({
             width: size.width,
             height: size.height
           });
-          Ember['default'].$('#ui_maskLayer_0').css({
+          this.$('.iframeDragResizeMask').css({
             display: 'none'
           });
         }.bind(this)
       });
       this.$().draggable({
         start: function () {
-          Ember['default'].$('#ui_maskLayer_0').css({
+          this.$('.iframeDragResizeMask').css({
             display: 'block'
           });
-        },
+        }.bind(this),
         stop: function(event, ui) {
           var position = ui.position;
           this.setProperties({
             top: position.top,
             left: position.left
           });
-          Ember['default'].$('#ui_maskLayer_0').css({
+          this.$('.iframeDragResizeMask').css({
             display: 'none'
           });
         }.bind(this)
@@ -1223,7 +1231,7 @@ define('web-desktop/templates/app/customer', ['exports', 'ember'], function (exp
     data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
       'id': ("view.content.name")
     },hashTypes:{'id': "ID"},hashContexts:{'id': depth0},contexts:[],types:[],data:data})));
-    data.buffer.push(" width=\"100%\" height=\"100%\" frameBorder=\"0\"></iframe>\n");
+    data.buffer.push(" width=\"100%\" height=\"100%\" frameBorder=\"0\"></iframe>\n<div id=\"iframeApp_dragResizeMask_3\" class=\"iframeDragResizeMask\"></div>\n");
     return buffer;
     
   });

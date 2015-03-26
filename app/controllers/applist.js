@@ -207,7 +207,6 @@ export default Ember.Controller.extend({
     },
 
     activateWindow: function (/*content*/) {
-      console.log('activateWindow');
     }
 
   }

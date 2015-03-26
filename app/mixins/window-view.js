@@ -17,18 +17,30 @@ export default Ember.Mixin.create({
   isMinSize: false,
 
   changeZindex: function () {
+    this.set('active', true);
+
     var zindex = -1;
-    Ember.$('.window').each(function () {
-      var z = parseInt(Ember.$(this).css('z-index'));
+    Ember.$('.window').each(function (index, item) {
+      var node = Ember.$(item);
+      var z = parseInt(node.css('z-index'));
       if (z > zindex) {
         zindex = z;
       }
-      Ember.$(this).removeClass('active');
-    });
+      var view = Ember.View.views[node.attr('id')];
+      if (view !== this) {
+        view.set('active', false);
+      }
+    }.bind(this));
 
     this.$().css('z-index', zindex + 1);
-    this.$().addClass('active');
   },
+
+  onActiveChange: function () {
+    var display = this.get('active') ? 'none' : 'block';
+    this.$('.iframeDragResizeMask').css({
+      display: display
+    });
+  }.observes('active'),
 
   showMinimizedApp: function () {
     if (this.get('isMinSize')) {
@@ -70,11 +82,8 @@ export default Ember.Mixin.create({
 /*    this.toggleProperty('isMinSize');*/
   },
 
-  mouseDown: function () {
-    this.changeZindex();
-  },
-
   click: function () {
+    this.changeZindex();
     this.get('parentView').send('activateWindow', this.get('content'));
   },
 
@@ -90,34 +99,34 @@ export default Ember.Mixin.create({
       minHeight: this.get('minHeight'),
       minWidth: this.get('minWidth'),
       start: function () {
-        Ember.$('#ui_maskLayer_0').css({
+        this.$('.iframeDragResizeMask').css({
           display: 'block'
         });
-      },
+      }.bind(this),
       stop: function( event, ui ) {
         var size = ui.size;
         this.setProperties({
           width: size.width,
           height: size.height
         });
-        Ember.$('#ui_maskLayer_0').css({
+        this.$('.iframeDragResizeMask').css({
           display: 'none'
         });
       }.bind(this)
     });
     this.$().draggable({
       start: function () {
-        Ember.$('#ui_maskLayer_0').css({
+        this.$('.iframeDragResizeMask').css({
           display: 'block'
         });
-      },
+      }.bind(this),
       stop: function(event, ui) {
         var position = ui.position;
         this.setProperties({
           top: position.top,
           left: position.left
         });
-        Ember.$('#ui_maskLayer_0').css({
+        this.$('.iframeDragResizeMask').css({
           display: 'none'
         });
       }.bind(this)
