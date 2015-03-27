@@ -11,7 +11,6 @@ export default Adapter.extend({
   find: function (store, type, id) {
     // Get on id = 2 or id = 3
     var onStr = 'ON employee_id=' + id;
-    console.log(onStr);
     var requestStr = 'GET ' + onStr;
     return this.ajax(this.buildURL(), 'POST', {
       data: {requestString: requestStr},
