@@ -136,6 +136,40 @@ define('web-desktop/adapters/login', ['exports', 'web-desktop/adapters/base', 'w
   });
 
 });
+define('web-desktop/adapters/user-setting', ['exports', 'web-desktop/adapters/base', 'web-desktop/serializers/user-setting', 'ember'], function (exports, Adapter, Serializer, Ember) {
+
+  'use strict';
+
+  var isEmpty = Ember['default'].isEmpty;
+  var get = Ember['default'].get;
+
+  exports['default'] = Adapter['default'].extend({
+    serializer: Serializer['default'].create(),
+
+    find: function (store, type, id) {
+      // Get on id = 2 or id = 3
+      var onStr = 'ON employee_id=' + id;
+      console.log(onStr);
+      var requestStr = 'GET ' + onStr;
+      return this.ajax(this.buildURL(), 'POST', {
+        data: {requestString: requestStr},
+        serviceAppName: 'UserSetting'
+      });
+    },
+
+    updateRecord: function (store, type, record) {
+      var id = get(record, 'id');
+      var installed_app = JSON.stringify(get(record, 'installed_app'));
+      var requestStr = 'SET installed_app=%@ ON employee_id=%@'.fmt(JSON.stringify(installed_app), id);
+      return this.ajax(this.buildURL(), 'POST', {
+        data: {requestString: requestStr},
+        serviceAppName: 'UserSetting'
+      });
+  },
+
+  });
+
+});
 define('web-desktop/app', ['exports', 'ember', 'ember/resolver', 'ember/load-initializers', 'web-desktop/config/environment'], function (exports, Ember, Resolver, loadInitializers, config) {
 
   'use strict';
@@ -232,16 +266,16 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
     needs: ['application'],
     screenNum: 3,
     screens: [
-    { id: 0, hasApp: false},
-    { id: 1, hasApp: false},
-    { id: 2, hasApp: false}
+      { id: 0, hasApp: false},
+      { id: 1, hasApp: false},
+      { id: 2, hasApp: false}
     ],
 
     appTouch: false,
 
     openApps: [],
 
-    installApps: Ember['default'].computed.alias('controllers.application.employee.installed_app'),
+    employeeId: Ember['default'].computed.alias('controllers.application.employee.id'),
 
     init: function () {
       this._super.apply(this, arguments);
@@ -273,35 +307,59 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
     }.observes('content.@each.screen'),
 
     loadInstallApps: function () {
-      var installApps = this.get('installApps');
 
-      if (!isEmpty(installApps)) {
-        var ids = installApps.getEach('id');
-
-        this.store.findQuery('app-info', {ids: ids}).then(function (res) {
-          var apps = res.get('content');
-          if (apps) {
-            apps.forEach(function (app) {
-              var obj = installApps.findBy('id', parseInt(app.get('id')));
-              if (obj && obj.location) {
-                var array = obj.location.split(',');
-                app.set('screen', parseInt(array[0]));
-                app.set('row', parseInt(array[1]));
-                app.set('col', parseInt(array[2]));
-              }
-              this.get('model').pushObject(app);
-            }.bind(this));
-          }
-        }.bind(this));
-
-      }
-    }.observes('installApps'),
+      var employeeId = this.get('employeeId');
+      this.store.find('user-setting', employeeId).then(function (settings) {
+        var obj = get(settings, '_data');
+        var installApps = get(obj, 'installed_app');
+        var hash = {};
+        if (!isEmpty(installApps)) {
+          installApps.forEach(function (item) {
+            hash[get(item, 'id')] = item;
+          });
+          this.set('desktopStatus', hash);
+          var ids = installApps.getEach('id');
+          this.store.findQuery('app-info', {ids: ids}).then(function (res) {
+            var apps = res.get('content');
+            if (apps) {
+              apps.forEach(function (app) {
+                var obj = hash[parseInt(app.get('id'))];
+                if (obj && obj.location) {
+                  var array = obj.location.split(',');
+                  app.set('screen', parseInt(array[0]));
+                  app.set('row', parseInt(array[1]));
+                  app.set('col', parseInt(array[2]));
+                }
+                this.get('model').pushObject(app);
+              }.bind(this));
+            }
+          }.bind(this));
+        }
+      }.bind(this));
+    }.observes('employeeId'),
 
     observeAppinstall: function () {
       // Send install APP
     }.observes('appinstall'),
 
+
+    syncAppLayout: function () {
+      var installed_app = this.get('desktopStatus').toString();
+      var model = this.store.getById('user-setting', this.get('employeeId'));
+      model.save().then(function () {
+        debugger;
+      });
+    },
+
     actions: {
+      appPosChange: function (item) {
+        var id = get(item, 'id');
+        var app =  this.get('desktopStatus.' + id);
+        if (app) {
+          app.location = get(item, 'screen') + ',' + get(item, 'row') + ',' + get(item, 'col');
+          this.syncAppLayout();
+        }
+      },
       appMoving: function () {
         this.set('controllers.application.appMoving', true);
       },
@@ -309,7 +367,7 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
         this.set('controllers.application.appMoving', false);
       },
 
-      openApp: function (item) { console.log(item);
+      openApp: function (item) {
         var name = get(item, 'name');
         var icon = get(item, 'icon');
         var find = this.get('openApps').any(function (it) {
@@ -808,6 +866,16 @@ define('web-desktop/models/employee', ['exports', 'ember-data'], function (expor
   });
 
 });
+define('web-desktop/models/installed-app', ['exports', 'ember-data'], function (exports, DS) {
+
+  'use strict';
+
+  exports['default'] = DS['default'].Model.extend({
+    link: DS['default'].attr('string'),
+    location: DS['default'].attr('string')
+  });
+
+});
 define('web-desktop/models/login', ['exports', 'ember-data'], function (exports, DS) {
 
   'use strict';
@@ -816,6 +884,17 @@ define('web-desktop/models/login', ['exports', 'ember-data'], function (exports,
     user_name: DS['default'].attr('string'),
     pwd: DS['default'].attr('string'),
     company_id: DS['default'].attr('number')
+  });
+
+});
+define('web-desktop/models/user-setting', ['exports', 'ember-data'], function (exports, DS) {
+
+  'use strict';
+
+  exports['default'] = DS['default'].Model.extend({
+    user_id: DS['default'].attr('number'),
+    employee_id: DS['default'].attr('number'),
+    installed_app: DS['default'].attr()
   });
 
 });
@@ -852,186 +931,187 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
       return {
         applist:[
           {
-           name: "Store",
-           icon: 'http://asa.static.gausian.com/user_app/Store/icon.png',
-           viewName: 'customer',
-           path: 'http://tianjiasun.github.io/APP_store/app/',
-           screen: 2,
-           col: 3,
-           row: 4
+            id: 0,
+            name: "Store",
+            icon: 'http://asa.static.gausian.com/user_app/Store/icon.png',
+            viewName: 'customer',
+            path: 'http://tianjiasun.github.io/APP_store/app/',
+            screen: 2,
+            col: 3,
+            row: 4
          },
-         {
-            name: "ASA",
-            icon: 'http://asa.static.gausian.com/user_app/ASA/icon.png',
-            viewName: 'customer',
-            path: 'http://tianjiasun.github.io/ASA_api/app/index.html',
-            screen: 2,
-            col: 0,
-            row: 0
-          },
-          {
-            name: "Map",
-            icon: 'http://asa.static.gausian.com/user_app/Map/icon.png',
-            viewName: 'customer',
-            path: 'https://www.google.com/maps/embed/v1/place?key=AIzaSyBrTaOSXSiXT1o7mUCjnJZSeRcSz0vnglw&q=silicon+valley',
-            screen: 2,
-            col: 3,
-            row: 0
-          },
-          {
-            name: "Customers",
-            app_id: "customerApp",
-            icon: 'http://asa.static.gausian.com/user_app/Customers/icon.png',
-            viewName: 'customer',
-            path: 'http://gausian-developers.github.io/user-app-template5/app/',
-            screen: 2,
-            col: 1,
-            row: 0
-          },
-          {
-            name: "Quotes",
-            icon: 'http://asa.static.gausian.com/user_app/Quotes/icon.png',
-            viewName: 'customer',
-            path: 'http://gausian-developers.github.io/user-app-template6/app/',
-            screen: 2,
-            col: 2,
-            row: 0
-          },
-          {
-            name: "HipChat",
-            icon: 'http://asa.static.gausian.com/user_app/HipChat/icon.png',
-            viewName: 'customer',
-            path: 'https://gausian.hipchat.com/chat',
-            screen: 2,
-            col: 0,
-            row: 1
-          },
-          {
-            name: "Pixlr",
-            icon: 'http://asa.static.gausian.com/user_app/Pixlr/icon.png',
-            viewName: 'customer',
-            path: 'http://pixlr.com/editor/?loc=zh-cn',
-            screen: 2,
-            col: 1,
-            row: 1
-          },
-          {
-            name: "TakaBreak",
-            icon: 'http://asa.static.gausian.com/user_app/TakaBreak/icon.png',
-            viewName: 'customer',
-            path: 'http://www.earbits.com/',
-            screen: 2,
-            col: 2,
-            row: 1
-          },
-          {
-            name: "EasyInvoice",
-            icon: 'http://asa.static.gausian.com/user_app/EasyInvoice/icon.png',
-            viewName: 'customer',
-            path: 'http://invoiceto.me/',
-            screen: 2,
-            col: 3,
-            row: 1
-          },
-          {
-            name: "LiveCAM",
-            icon: 'http://asa.static.gausian.com/user_app/LiveCAM/icon.png',
-            viewName: 'customer',
-            path: 'http://trafficcam.santaclaraca.gov/TrafficCamera.aspx?CID=GA101',
-            screen: 2,
-            col: 0,
-            row: 2
-          },
-          {
-            name: "Math",
-            icon: 'http://asa.static.gausian.com/user_app/Math/icon.png',
-            viewName: 'customer',
-            path: 'https://www.mathway.com/graph',
-            screen: 2,
-            col: 1,
-            row: 2
-          },
-          {
-            name: "Withholding",
-            icon: 'http://asa.static.gausian.com/user_app/Withholding/icon.png',
-            viewName: 'customer',
-            path: 'http://apps.irs.gov/app/withholdingcalculator/',
-            screen: 2,
-            col: 2,
-            row: 2
-          },
-          {
-            name: "JSON Viewer",
-            icon: 'http://asa.static.gausian.com/user_app/JSON/icon.png',
-            viewName: 'customer',
-            path: 'http://jsonviewer.stack.hu/',
-            screen: 2,
-            col: 3,
-            row: 2
-          },
-          {
-            name: "Weather",
-            icon: 'http://asa.static.gausian.com/user_app/Weather/icon.png',
-            viewName: 'customer',
-            path: 'http://chrome.wunderground.com/auto/chrome/geo/wx/index.html?query=95054',
-            screen: 2,
-            col: 0,
-            row: 3
-          },
-          {
-            name: "FloorPlans",
-            icon: 'http://asa.static.gausian.com/user_app/FloorPlans/icon.png',
-            viewName: 'customer',
-            path: 'https://planner5d.com/app-chrome/?key=3a95cf1e2b3c5c74ff7ee00871a49c8b',
-            screen: 2,
-            col: 1,
-            row: 3
-          },
-          {
-            name: "Draw",
-            icon: 'http://asa.static.gausian.com/user_app/Draw/icon.png',
-            viewName: 'customer',
-            path: 'http://www.ratemydrawings.com/canvasdraw/',
-            screen: 2,
-            col: 2,
-            row: 3
-          },
-          {
-            name: "3D",
-            icon: 'http://asa.static.gausian.com/user_app/3D/icon.png',
-            viewName: 'customer',
-            path: 'http://www.3dtin.com/2cwe',
-            screen: 2,
-            col: 3,
-            row: 3
-          },
-          {
-            name: "Calculator",
-            icon: 'http://asa.static.gausian.com/user_app/Calculator/icon.png',
-            viewName: 'customer',
-            path: 'http://scientific-calculator.appspot.com/',
-            screen: 2,
-            col: 0,
-            row: 4
-          },
-          {
-            name: "Developer",
-            icon: 'http://asa.static.gausian.com/user_app/Developer/icon.png',
-            viewName: 'customer',
-            path: 'http://tianjiasun.github.io/ASA_website/',
-            screen: 2,
-            col: 1,
-            row: 4
-          },
-          {
-            name: "SimpleToDo",
-            icon: 'http://asa.static.gausian.com/user_app/SimpleToDo/icon.png',
-            viewName: 'customer',
-            path: 'http://scrumy.com/husks11rubbish',
-            screen: 2,
-            col: 2,
-            row: 4
-          }
+        //  {
+        //     name: "ASA",
+        //     icon: 'http://asa.static.gausian.com/user_app/ASA/icon.png',
+        //     viewName: 'customer',
+        //     path: 'http://tianjiasun.github.io/ASA_api/app/index.html',
+        //     screen: 2,
+        //     col: 0,
+        //     row: 0
+        //   },
+        //   {
+        //     name: "Map",
+        //     icon: 'http://asa.static.gausian.com/user_app/Map/icon.png',
+        //     viewName: 'customer',
+        //     path: 'https://www.google.com/maps/embed/v1/place?key=AIzaSyBrTaOSXSiXT1o7mUCjnJZSeRcSz0vnglw&q=silicon+valley',
+        //     screen: 2,
+        //     col: 3,
+        //     row: 0
+        //   },
+        //   {
+        //     name: "Customers",
+        //     app_id: "customerApp",
+        //     icon: 'http://asa.static.gausian.com/user_app/Customers/icon.png',
+        //     viewName: 'customer',
+        //     path: 'http://gausian-developers.github.io/user-app-template5/app/',
+        //     screen: 2,
+        //     col: 1,
+        //     row: 0
+        //   },
+        //   {
+        //     name: "Quotes",
+        //     icon: 'http://asa.static.gausian.com/user_app/Quotes/icon.png',
+        //     viewName: 'customer',
+        //     path: 'http://gausian-developers.github.io/user-app-template6/app/',
+        //     screen: 2,
+        //     col: 2,
+        //     row: 0
+        //   },
+        //   {
+        //     name: "HipChat",
+        //     icon: 'http://asa.static.gausian.com/user_app/HipChat/icon.png',
+        //     viewName: 'customer',
+        //     path: 'https://gausian.hipchat.com/chat',
+        //     screen: 2,
+        //     col: 0,
+        //     row: 1
+        //   },
+        //   {
+        //     name: "Pixlr",
+        //     icon: 'http://asa.static.gausian.com/user_app/Pixlr/icon.png',
+        //     viewName: 'customer',
+        //     path: 'http://pixlr.com/editor/?loc=zh-cn',
+        //     screen: 2,
+        //     col: 1,
+        //     row: 1
+        //   },
+        //   {
+        //     name: "TakaBreak",
+        //     icon: 'http://asa.static.gausian.com/user_app/TakaBreak/icon.png',
+        //     viewName: 'customer',
+        //     path: 'http://www.earbits.com/',
+        //     screen: 2,
+        //     col: 2,
+        //     row: 1
+        //   },
+        //   {
+        //     name: "EasyInvoice",
+        //     icon: 'http://asa.static.gausian.com/user_app/EasyInvoice/icon.png',
+        //     viewName: 'customer',
+        //     path: 'http://invoiceto.me/',
+        //     screen: 2,
+        //     col: 3,
+        //     row: 1
+        //   },
+        //   {
+        //     name: "LiveCAM",
+        //     icon: 'http://asa.static.gausian.com/user_app/LiveCAM/icon.png',
+        //     viewName: 'customer',
+        //     path: 'http://trafficcam.santaclaraca.gov/TrafficCamera.aspx?CID=GA101',
+        //     screen: 2,
+        //     col: 0,
+        //     row: 2
+        //   },
+        //   {
+        //     name: "Math",
+        //     icon: 'http://asa.static.gausian.com/user_app/Math/icon.png',
+        //     viewName: 'customer',
+        //     path: 'https://www.mathway.com/graph',
+        //     screen: 2,
+        //     col: 1,
+        //     row: 2
+        //   },
+        //   {
+        //     name: "Withholding",
+        //     icon: 'http://asa.static.gausian.com/user_app/Withholding/icon.png',
+        //     viewName: 'customer',
+        //     path: 'http://apps.irs.gov/app/withholdingcalculator/',
+        //     screen: 2,
+        //     col: 2,
+        //     row: 2
+        //   },
+        //   {
+        //     name: "JSON Viewer",
+        //     icon: 'http://asa.static.gausian.com/user_app/JSON/icon.png',
+        //     viewName: 'customer',
+        //     path: 'http://jsonviewer.stack.hu/',
+        //     screen: 2,
+        //     col: 3,
+        //     row: 2
+        //   },
+        //   {
+        //     name: "Weather",
+        //     icon: 'http://asa.static.gausian.com/user_app/Weather/icon.png',
+        //     viewName: 'customer',
+        //     path: 'http://chrome.wunderground.com/auto/chrome/geo/wx/index.html?query=95054',
+        //     screen: 2,
+        //     col: 0,
+        //     row: 3
+        //   },
+        //   {
+        //     name: "FloorPlans",
+        //     icon: 'http://asa.static.gausian.com/user_app/FloorPlans/icon.png',
+        //     viewName: 'customer',
+        //     path: 'https://planner5d.com/app-chrome/?key=3a95cf1e2b3c5c74ff7ee00871a49c8b',
+        //     screen: 2,
+        //     col: 1,
+        //     row: 3
+        //   },
+        //   {
+        //     name: "Draw",
+        //     icon: 'http://asa.static.gausian.com/user_app/Draw/icon.png',
+        //     viewName: 'customer',
+        //     path: 'http://www.ratemydrawings.com/canvasdraw/',
+        //     screen: 2,
+        //     col: 2,
+        //     row: 3
+        //   },
+        //   {
+        //     name: "3D",
+        //     icon: 'http://asa.static.gausian.com/user_app/3D/icon.png',
+        //     viewName: 'customer',
+        //     path: 'http://www.3dtin.com/2cwe',
+        //     screen: 2,
+        //     col: 3,
+        //     row: 3
+        //   },
+        //   {
+        //     name: "Calculator",
+        //     icon: 'http://asa.static.gausian.com/user_app/Calculator/icon.png',
+        //     viewName: 'customer',
+        //     path: 'http://scientific-calculator.appspot.com/',
+        //     screen: 2,
+        //     col: 0,
+        //     row: 4
+        //   },
+        //   {
+        //     name: "Developer",
+        //     icon: 'http://asa.static.gausian.com/user_app/Developer/icon.png',
+        //     viewName: 'customer',
+        //     path: 'http://tianjiasun.github.io/ASA_website/',
+        //     screen: 2,
+        //     col: 1,
+        //     row: 4
+        //   },
+        //   {
+        //     name: "SimpleToDo",
+        //     icon: 'http://asa.static.gausian.com/user_app/SimpleToDo/icon.png',
+        //     viewName: 'customer',
+        //     path: 'http://scrumy.com/husks11rubbish',
+        //     screen: 2,
+        //     col: 2,
+        //     row: 4
+        //   }
         ]
       };
     },
@@ -1139,7 +1219,14 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
   });
 
 });
-define('web-desktop/serializers/app-info', ['exports', 'ember', 'ember-data'], function (exports, Ember, DS) {
+define('web-desktop/serializers/app-info', ['exports', 'web-desktop/serializers/base'], function (exports, Base) {
+
+	'use strict';
+
+	exports['default'] = Base['default'].extend({});
+
+});
+define('web-desktop/serializers/base', ['exports', 'ember', 'ember-data'], function (exports, Ember, DS) {
 
   'use strict';
 
@@ -1153,7 +1240,7 @@ define('web-desktop/serializers/app-info', ['exports', 'ember', 'ember-data'], f
         try {
           obj = JSON.parse(response);
         } catch (e) {
-          console.error('serializer - app-info failed to parse response: ' +response);
+          console.error('serializer - failed to parse response: ' +response);
         }
       }
       console.log(obj);
@@ -1162,27 +1249,11 @@ define('web-desktop/serializers/app-info', ['exports', 'ember', 'ember-data'], f
   });
 
 });
-define('web-desktop/serializers/employee', ['exports', 'ember', 'ember-data'], function (exports, Ember, DS) {
+define('web-desktop/serializers/employee', ['exports', 'web-desktop/serializers/base'], function (exports, Base) {
 
-  'use strict';
+	'use strict';
 
-  exports['default'] = DS['default'].RESTSerializer.extend({
-    extract: function (store, type, payload/*, id, requestType*/) {
-      var response = Ember['default'].get(payload, 'response');
-      var code = Ember['default'].get(payload, 'response_code');
-
-      var obj = [];
-      if (code === 1 && response) {
-        try {
-          obj = JSON.parse(response);
-        } catch (e) {
-          console.error('serializer - app-info failed to parse response: ' +response);
-        }
-      }
-      console.log(obj);
-      return obj;
-    }
-  });
+	exports['default'] = Base['default'].extend({});
 
 });
 define('web-desktop/serializers/login', ['exports', 'ember', 'ember-data'], function (exports, Ember, DS) {
@@ -1209,6 +1280,27 @@ define('web-desktop/serializers/login', ['exports', 'ember', 'ember-data'], func
     //
     //   Ember.merge(hash, oldHash);
     // }
+  });
+
+});
+define('web-desktop/serializers/user-setting', ['exports', 'web-desktop/serializers/base', 'ember'], function (exports, Base, Ember) {
+
+  'use strict';
+
+  exports['default'] = Base['default'].extend({
+
+    extract: function (store, type, payload/*, id, requestType*/) {
+      var array = this._super(store, type, payload);
+      var installed_app = [];
+      var obj = array[0];
+      try {
+        installed_app = JSON.parse(Ember['default'].get(obj, 'installed_app'));
+      } catch (e) {
+        console.error(e);
+      }
+      Ember['default'].set(obj, 'installed_app', installed_app);
+      return obj;
+    }
   });
 
 });
@@ -1888,6 +1980,16 @@ define('web-desktop/tests/adapters/login.jshint', function () {
   });
 
 });
+define('web-desktop/tests/adapters/user-setting.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - adapters');
+  test('adapters/user-setting.js should pass jshint', function() { 
+    ok(false, 'adapters/user-setting.js should pass jshint.\nadapters/user-setting.js: line 5, col 5, \'isEmpty\' is defined but never used.\n\n1 error'); 
+  });
+
+});
 define('web-desktop/tests/app.jshint', function () {
 
   'use strict';
@@ -1944,7 +2046,7 @@ define('web-desktop/tests/controllers/applist.jshint', function () {
 
   module('JSHint - controllers');
   test('controllers/applist.js should pass jshint', function() { 
-    ok(true, 'controllers/applist.js should pass jshint.'); 
+    ok(false, 'controllers/applist.js should pass jshint.\ncontrollers/applist.js: line 93, col 7, Forgotten \'debugger\' statement?\ncontrollers/applist.js: line 90, col 9, \'installed_app\' is defined but never used.\n\n2 errors'); 
   });
 
 });
@@ -2069,6 +2171,16 @@ define('web-desktop/tests/models/employee.jshint', function () {
   });
 
 });
+define('web-desktop/tests/models/installed-app.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - models');
+  test('models/installed-app.js should pass jshint', function() { 
+    ok(true, 'models/installed-app.js should pass jshint.'); 
+  });
+
+});
 define('web-desktop/tests/models/login.jshint', function () {
 
   'use strict';
@@ -2076,6 +2188,16 @@ define('web-desktop/tests/models/login.jshint', function () {
   module('JSHint - models');
   test('models/login.js should pass jshint', function() { 
     ok(true, 'models/login.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/models/user-setting.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - models');
+  test('models/user-setting.js should pass jshint', function() { 
+    ok(true, 'models/user-setting.js should pass jshint.'); 
   });
 
 });
@@ -2095,7 +2217,7 @@ define('web-desktop/tests/routes/application.jshint', function () {
 
   module('JSHint - routes');
   test('routes/application.js should pass jshint', function() { 
-    ok(false, 'routes/application.js should pass jshint.\nroutes/application.js: line 9, col 20, \'params\' is defined but never used.\nroutes/application.js: line 226, col 27, \'content\' is defined but never used.\nroutes/application.js: line 231, col 24, \'content\' is defined but never used.\nroutes/application.js: line 236, col 26, \'content\' is defined but never used.\nroutes/application.js: line 249, col 13, \'responseCode\' is defined but never used.\n\n5 errors'); 
+    ok(false, 'routes/application.js should pass jshint.\nroutes/application.js: line 9, col 20, \'params\' is defined but never used.\nroutes/application.js: line 227, col 27, \'content\' is defined but never used.\nroutes/application.js: line 232, col 24, \'content\' is defined but never used.\nroutes/application.js: line 237, col 26, \'content\' is defined but never used.\nroutes/application.js: line 250, col 13, \'responseCode\' is defined but never used.\n\n5 errors'); 
   });
 
 });
@@ -2106,6 +2228,16 @@ define('web-desktop/tests/serializers/app-info.jshint', function () {
   module('JSHint - serializers');
   test('serializers/app-info.js should pass jshint', function() { 
     ok(true, 'serializers/app-info.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/serializers/base.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - serializers');
+  test('serializers/base.js should pass jshint', function() { 
+    ok(true, 'serializers/base.js should pass jshint.'); 
   });
 
 });
@@ -2126,6 +2258,16 @@ define('web-desktop/tests/serializers/login.jshint', function () {
   module('JSHint - serializers');
   test('serializers/login.js should pass jshint', function() { 
     ok(true, 'serializers/login.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/serializers/user-setting.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - serializers');
+  test('serializers/user-setting.js should pass jshint', function() { 
+    ok(true, 'serializers/user-setting.js should pass jshint.'); 
   });
 
 });
@@ -2763,9 +2905,13 @@ define('web-desktop/views/appicon', ['exports', 'ember'], function (exports, Emb
     },
 
     position: function (row, col, scr, duration) {
-      row = !Ember['default'].isEmpty(row) ? row : this.get('row');
-      col = !Ember['default'].isEmpty(col) ? col : this.get('col');
-      scr = !Ember['default'].isEmpty(scr) ? scr : this.get('scr');
+      if (Ember['default'].isEmpty(row) && Ember['default'].isEmpty(col) && Ember['default'].isEmpty(scr)) { // init
+        row = this.get('row');
+        col = this.get('col');
+        scr = this.get('scr');
+      } else { //
+        this.get('controller').send('appPosChange', this.get('content'));
+      }
 
       var position = this.index2position(row, col, scr);
       var top = position.top;

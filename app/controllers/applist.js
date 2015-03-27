@@ -9,16 +9,16 @@ export default Ember.Controller.extend({
   needs: ['application'],
   screenNum: 3,
   screens: [
-  { id: 0, hasApp: false},
-  { id: 1, hasApp: false},
-  { id: 2, hasApp: false}
+    { id: 0, hasApp: false},
+    { id: 1, hasApp: false},
+    { id: 2, hasApp: false}
   ],
 
   appTouch: false,
 
   openApps: [],
 
-  installApps: Ember.computed.alias('controllers.application.employee.installed_app'),
+  employeeId: Ember.computed.alias('controllers.application.employee.id'),
 
   init: function () {
     this._super.apply(this, arguments);
@@ -50,35 +50,59 @@ export default Ember.Controller.extend({
   }.observes('content.@each.screen'),
 
   loadInstallApps: function () {
-    var installApps = this.get('installApps');
 
-    if (!isEmpty(installApps)) {
-      var ids = installApps.getEach('id');
-
-      this.store.findQuery('app-info', {ids: ids}).then(function (res) {
-        var apps = res.get('content');
-        if (apps) {
-          apps.forEach(function (app) {
-            var obj = installApps.findBy('id', parseInt(app.get('id')));
-            if (obj && obj.location) {
-              var array = obj.location.split(',');
-              app.set('screen', parseInt(array[0]));
-              app.set('row', parseInt(array[1]));
-              app.set('col', parseInt(array[2]));
-            }
-            this.get('model').pushObject(app);
-          }.bind(this));
-        }
-      }.bind(this));
-
-    }
-  }.observes('installApps'),
+    var employeeId = this.get('employeeId');
+    this.store.find('user-setting', employeeId).then(function (settings) {
+      var obj = get(settings, '_data');
+      var installApps = get(obj, 'installed_app');
+      var hash = {};
+      if (!isEmpty(installApps)) {
+        installApps.forEach(function (item) {
+          hash[get(item, 'id')] = item;
+        });
+        this.set('desktopStatus', hash);
+        var ids = installApps.getEach('id');
+        this.store.findQuery('app-info', {ids: ids}).then(function (res) {
+          var apps = res.get('content');
+          if (apps) {
+            apps.forEach(function (app) {
+              var obj = hash[parseInt(app.get('id'))];
+              if (obj && obj.location) {
+                var array = obj.location.split(',');
+                app.set('screen', parseInt(array[0]));
+                app.set('row', parseInt(array[1]));
+                app.set('col', parseInt(array[2]));
+              }
+              this.get('model').pushObject(app);
+            }.bind(this));
+          }
+        }.bind(this));
+      }
+    }.bind(this));
+  }.observes('employeeId'),
 
   observeAppinstall: function () {
     // Send install APP
   }.observes('appinstall'),
 
+
+  syncAppLayout: function () {
+    var installed_app = this.get('desktopStatus').toString();
+    var model = this.store.getById('user-setting', this.get('employeeId'));
+    model.save().then(function () {
+      debugger;
+    });
+  },
+
   actions: {
+    appPosChange: function (item) {
+      var id = get(item, 'id');
+      var app =  this.get('desktopStatus.' + id);
+      if (app) {
+        app.location = get(item, 'screen') + ',' + get(item, 'row') + ',' + get(item, 'col');
+        this.syncAppLayout();
+      }
+    },
     appMoving: function () {
       this.set('controllers.application.appMoving', true);
     },
@@ -86,7 +110,7 @@ export default Ember.Controller.extend({
       this.set('controllers.application.appMoving', false);
     },
 
-    openApp: function (item) { console.log(item);
+    openApp: function (item) {
       var name = get(item, 'name');
       var icon = get(item, 'icon');
       var find = this.get('openApps').any(function (it) {

@@ -104,9 +104,13 @@ export default Ember.View.extend({
   },
 
   position: function (row, col, scr, duration) {
-    row = !Ember.isEmpty(row) ? row : this.get('row');
-    col = !Ember.isEmpty(col) ? col : this.get('col');
-    scr = !Ember.isEmpty(scr) ? scr : this.get('scr');
+    if (Ember.isEmpty(row) && Ember.isEmpty(col) && Ember.isEmpty(scr)) { // init
+      row = this.get('row');
+      col = this.get('col');
+      scr = this.get('scr');
+    } else { //
+      this.get('controller').send('appPosChange', this.get('content'));
+    }
 
     var position = this.index2position(row, col, scr);
     var top = position.top;
