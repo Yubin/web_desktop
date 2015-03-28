@@ -256,7 +256,8 @@ export default Ember.Route.extend({
             isLogin: true,
             'companies': get(responseBody, 'companies'),
             'user': get(responseBody, 'user'),
-            'employee': get(responseBody, 'employee_info')
+            'employee': get(responseBody, 'employee_info'),
+            'current_login_company': get(responseBody, 'current_login_company')
           });
           // localStorage.setItem('gausian-user', JSON.stringify(user));
           this.set('controller.loginShow', false);
@@ -265,7 +266,6 @@ export default Ember.Route.extend({
     },
 
     loginVisitor: function (content) {
-
       var user = {
         first: get(content, 'firstName'),
         last: get(content, 'lastName'),
@@ -278,21 +278,27 @@ export default Ember.Route.extend({
         isLogin: true,
         'user': user
       });
-      localStorage.setItem('gausian-user', JSON.stringify(user));
+      // localStorage.setItem('gausian-user', JSON.stringify(user));
       this.set('controller.loginShow', false);
     },
 
     changeCompany: function (id) {
-      this.get('controller').set('user.current_compony_id', id);
+      this.store.createRecord('user-company', {'company_id': id}).save().then(function (res) {
+        this.get('controller').setProperties({
+          'current_login_company': id,
+          'employee': get(res, '_data.employee_info')
+        });
+      }.bind(this));
     },
 
     SignOut: function () {
       this.get('controller').setProperties({
         isLogin: false,
-        loginType: 0
+        loginType: 0,
+        'current_login_company': 0
       });
       this.refresh();
-      localStorage.setItem('gausian-user', null);
+      // localStorage.setItem('gausian-user', null);
     }
   }
 });

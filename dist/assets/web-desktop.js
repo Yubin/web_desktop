@@ -136,11 +136,31 @@ define('web-desktop/adapters/login', ['exports', 'web-desktop/adapters/base', 'w
   });
 
 });
+define('web-desktop/adapters/user-company', ['exports', 'web-desktop/adapters/base', 'web-desktop/serializers/user-company', 'ember'], function (exports, Adapter, Serializer, Ember) {
+
+  'use strict';
+
+  var get = Ember['default'].get;
+
+  exports['default'] = Adapter['default'].extend({
+    serializer: Serializer['default'].create(),
+
+    createRecord: function (store, type, record) {
+      var id = get(record, 'company_id');
+      var requestStr = id;
+      return this.ajax(this.buildURL(), 'POST', {
+        data: {requestString: requestStr},
+        serviceAppName: 'SetCompany'
+      });
+    }
+
+  });
+
+});
 define('web-desktop/adapters/user-setting', ['exports', 'web-desktop/adapters/base', 'web-desktop/serializers/user-setting', 'ember'], function (exports, Adapter, Serializer, Ember) {
 
   'use strict';
 
-  var isEmpty = Ember['default'].isEmpty;
   var get = Ember['default'].get;
 
   exports['default'] = Adapter['default'].extend({
@@ -159,7 +179,7 @@ define('web-desktop/adapters/user-setting', ['exports', 'web-desktop/adapters/ba
     updateRecord: function (store, type, record) {
       var id = get(record, 'id');
       var installed_app = JSON.stringify(get(record, 'installed_app'));
-      var requestStr = 'SET installed_app=%@ ON employee_id=%@'.fmt(JSON.stringify(installed_app), id);
+      var requestStr = 'UPDATE installed_app=%@ ON employee_id=%@'.fmt(JSON.stringify(installed_app), id);
       return this.ajax(this.buildURL(), 'POST', {
         data: {requestString: requestStr},
         serviceAppName: 'UserSetting'
@@ -274,6 +294,7 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
 
     openApps: [],
 
+    companyId: Ember['default'].computed.alias('controllers.application.current_login_company'),
     employeeId: Ember['default'].computed.alias('controllers.application.employee.id'),
 
     init: function () {
@@ -298,7 +319,6 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
       screens.forEach(function (scr) {
         var index = get(scr, 'id');
         var hasApp = apps.any(function (app) {
-
           return get(app, 'screen') === index;
         });
         set(scr, 'hasApp', hasApp);
@@ -306,8 +326,9 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
     }.observes('content.@each.screen'),
 
     loadInstallApps: function () {
-
       var employeeId = this.get('employeeId');
+      var model = this.get('model');
+      model.clear();
       this.store.find('user-setting', employeeId).then(function (settings) {
         var obj = get(settings, '_data');
         var installApps = get(obj, 'installed_app');
@@ -329,25 +350,22 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
                   app.set('row', parseInt(array[1]));
                   app.set('col', parseInt(array[2]));
                 }
-                this.get('model').pushObject(app);
+                model.pushObject(app);
               }.bind(this));
             }
           }.bind(this));
         }
       }.bind(this));
-    }.observes('employeeId'),
+    }.observes('companyId'),
 
     observeAppinstall: function () {
       // Send install APP
     }.observes('appinstall'),
 
-
     syncAppLayout: function () {
       var installed_app = this.get('desktopStatus').toString();
       var model = this.store.getById('user-setting', this.get('employeeId'));
-      model.save().then(function () {
-        debugger;
-      });
+      model.save().then(function () {});
     },
 
     actions: {
@@ -391,13 +409,13 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
             this.get('openApps').pushObject({name: name, icon: icon, instant: instant});
           }
         } else {
-            var obj = this.get('openApps').findBy('name', name);
-            // if user clicks a app icon and the app has been minimized
-            if (obj.instant.get('isMinSize')) {
-              obj.instant.showMinimizedApp();
-            }
-            // if user clicks a app icon and the app is not on top
-            obj.instant.changeZindex();
+          var obj = this.get('openApps').findBy('name', name);
+          // if user clicks a app icon and the app has been minimized
+          if (obj.instant.get('isMinSize')) {
+            obj.instant.showMinimizedApp();
+          }
+          // if user clicks a app icon and the app is not on top
+          obj.instant.changeZindex();
         }
       },
 
@@ -504,7 +522,7 @@ define('web-desktop/controllers/header', ['exports', 'ember'], function (exports
     headerShowing: Ember['default'].computed.not('controllers.application.appMoving'),
     isLogin: Ember['default'].computed.alias('controllers.application.isLogin'),
     companies: Ember['default'].computed.alias('controllers.application.companies'),
-
+    current_login_company: Ember['default'].computed.alias('controllers.application.current_login_company'),
     dock: function () {
       return this.get('openApps').slice(0, 10);
     }.property('openApps.length'),
@@ -529,7 +547,6 @@ define('web-desktop/controllers/search-bar', ['exports', 'ember'], function (exp
           var searchResults = [];
           if (apps) {
             searchResults = apps.filter(function (app) {
-              console.log(app);
               return Ember['default'].get(app, 'name').toLowerCase().indexOf(query.toLowerCase()) >=0;
             });
           }
@@ -886,6 +903,15 @@ define('web-desktop/models/login', ['exports', 'ember-data'], function (exports,
   });
 
 });
+define('web-desktop/models/user-company', ['exports', 'ember-data'], function (exports, DS) {
+
+  'use strict';
+
+  exports['default'] = DS['default'].Model.extend({
+    company_id: DS['default'].attr('number'),
+  });
+
+});
 define('web-desktop/models/user-setting', ['exports', 'ember-data'], function (exports, DS) {
 
   'use strict';
@@ -1176,7 +1202,8 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
               isLogin: true,
               'companies': get(responseBody, 'companies'),
               'user': get(responseBody, 'user'),
-              'employee': get(responseBody, 'employee_info')
+              'employee': get(responseBody, 'employee_info'),
+              'current_login_company': get(responseBody, 'current_login_company')
             });
             // localStorage.setItem('gausian-user', JSON.stringify(user));
             this.set('controller.loginShow', false);
@@ -1185,7 +1212,6 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
       },
 
       loginVisitor: function (content) {
-
         var user = {
           first: get(content, 'firstName'),
           last: get(content, 'lastName'),
@@ -1198,21 +1224,27 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
           isLogin: true,
           'user': user
         });
-        localStorage.setItem('gausian-user', JSON.stringify(user));
+        // localStorage.setItem('gausian-user', JSON.stringify(user));
         this.set('controller.loginShow', false);
       },
 
       changeCompany: function (id) {
-        this.get('controller').set('user.current_compony_id', id);
+        this.store.createRecord('user-company', {'company_id': id}).save().then(function (res) {
+          this.get('controller').setProperties({
+            'current_login_company': id,
+            'employee': get(res, '_data.employee_info')
+          });
+        }.bind(this));
       },
 
       SignOut: function () {
         this.get('controller').setProperties({
           isLogin: false,
-          loginType: 0
+          loginType: 0,
+          'current_login_company': 0
         });
         this.refresh();
-        localStorage.setItem('gausian-user', null);
+        // localStorage.setItem('gausian-user', null);
       }
     }
   });
@@ -1280,6 +1312,13 @@ define('web-desktop/serializers/login', ['exports', 'ember', 'ember-data'], func
     //   Ember.merge(hash, oldHash);
     // }
   });
+
+});
+define('web-desktop/serializers/user-company', ['exports', 'web-desktop/serializers/base'], function (exports, Base) {
+
+	'use strict';
+
+	exports['default'] = Base['default'].extend({});
 
 });
 define('web-desktop/serializers/user-setting', ['exports', 'web-desktop/serializers/base', 'ember'], function (exports, Base, Ember) {
@@ -1979,13 +2018,23 @@ define('web-desktop/tests/adapters/login.jshint', function () {
   });
 
 });
+define('web-desktop/tests/adapters/user-company.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - adapters');
+  test('adapters/user-company.js should pass jshint', function() { 
+    ok(true, 'adapters/user-company.js should pass jshint.'); 
+  });
+
+});
 define('web-desktop/tests/adapters/user-setting.jshint', function () {
 
   'use strict';
 
   module('JSHint - adapters');
   test('adapters/user-setting.js should pass jshint', function() { 
-    ok(false, 'adapters/user-setting.js should pass jshint.\nadapters/user-setting.js: line 5, col 5, \'isEmpty\' is defined but never used.\n\n1 error'); 
+    ok(true, 'adapters/user-setting.js should pass jshint.'); 
   });
 
 });
@@ -2045,7 +2094,7 @@ define('web-desktop/tests/controllers/applist.jshint', function () {
 
   module('JSHint - controllers');
   test('controllers/applist.js should pass jshint', function() { 
-    ok(false, 'controllers/applist.js should pass jshint.\ncontrollers/applist.js: line 93, col 7, Forgotten \'debugger\' statement?\ncontrollers/applist.js: line 90, col 9, \'installed_app\' is defined but never used.\n\n2 errors'); 
+    ok(false, 'controllers/applist.js should pass jshint.\ncontrollers/applist.js: line 90, col 9, \'installed_app\' is defined but never used.\n\n1 error'); 
   });
 
 });
@@ -2190,6 +2239,16 @@ define('web-desktop/tests/models/login.jshint', function () {
   });
 
 });
+define('web-desktop/tests/models/user-company.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - models');
+  test('models/user-company.js should pass jshint', function() { 
+    ok(true, 'models/user-company.js should pass jshint.'); 
+  });
+
+});
 define('web-desktop/tests/models/user-setting.jshint', function () {
 
   'use strict';
@@ -2257,6 +2316,16 @@ define('web-desktop/tests/serializers/login.jshint', function () {
   module('JSHint - serializers');
   test('serializers/login.js should pass jshint', function() { 
     ok(true, 'serializers/login.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/serializers/user-company.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - serializers');
+  test('serializers/user-company.js should pass jshint', function() { 
+    ok(true, 'serializers/user-company.js should pass jshint.'); 
   });
 
 });
@@ -3234,13 +3303,13 @@ define('web-desktop/views/header', ['exports', 'ember'], function (exports, Embe
     companyName: function () {
       var name = 'Company Name';
       var companies = this.get('controller.companies');
-      var id = this.get('controller.user.current_compony_id');
-      if (!Ember['default'].isEmpty(companies) && !Ember['default'].isEmpty(id)) {
+      var id = this.get('controller.current_login_company');
+      if (!Ember['default'].isEmpty(companies) && id) {
         var obj = companies.findBy('id', parseInt(id));
-        name = Ember['default'].get(obj, 'name');
+        name = obj && Ember['default'].get(obj, 'name');
       }
       return name;
-    }.property('controller.companies.[]', 'controller.user.current_compony_id'),
+    }.property('controller.companies.[]', 'controller.current_login_company'),
 
     adjustSize: function () {
       var total_dock = this.get('content.dock.length');

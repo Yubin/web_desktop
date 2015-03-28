@@ -13,13 +13,13 @@ export default Ember.View.extend({
   companyName: function () {
     var name = 'Company Name';
     var companies = this.get('controller.companies');
-    var id = this.get('controller.user.current_compony_id');
-    if (!Ember.isEmpty(companies) && !Ember.isEmpty(id)) {
+    var id = this.get('controller.current_login_company');
+    if (!Ember.isEmpty(companies) && id) {
       var obj = companies.findBy('id', parseInt(id));
-      name = Ember.get(obj, 'name');
+      name = obj && Ember.get(obj, 'name');
     }
     return name;
-  }.property('controller.companies.[]', 'controller.user.current_compony_id'),
+  }.property('controller.companies.[]', 'controller.current_login_company'),
 
   adjustSize: function () {
     var total_dock = this.get('content.dock.length');

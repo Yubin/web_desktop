@@ -18,6 +18,7 @@ export default Ember.Controller.extend({
 
   openApps: [],
 
+  companyId: Ember.computed.alias('controllers.application.current_login_company'),
   employeeId: Ember.computed.alias('controllers.application.employee.id'),
 
   init: function () {
@@ -42,7 +43,6 @@ export default Ember.Controller.extend({
     screens.forEach(function (scr) {
       var index = get(scr, 'id');
       var hasApp = apps.any(function (app) {
-
         return get(app, 'screen') === index;
       });
       set(scr, 'hasApp', hasApp);
@@ -50,8 +50,9 @@ export default Ember.Controller.extend({
   }.observes('content.@each.screen'),
 
   loadInstallApps: function () {
-
     var employeeId = this.get('employeeId');
+    var model = this.get('model');
+    model.clear();
     this.store.find('user-setting', employeeId).then(function (settings) {
       var obj = get(settings, '_data');
       var installApps = get(obj, 'installed_app');
@@ -73,25 +74,22 @@ export default Ember.Controller.extend({
                 app.set('row', parseInt(array[1]));
                 app.set('col', parseInt(array[2]));
               }
-              this.get('model').pushObject(app);
+              model.pushObject(app);
             }.bind(this));
           }
         }.bind(this));
       }
     }.bind(this));
-  }.observes('employeeId'),
+  }.observes('companyId'),
 
   observeAppinstall: function () {
     // Send install APP
   }.observes('appinstall'),
 
-
   syncAppLayout: function () {
     var installed_app = this.get('desktopStatus').toString();
     var model = this.store.getById('user-setting', this.get('employeeId'));
-    model.save().then(function () {
-      debugger;
-    });
+    model.save().then(function () {});
   },
 
   actions: {
@@ -135,13 +133,13 @@ export default Ember.Controller.extend({
           this.get('openApps').pushObject({name: name, icon: icon, instant: instant});
         }
       } else {
-          var obj = this.get('openApps').findBy('name', name);
-          // if user clicks a app icon and the app has been minimized
-          if (obj.instant.get('isMinSize')) {
-            obj.instant.showMinimizedApp();
-          }
-          // if user clicks a app icon and the app is not on top
-          obj.instant.changeZindex();
+        var obj = this.get('openApps').findBy('name', name);
+        // if user clicks a app icon and the app has been minimized
+        if (obj.instant.get('isMinSize')) {
+          obj.instant.showMinimizedApp();
+        }
+        // if user clicks a app icon and the app is not on top
+        obj.instant.changeZindex();
       }
     },
 

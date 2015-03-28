@@ -2,7 +2,6 @@ import Adapter from './base';
 import Serializer from '../serializers/user-setting';
 import Ember from 'ember';
 
-var isEmpty = Ember.isEmpty;
 var get = Ember.get;
 
 export default Adapter.extend({
@@ -21,7 +20,7 @@ export default Adapter.extend({
   updateRecord: function (store, type, record) {
     var id = get(record, 'id');
     var installed_app = JSON.stringify(get(record, 'installed_app'));
-    var requestStr = 'SET installed_app=%@ ON employee_id=%@'.fmt(JSON.stringify(installed_app), id);
+    var requestStr = 'UPDATE installed_app=%@ ON employee_id=%@'.fmt(JSON.stringify(installed_app), id);
     return this.ajax(this.buildURL(), 'POST', {
       data: {requestString: requestStr},
       serviceAppName: 'UserSetting'

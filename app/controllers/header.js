@@ -7,7 +7,7 @@ export default Ember.Controller.extend({
   headerShowing: Ember.computed.not('controllers.application.appMoving'),
   isLogin: Ember.computed.alias('controllers.application.isLogin'),
   companies: Ember.computed.alias('controllers.application.companies'),
-
+  current_login_company: Ember.computed.alias('controllers.application.current_login_company'),
   dock: function () {
     return this.get('openApps').slice(0, 10);
   }.property('openApps.length'),
