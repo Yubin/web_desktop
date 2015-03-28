@@ -53,6 +53,7 @@ export default Ember.Controller.extend({
     var employeeId = this.get('employeeId');
     var model = this.get('model');
     model.clear();
+    this.store.unloadAll('user-setting');
     this.store.find('user-setting', employeeId).then(function (settings) {
       var obj = get(settings, '_data');
       var installApps = get(obj, 'installed_app');
@@ -82,13 +83,16 @@ export default Ember.Controller.extend({
     }.bind(this));
   }.observes('companyId'),
 
-  observeAppinstall: function () {
-    // Send install APP
-  }.observes('appinstall'),
-
   syncAppLayout: function () {
-    var installed_app = this.get('desktopStatus').toString();
+    var installed_app = this.get('desktopStatus');
+    var array = [];
+    for (var key in installed_app) {
+      if (installed_app.hasOwnProperty(key)) {
+        array.pushObject(installed_app[key]);
+      }
+    }
     var model = this.store.getById('user-setting', this.get('employeeId'));
+    model.set('installed_app', array);
     model.save().then(function () {});
   },
 
@@ -209,19 +213,32 @@ export default Ember.Controller.extend({
         }
       }
 
-      apps.pushObject(
-        Ember.$.extend({
-          screen: screen,
-          col: col,
-          row: row
-        }, content));
+      apps.pushObject(Ember.$.extend({
+        screen: screen,
+        col: col,
+        row: row
+      }, content));
+
+      var desktopStatus =  this.get('desktopStatus');
+      var id = get(content, 'id');
+      desktopStatus[id] = {
+        id: id,
+        location: screen + ',' + row + ',' + col
+      };
+      console.log(this.get('desktopStatus'));
+
+      this.syncAppLayout();
     },
 
     deleteApp: function (content) {
       this._actions['closeApp'].apply(this, [content]);
       var apps  = this.get('model');
+      var id = get(content, 'id');
+      var desktopStatus =  this.get('desktopStatus');
+
       apps.removeObject(content);
-      console.log(content);
+      delete desktopStatus[id];
+      this.syncAppLayout();
     },
 
     moveImage: function (key) {

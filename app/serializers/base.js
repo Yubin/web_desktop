@@ -14,7 +14,6 @@ export default DS.RESTSerializer.extend({
         console.error('serializer - failed to parse response: ' +response);
       }
     }
-    console.log(obj);
     return obj;
   }
 });
