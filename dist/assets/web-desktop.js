@@ -347,9 +347,14 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
                 var obj = hash[parseInt(app.get('id'))];
                 if (obj && obj.location) {
                   var array = obj.location.split(',');
-                  app.set('screen', parseInt(array[0]));
-                  app.set('row', parseInt(array[1]));
-                  app.set('col', parseInt(array[2]));
+                  app.setProperties({
+                    'screen': parseInt(array[0]),
+                    'row': parseInt(array[1]),
+                    'col': parseInt(array[2]),
+                  });
+                  if (obj.link) {
+                    app.set('linked', obj.link.join(','));
+                  }
                 }
                 model.pushObject(app);
               }.bind(this));
@@ -396,9 +401,8 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
         });
 
         if (!find) {
-          var viewName = get(item, 'viewName') || 'customer';
-          var viewType = 'app.' + viewName;
-          var klass = this.container.lookupFactory('view:' + viewType);
+          var viewName = get(item, 'viewName') || 'iframe';
+          var klass = this.container.lookupFactory('view:' + viewName);
           var length = this.get('openApps').length;
           var top = 125 + 30 * length;
           var left = 250 + 30 * length;
@@ -501,7 +505,6 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
           id: id,
           location: screen + ',' + row + ',' + col
         };
-        console.log(this.get('desktopStatus'));
 
         this.syncAppLayout();
       },
@@ -517,12 +520,6 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
         this.syncAppLayout();
       },
 
-      moveImage: function (key) {
-        console.log('moveImage' + key);
-      },
-
-      activateWindow: function (/*content*/) {
-      }
 
     }
   });
@@ -632,6 +629,9 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
 
   'use strict';
 
+  var get = Ember['default'].get;
+  var set = Ember['default'].set;
+
   exports['default'] = Ember['default'].Mixin.create({
     classNames: ['window', 'windows-vis', 'flipper', 'fadeIn', 'fadeIn-20ms'],
     classNameBindings: ['active'],
@@ -647,6 +647,9 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
     layoutName: 'window',
     isFullSize: false,
     isMinSize: false,
+
+    linkAppObject: {},
+    appLinkables: [],
 
     changeZindex: function () {
       this.set('active', true);
@@ -716,7 +719,6 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
 
     click: function () {
       this.changeZindex();
-      this.get('parentView').send('activateWindow', this.get('content'));
     },
 
     didInsertElement: function () {
@@ -787,15 +789,38 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
     },
 
     showFliped: function () {
-      var fliped = this.get('fliped');
-      if (fliped) {
-        // Get List
-        this.$().addClass('fliped');
+      var appLinkables = this.get('appLinkables');
+      appLinkables.clear();
 
-      } else {
-        this.$().removeClass('fliped');
+      var linkAppObject = this.get('linkAppObject');
+
+      if (linkAppObject) {
+        // Get List
+        var allApps = this.get('parentView.model');
+        var app = allApps.findBy('name', get(linkAppObject, 'appId'));
+        if (app && get(app, 'input_service')) {
+          var idArray = get(app, 'input_service').split(',');
+          var linked = get(app, 'linked');
+          allApps.forEach(function (item) {
+            var id = get(item, 'id');
+            if (idArray.indexOf(id) > -1) { // in white list
+              var hasLinked = false;
+              if (linked && linked.split(',').indexOf(id) > -1) { // linked
+                hasLinked = true;
+              }
+              appLinkables.pushObject({
+                id: get(item, 'id'),
+                name: get(item, 'name'),
+                icon: get(item, 'icon'),
+                hasLinked: hasLinked
+              });
+            }
+          });
+        }
       }
-    }.observes('fliped'),
+      this.$().addClass('fliped');
+
+    }.observes('linkAppObject'),
 
     actions: {
       maximizeApp: function () {
@@ -845,7 +870,20 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
       },
 
       flipApp: function () {
-        this.set('fliped', false);
+        this.$().removeClass('fliped');
+      },
+
+      link: function (content) {
+        var payload = {
+         op: 'selectLink',
+         targetApp: {
+           id: get(content, 'name'),
+           name: get(content, 'name'),
+           icon: get(content, 'icon')
+         }
+       };
+       this.$('iframe')[0].contentWindow.postMessage(payload, this.get('linkAppObject.eventOrigin'));
+       set(content, 'hasLinked', true);
       }
     }
 
@@ -866,8 +904,9 @@ define('web-desktop/models/app-info', ['exports', 'ember-data'], function (expor
     certified: DS['default'].attr('boolean'),
     default_install: DS['default'].attr('boolean'),
     subscribed_services: DS['default'].attr('string'),
-    output_service_id: DS['default'].attr('string'),
-    input_service_id: DS['default'].attr('string'),
+    output_service: DS['default'].attr('string'),
+    input_service: DS['default'].attr('string'),
+    linked: DS['default'].attr('string'),
     censorship_date: DS['default'].attr('string'),
     path: DS['default'].attr('string'),
     icon: DS['default'].attr('string'),
@@ -976,7 +1015,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
             id: 0,
             name: "Store",
             icon: 'http://asa.static.gausian.com/user_app/Store/icon.png',
-            viewName: 'customer',
+            viewName: 'iframe',
             path: 'http://tianjiasun.github.io/APP_store/app/',
             screen: 2,
             col: 3,
@@ -985,7 +1024,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
          {
             name: "ASA",
             icon: 'http://asa.static.gausian.com/user_app/ASA/icon.png',
-            viewName: 'customer',
+            viewName: 'iframe',
             path: 'http://tianjiasun.github.io/ASA_api/app/index.html',
             screen: 2,
             col: 0,
@@ -994,7 +1033,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
           {
             name: "Map",
             icon: 'http://asa.static.gausian.com/user_app/Map/icon.png',
-            viewName: 'customer',
+            viewName: 'iframe',
             path: 'https://www.google.com/maps/embed/v1/place?key=AIzaSyBrTaOSXSiXT1o7mUCjnJZSeRcSz0vnglw&q=silicon+valley',
             screen: 2,
             col: 3,
@@ -1004,7 +1043,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
             name: "Customers",
             app_id: "customerApp",
             icon: 'http://asa.static.gausian.com/user_app/Customers/icon.png',
-            viewName: 'customer',
+            viewName: 'iframe',
             path: 'http://gausian-developers.github.io/user-app-template5/app/',
             screen: 2,
             col: 1,
@@ -1013,7 +1052,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
           {
             name: "Quotes",
             icon: 'http://asa.static.gausian.com/user_app/Quotes/icon.png',
-            viewName: 'customer',
+            viewName: 'iframe',
             path: 'http://gausian-developers.github.io/user-app-template6/app/',
             screen: 2,
             col: 2,
@@ -1022,7 +1061,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
           {
             name: "HipChat",
             icon: 'http://asa.static.gausian.com/user_app/HipChat/icon.png',
-            viewName: 'customer',
+            viewName: 'iframe',
             path: 'https://gausian.hipchat.com/chat',
             screen: 2,
             col: 0,
@@ -1031,7 +1070,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
           {
             name: "Pixlr",
             icon: 'http://asa.static.gausian.com/user_app/Pixlr/icon.png',
-            viewName: 'customer',
+            viewName: 'iframe',
             path: 'http://pixlr.com/editor/?loc=zh-cn',
             screen: 2,
             col: 1,
@@ -1040,7 +1079,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
           {
             name: "TakaBreak",
             icon: 'http://asa.static.gausian.com/user_app/TakaBreak/icon.png',
-            viewName: 'customer',
+            viewName: 'iframe',
             path: 'http://www.earbits.com/',
             screen: 2,
             col: 2,
@@ -1049,7 +1088,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
           {
             name: "EasyInvoice",
             icon: 'http://asa.static.gausian.com/user_app/EasyInvoice/icon.png',
-            viewName: 'customer',
+            viewName: 'iframe',
             path: 'http://invoiceto.me/',
             screen: 2,
             col: 3,
@@ -1058,7 +1097,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
           {
             name: "LiveCAM",
             icon: 'http://asa.static.gausian.com/user_app/LiveCAM/icon.png',
-            viewName: 'customer',
+            viewName: 'iframe',
             path: 'http://trafficcam.santaclaraca.gov/TrafficCamera.aspx?CID=GA101',
             screen: 2,
             col: 0,
@@ -1067,7 +1106,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
           {
             name: "Math",
             icon: 'http://asa.static.gausian.com/user_app/Math/icon.png',
-            viewName: 'customer',
+            viewName: 'iframe',
             path: 'https://www.mathway.com/graph',
             screen: 2,
             col: 1,
@@ -1076,7 +1115,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
           {
             name: "Withholding",
             icon: 'http://asa.static.gausian.com/user_app/Withholding/icon.png',
-            viewName: 'customer',
+            viewName: 'iframe',
             path: 'http://apps.irs.gov/app/withholdingcalculator/',
             screen: 2,
             col: 2,
@@ -1085,7 +1124,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
           {
             name: "JSON Viewer",
             icon: 'http://asa.static.gausian.com/user_app/JSON/icon.png',
-            viewName: 'customer',
+            viewName: 'iframe',
             path: 'http://jsonviewer.stack.hu/',
             screen: 2,
             col: 3,
@@ -1094,7 +1133,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
           {
             name: "Weather",
             icon: 'http://asa.static.gausian.com/user_app/Weather/icon.png',
-            viewName: 'customer',
+            viewName: 'iframe',
             path: 'http://chrome.wunderground.com/auto/chrome/geo/wx/index.html?query=95054',
             screen: 2,
             col: 0,
@@ -1103,7 +1142,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
           {
             name: "FloorPlans",
             icon: 'http://asa.static.gausian.com/user_app/FloorPlans/icon.png',
-            viewName: 'customer',
+            viewName: 'iframe',
             path: 'https://planner5d.com/app-chrome/?key=3a95cf1e2b3c5c74ff7ee00871a49c8b',
             screen: 2,
             col: 1,
@@ -1112,7 +1151,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
           {
             name: "Draw",
             icon: 'http://asa.static.gausian.com/user_app/Draw/icon.png',
-            viewName: 'customer',
+            viewName: 'iframe',
             path: 'http://www.ratemydrawings.com/canvasdraw/',
             screen: 2,
             col: 2,
@@ -1121,7 +1160,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
           {
             name: "3D",
             icon: 'http://asa.static.gausian.com/user_app/3D/icon.png',
-            viewName: 'customer',
+            viewName: 'iframe',
             path: 'http://www.3dtin.com/2cwe',
             screen: 2,
             col: 3,
@@ -1130,7 +1169,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
           {
             name: "Calculator",
             icon: 'http://asa.static.gausian.com/user_app/Calculator/icon.png',
-            viewName: 'customer',
+            viewName: 'iframe',
             path: 'http://scientific-calculator.appspot.com/',
             screen: 2,
             col: 0,
@@ -1139,7 +1178,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
           {
             name: "Developer",
             icon: 'http://asa.static.gausian.com/user_app/Developer/icon.png',
-            viewName: 'customer',
+            viewName: 'iframe',
             path: 'http://tianjiasun.github.io/ASA_website/',
             screen: 2,
             col: 1,
@@ -1148,7 +1187,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
           {
             name: "SimpleToDo",
             icon: 'http://asa.static.gausian.com/user_app/SimpleToDo/icon.png',
-            viewName: 'customer',
+            viewName: 'iframe',
             path: 'http://scrumy.com/husks11rubbish',
             screen: 2,
             col: 2,
@@ -1355,94 +1394,6 @@ define('web-desktop/serializers/user-setting', ['exports', 'web-desktop/serializ
       Ember['default'].set(obj, 'installed_app', installed_app);
       return obj;
     }
-  });
-
-});
-define('web-desktop/templates/app/customer', ['exports', 'ember'], function (exports, Ember) {
-
-  'use strict';
-
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
-  /**/) {
-  this.compilerInfo = [4,'>= 1.0.0'];
-  helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
-    var buffer = '', escapeExpression=this.escapeExpression;
-
-
-    data.buffer.push("<iframe ");
-    data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
-      'src': ("view.content.path")
-    },hashTypes:{'src': "ID"},hashContexts:{'src': depth0},contexts:[],types:[],data:data})));
-    data.buffer.push(" ");
-    data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
-      'id': ("view.content.name")
-    },hashTypes:{'id': "ID"},hashContexts:{'id': depth0},contexts:[],types:[],data:data})));
-    data.buffer.push(" width=\"100%\" height=\"100%\" frameBorder=\"0\"></iframe>\n<div id=\"iframeApp_dragResizeMask_3\" class=\"iframeDragResizeMask\"></div>\n");
-    return buffer;
-    
-  });
-
-});
-define('web-desktop/templates/app/deliver-bid', ['exports', 'ember'], function (exports, Ember) {
-
-  'use strict';
-
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
-  /**/) {
-  this.compilerInfo = [4,'>= 1.0.0'];
-  helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
-    var buffer = '', escapeExpression=this.escapeExpression;
-
-
-    data.buffer.push("<img ");
-    data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
-      'src': ("view.logoUrl")
-    },hashTypes:{'src': "ID"},hashContexts:{'src': depth0},contexts:[],types:[],data:data})));
-    data.buffer.push(" width=\"100%\" height=\"100%\">\n<img src=\"img/spinnerSmall.gif\" class='spinner' style=\"top:270px; left:37px\">\n");
-    return buffer;
-    
-  });
-
-});
-define('web-desktop/templates/app/einventory', ['exports', 'ember'], function (exports, Ember) {
-
-  'use strict';
-
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
-  /**/) {
-  this.compilerInfo = [4,'>= 1.0.0'];
-  helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
-    var buffer = '', escapeExpression=this.escapeExpression;
-
-
-    data.buffer.push("<img ");
-    data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
-      'src': ("view.logoUrl")
-    },hashTypes:{'src': "ID"},hashContexts:{'src': depth0},contexts:[],types:[],data:data})));
-    data.buffer.push(" width=\"100%\" height=\"100%\">\n<img src=\"img/spinnerSmall.gif\" class='spinner' style=\"top:270px; left:37px\">\n");
-    return buffer;
-    
-  });
-
-});
-define('web-desktop/templates/app/vendor-match', ['exports', 'ember'], function (exports, Ember) {
-
-  'use strict';
-
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
-  /**/) {
-  this.compilerInfo = [4,'>= 1.0.0'];
-  helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
-    var buffer = '', escapeExpression=this.escapeExpression;
-
-
-    data.buffer.push("<img ");
-    data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
-      'src': ("view.logoUrl")
-    },hashTypes:{'src': "ID"},hashContexts:{'src': depth0},contexts:[],types:[],data:data})));
-    data.buffer.push(" width=\"100%\" height=\"100%\">\n<img src=\"img/spinnerSmall.gif\" class='spinner' style=\"top:270px; left:37px\">\n");
-    return buffer;
-    
   });
 
 });
@@ -1721,6 +1672,31 @@ define('web-desktop/templates/header', ['exports', 'ember'], function (exports, 
   });
 
 });
+define('web-desktop/templates/iframe', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+  helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
+    var buffer = '', escapeExpression=this.escapeExpression;
+
+
+    data.buffer.push("<iframe ");
+    data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
+      'src': ("view.content.path")
+    },hashTypes:{'src': "ID"},hashContexts:{'src': depth0},contexts:[],types:[],data:data})));
+    data.buffer.push(" ");
+    data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
+      'id': ("view.content.name")
+    },hashTypes:{'id': "ID"},hashContexts:{'id': depth0},contexts:[],types:[],data:data})));
+    data.buffer.push(" width=\"100%\" height=\"100%\" frameBorder=\"0\"></iframe>\n<div id=\"iframeApp_dragResizeMask_3\" class=\"iframeDragResizeMask\"></div>\n");
+    return buffer;
+    
+  });
+
+});
 define('web-desktop/templates/login', ['exports', 'ember'], function (exports, Ember) {
 
   'use strict';
@@ -1963,8 +1939,45 @@ define('web-desktop/templates/window', ['exports', 'ember'], function (exports, 
   /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
-    var buffer = '', stack1, escapeExpression=this.escapeExpression;
+    var buffer = '', stack1, escapeExpression=this.escapeExpression, self=this;
 
+  function program1(depth0,data) {
+    
+    var buffer = '', stack1;
+    data.buffer.push("\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" ");
+    data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
+      'src': ("icon")
+    },hashTypes:{'src': "ID"},hashContexts:{'src': depth0},contexts:[],types:[],data:data})));
+    data.buffer.push(">\n					<div class=\"back_name\">");
+    stack1 = helpers._triageMustache.call(depth0, "name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+    data.buffer.push("</div>\n          ");
+    stack1 = helpers['if'].call(depth0, "hasLinked", {hash:{},hashTypes:{},hashContexts:{},inverse:self.program(4, program4, data),fn:self.program(2, program2, data),contexts:[depth0],types:["ID"],data:data});
+    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+    data.buffer.push("\n          ");
+    return buffer;
+    }
+  function program2(depth0,data) {
+    
+    var buffer = '';
+    data.buffer.push("\n					<div class=\"back_app_linked\">\n						<img class=\"back_app_linked_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<a class=\"back_app_overlay_text\" ");
+    data.buffer.push(escapeExpression(helpers.action.call(depth0, "unlink", "", {hash:{
+      'target': ("view")
+    },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0,depth0],types:["STRING","ID"],data:data})));
+    data.buffer.push(">Unlink</a>\n					</div>\n          ");
+    return buffer;
+    }
+
+  function program4(depth0,data) {
+    
+    var buffer = '';
+    data.buffer.push("\n          <div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n            <a class=\"back_app_overlay_text\" ");
+    data.buffer.push(escapeExpression(helpers.action.call(depth0, "link", "", {hash:{
+      'target': ("view")
+    },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0,depth0],types:["STRING","ID"],data:data})));
+    data.buffer.push(">Link</a>\n          </div>\n          ");
+    return buffer;
+    }
 
     data.buffer.push("<div class=\"front shadow\">\n  <div class=\"header\">\n    <span class=\"titleInside\">");
     stack1 = helpers._triageMustache.call(depth0, "view.content.name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
@@ -1988,7 +2001,10 @@ define('web-desktop/templates/window', ['exports', 'ember'], function (exports, 
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "flipApp", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push("\n			/>\n			<div class=\"back_shadow_decoration\"></div>\n			<div class=\"back_title\">Available Links on Desktop</div>\n			<div class=\"back_app_container\">\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/Map/icon.png\"/>\n					<div class=\"back_name\">Map</div>\n					<div class=\"back_app_linked\">\n						<img class=\"back_app_linked_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<div class=\"back_app_overlay_text\">Unlink</div>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/HipChat/icon.png\"/>\n					<div class=\"back_name\">HipChat</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<img class=\"back_app_overlay_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/Quotes/icon.png\"/>\n					<div class=\"back_name\">Quotes</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<img class=\"back_app_overlay_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/HipChat/icon.png\"/>\n					<div class=\"back_name\">HipChat</div>\n					<div class=\"back_app_linked\">\n						<img class=\"back_app_linked_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<div class=\"back_app_overlay_text\">Unlink</div>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/Pixlr/icon.png\"/>\n					<div class=\"back_name\">Pixlr</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<img class=\"back_app_overlay_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/TakaBreak/icon.png\"/>\n					<div class=\"back_name\">TakaBreak</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<img class=\"back_app_overlay_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/LiveCAM/icon.png\"/>\n					<div class=\"back_name\">LiveCAM</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<img class=\"back_app_overlay_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/Math/icon.png\"/>\n					<div class=\"back_name\">Math</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<img class=\"back_app_overlay_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/Withholding/icon.png\"/>\n					<div class=\"back_name\">Withholding</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<img class=\"back_app_overlay_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" src=\"http://asa.static.gausian.com/user_app/Draw/icon.png\"/>\n					<div class=\"back_name\">Draw</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<img class=\"back_app_overlay_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n				</div>\n			</div>\n<!-- 						<div class=\"back_recommend\">Popular Links on Cloud</div>\n			<div class=\"back_recommend_container\">\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/Quotes/icon.png\"/>\n					<div class=\"back_name\">Quotes</div>\n					<div class=\"back_app_overlay\"></div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/HipChat/icon.png\"/>\n					<div class=\"back_name\">HipChat</div>\n					<div class=\"back_app_overlay\"></div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/Pixlr/icon.png\"/>\n					<div class=\"back_name\">Pixlr</div>\n					<div class=\"back_app_overlay\"></div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/Map/icon.png\"/>\n					<div class=\"back_name\">Map</div>\n					<div class=\"back_app_overlay\"></div>\n				</div>\n			</div> -->\n			<div class=\"back_notation\">Powered by GAUSIAN ASA</div>\n		</div>\n	</div>\n</div>\n");
+    data.buffer.push("\n			/>\n			<div class=\"back_shadow_decoration\"></div>\n			<div class=\"back_title\">Available Links on Desktop</div>\n			<div class=\"back_app_container\">\n        ");
+    stack1 = helpers.each.call(depth0, "view.appLinkables", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],data:data});
+    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+    data.buffer.push("\n				</div>\n			</div>\n<!-- 						<div class=\"back_recommend\">Popular Links on Cloud</div>\n			<div class=\"back_recommend_container\">\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/Quotes/icon.png\"/>\n					<div class=\"back_name\">Quotes</div>\n					<div class=\"back_app_overlay\"></div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/HipChat/icon.png\"/>\n					<div class=\"back_name\">HipChat</div>\n					<div class=\"back_app_overlay\"></div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/Pixlr/icon.png\"/>\n					<div class=\"back_name\">Pixlr</div>\n					<div class=\"back_app_overlay\"></div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/Map/icon.png\"/>\n					<div class=\"back_name\">Map</div>\n					<div class=\"back_app_overlay\"></div>\n				</div>\n			</div> -->\n			<div class=\"back_notation\">Powered by GAUSIAN ASA</div>\n		</div>\n	</div>\n</div>\n");
     return buffer;
     
   });
@@ -2388,56 +2404,6 @@ define('web-desktop/tests/utils/keys.jshint', function () {
   });
 
 });
-define('web-desktop/tests/views/app/customer.jshint', function () {
-
-  'use strict';
-
-  module('JSHint - views/app');
-  test('views/app/customer.js should pass jshint', function() { 
-    ok(true, 'views/app/customer.js should pass jshint.'); 
-  });
-
-});
-define('web-desktop/tests/views/app/deliver-bid.jshint', function () {
-
-  'use strict';
-
-  module('JSHint - views/app');
-  test('views/app/deliver-bid.js should pass jshint', function() { 
-    ok(true, 'views/app/deliver-bid.js should pass jshint.'); 
-  });
-
-});
-define('web-desktop/tests/views/app/einventory.jshint', function () {
-
-  'use strict';
-
-  module('JSHint - views/app');
-  test('views/app/einventory.js should pass jshint', function() { 
-    ok(true, 'views/app/einventory.js should pass jshint.'); 
-  });
-
-});
-define('web-desktop/tests/views/app/gausian-store.jshint', function () {
-
-  'use strict';
-
-  module('JSHint - views/app');
-  test('views/app/gausian-store.js should pass jshint', function() { 
-    ok(true, 'views/app/gausian-store.js should pass jshint.'); 
-  });
-
-});
-define('web-desktop/tests/views/app/vendor-match.jshint', function () {
-
-  'use strict';
-
-  module('JSHint - views/app');
-  test('views/app/vendor-match.js should pass jshint', function() { 
-    ok(true, 'views/app/vendor-match.js should pass jshint.'); 
-  });
-
-});
 define('web-desktop/tests/views/appicon.jshint', function () {
 
   'use strict';
@@ -2508,6 +2474,16 @@ define('web-desktop/tests/views/header.jshint', function () {
   });
 
 });
+define('web-desktop/tests/views/iframe.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - views');
+  test('views/iframe.js should pass jshint', function() { 
+    ok(true, 'views/iframe.js should pass jshint.'); 
+  });
+
+});
 define('web-desktop/tests/views/login.jshint', function () {
 
   'use strict';
@@ -2565,16 +2541,6 @@ define('web-desktop/tests/views/search-results.jshint', function () {
   module('JSHint - views');
   test('views/search-results.js should pass jshint', function() { 
     ok(false, 'views/search-results.js should pass jshint.\nviews/search-results.js: line 7, col 40, \'key\' is defined but never used.\nviews/search-results.js: line 7, col 35, \'obj\' is defined but never used.\n\n2 errors'); 
-  });
-
-});
-define('web-desktop/tests/views/window.jshint', function () {
-
-  'use strict';
-
-  module('JSHint - views');
-  test('views/window.js should pass jshint', function() { 
-    ok(false, 'views/window.js should pass jshint.\nviews/window.js: line 19, col 11, \'offsetX\' is defined but never used.\nviews/window.js: line 20, col 11, \'offsetY\' is defined but never used.\n\n2 errors'); 
   });
 
 });
@@ -2701,184 +2667,6 @@ define('web-desktop/utils/keys', ['exports'], function (exports) {
   }
 
   exports['default'] = keyUtils;
-
-});
-define('web-desktop/views/app/customer', ['exports', 'ember', 'web-desktop/mixins/window-view'], function (exports, Ember, WindowMixin) {
-
-  'use strict';
-
-  exports['default'] = Ember['default'].View.extend(WindowMixin['default'], {
-    classNameBindings: ['content.app_id'],
-    templateName: 'app/customer'
-  });
-
-});
-define('web-desktop/views/app/deliver-bid', ['exports', 'ember', 'web-desktop/mixins/window-view'], function (exports, Ember, WindowMixin) {
-
-  'use strict';
-
-  exports['default'] = Ember['default'].View.extend(WindowMixin['default'], {
-
-    layoutName: 'window',
-    templateName: 'app/deliver-bid',
-    finalIndex: 5,
-
-    didInsertElement: function () {
-      this._super();
-      this.set('index', 1);
-      this.$('img:first').on('mousedown', function () {
-        var index = this.get('index');
-
-        index = index === this.get('finalIndex') ? 1 : index + 1;
-
-        this.set('index', index);
-      }.bind(this));
-    },
-
-    onImageChange: function () {
-      console.log('onImageChange');
-
-      var index = this.get('index');
-
-      this.set('logoUrl', 'img/pictures_for_apps/DeliverBid_%@.jpg'.fmt(index));
-      if (index === 1 || index === 4) {
-        this.$('img.spinner').show();
-        Ember['default'].run.later(function () {
-          this.set('index', index + 1);
-          this.$('img.spinner').hide();
-        }.bind(this), 600);
-      }
-
-    }.observes('index')
-
-  });
-
-});
-define('web-desktop/views/app/einventory', ['exports', 'ember', 'web-desktop/mixins/window-view'], function (exports, Ember, WindowMixin) {
-
-  'use strict';
-
-  exports['default'] = Ember['default'].View.extend(WindowMixin['default'], {
-
-    layoutName: 'window',
-    templateName: 'app/einventory',
-    finalIndex: 3,
-
-    didInsertElement: function () {
-      this._super();
-      this.set('index', 1);
-      this.$('img:first').on('mousedown', function () {
-        var index = this.get('index');
-
-        index = index === this.get('finalIndex') ? 1 : index + 1;
-
-        this.set('index', index);
-      }.bind(this));
-    },
-
-    onImageChange: function () {
-      console.log('onImageChange');
-
-      var index = this.get('index');
-
-      this.set('logoUrl', 'img/pictures_for_apps/VenderMatch_%@.jpg'.fmt(index));
-      // if (index < this.get('finalIndex')) {
-      //   this.$('img.spinner').show();
-      //   Ember.run.later(function () {
-      //     this.set('index', index + 1);
-      //     this.$('img.spinner').hide();
-      //   }.bind(this), 600);
-      // }
-
-
-
-    }.observes('index')
-
-  });
-
-});
-define('web-desktop/views/app/gausian-store', ['exports', 'ember', 'web-desktop/mixins/window-view'], function (exports, Ember, WindowMixin) {
-
-  'use strict';
-
-  exports['default'] = Ember['default'].View.extend(WindowMixin['default'], {
-
-    layoutName: 'window',
-    templateName: 'app/deliver-bid',
-    finalIndex: 4,
-
-    didInsertElement: function () {
-      this._super();
-      this.set('index', 1);
-      this.$('img:first').on('mousedown', function () {
-        var index = this.get('index');
-
-        index = index === this.get('finalIndex') ? 1 : index + 1;
-
-        this.set('index', index);
-      }.bind(this));
-    },
-
-    onImageChange: function () {
-
-      var index = this.get('index');
-
-      this.set('logoUrl', 'img/pictures_for_apps/Gausian_Store_%@.jpg'.fmt(index));
-      // if (index < this.get('finalIndex')) {
-      //   this.$('img.spinner').show();
-      //   Ember.run.later(function () {
-      //     this.set('index', index + 1);
-      //     this.$('img.spinner').hide();
-      //   }.bind(this), 600);
-      // }
-
-
-
-    }.observes('index')
-
-  });
-
-});
-define('web-desktop/views/app/vendor-match', ['exports', 'ember', 'web-desktop/mixins/window-view'], function (exports, Ember, WindowMixin) {
-
-  'use strict';
-
-  exports['default'] = Ember['default'].View.extend(WindowMixin['default'], {
-
-    layoutName: 'window',
-    templateName: 'app/deliver-bid',
-    finalIndex: 3,
-
-    didInsertElement: function () {
-      this._super();
-      this.set('index', 1);
-      this.$('img:first').on('mousedown', function () {
-        var index = this.get('index');
-
-        index = index === this.get('finalIndex') ? 1 : index + 1;
-
-        this.set('index', index);
-      }.bind(this));
-    },
-
-    onImageChange: function () {
-
-      var index = this.get('index');
-
-      this.set('logoUrl', 'img/pictures_for_apps/Einventory_%@.jpg'.fmt(index));
-      // if (index < this.get('finalIndex')) {
-      //   this.$('img.spinner').show();
-      //   Ember.run.later(function () {
-      //     this.set('index', index + 1);
-      //     this.$('img.spinner').hide();
-      //   }.bind(this), 600);
-      // }
-
-
-
-    }.observes('index')
-
-  });
 
 });
 define('web-desktop/views/appicon', ['exports', 'ember'], function (exports, Ember) {
@@ -3374,6 +3162,16 @@ define('web-desktop/views/header', ['exports', 'ember'], function (exports, Embe
   });
 
 });
+define('web-desktop/views/iframe', ['exports', 'ember', 'web-desktop/mixins/window-view'], function (exports, Ember, WindowMixin) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].View.extend(WindowMixin['default'], {
+    classNameBindings: ['content.name'],
+    templateName: 'iframe'
+  });
+
+});
 define('web-desktop/views/login', ['exports', 'ember'], function (exports, Ember) {
 
   'use strict';
@@ -3680,56 +3478,6 @@ define('web-desktop/views/search-results', ['exports', 'ember'], function (expor
     childViewsDidRender : function(){
       this.get('controller').set('resultDivHeight', this.$().height());
     }
-  });
-
-});
-define('web-desktop/views/window', ['exports', 'ember'], function (exports, Ember) {
-
-  'use strict';
-
-  exports['default'] = Ember['default'].View.extend({
-    templateName: 'window',
-    classNames: ['window', 'share',  'windows-vis'],
-
-    width: 800,
-    height: 600,
-
-    didInsertElement: function () {
-
-      this.$().css({
-        width: this.get('width'),
-        height: this.get('height')
-      });
-
-      this.$('.header').on('mousedown', function (event) {
-        var originEvt = event.originalEvent;
-        var offsetX = originEvt.offsetX ? originEvt.offsetX : originEvt.layerX;
-        var offsetY = originEvt.offsetY ? originEvt.offsetY : originEvt.layerY;
-
-      //   this.$('.header').on('mousemove', function (event) {
-      //     var originEvt = event.originalEvent;
-      //     var x = originEvt.clientX - offsetX;
-      //     var y = originEvt.clientY - offsetY;
-      //     this.$().css({ // image follow
-      //       'top': y,
-      //       'left': x,
-      //       'z-index': '1000'
-      //     });
-      //   }.bind(this));
-      //
-      }.bind(this));
-
-      this.$('.header').on('mouseup', function () {console.log('mouseup');
-        Ember['default'].$(this).off('mousemove');
-      });
-
-    },
-
-    willDestroyElement: function () {
-      this.$('.header').on('mousedown');
-      this.$('.header').on('mouseup');
-    }
-
   });
 
 });

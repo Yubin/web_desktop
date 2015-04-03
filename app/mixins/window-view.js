@@ -1,5 +1,8 @@
 import Ember from 'ember';
 
+var get = Ember.get;
+var set = Ember.set;
+
 export default Ember.Mixin.create({
   classNames: ['window', 'windows-vis', 'flipper', 'fadeIn', 'fadeIn-20ms'],
   classNameBindings: ['active'],
@@ -15,6 +18,9 @@ export default Ember.Mixin.create({
   layoutName: 'window',
   isFullSize: false,
   isMinSize: false,
+
+  linkAppObject: {},
+  appLinkables: [],
 
   changeZindex: function () {
     this.set('active', true);
@@ -84,7 +90,6 @@ export default Ember.Mixin.create({
 
   click: function () {
     this.changeZindex();
-    this.get('parentView').send('activateWindow', this.get('content'));
   },
 
   didInsertElement: function () {
@@ -155,15 +160,38 @@ export default Ember.Mixin.create({
   },
 
   showFliped: function () {
-    var fliped = this.get('fliped');
-    if (fliped) {
-      // Get List
-      this.$().addClass('fliped');
+    var appLinkables = this.get('appLinkables');
+    appLinkables.clear();
 
-    } else {
-      this.$().removeClass('fliped');
+    var linkAppObject = this.get('linkAppObject');
+
+    if (linkAppObject) {
+      // Get List
+      var allApps = this.get('parentView.model');
+      var app = allApps.findBy('name', get(linkAppObject, 'appId'));
+      if (app && get(app, 'input_service')) {
+        var idArray = get(app, 'input_service').split(',');
+        var linked = get(app, 'linked');
+        allApps.forEach(function (item) {
+          var id = get(item, 'id');
+          if (idArray.indexOf(id) > -1) { // in white list
+            var hasLinked = false;
+            if (linked && linked.split(',').indexOf(id) > -1) { // linked
+              hasLinked = true;
+            }
+            appLinkables.pushObject({
+              id: get(item, 'id'),
+              name: get(item, 'name'),
+              icon: get(item, 'icon'),
+              hasLinked: hasLinked
+            });
+          }
+        });
+      }
     }
-  }.observes('fliped'),
+    this.$().addClass('fliped');
+
+  }.observes('linkAppObject'),
 
   actions: {
     maximizeApp: function () {
@@ -213,7 +241,20 @@ export default Ember.Mixin.create({
     },
 
     flipApp: function () {
-      this.set('fliped', false);
+      this.$().removeClass('fliped');
+    },
+
+    link: function (content) {
+      var payload = {
+       op: 'selectLink',
+       targetApp: {
+         id: get(content, 'name'),
+         name: get(content, 'name'),
+         icon: get(content, 'icon')
+       }
+     };
+     this.$('iframe')[0].contentWindow.postMessage(payload, this.get('linkAppObject.eventOrigin'));
+     set(content, 'hasLinked', true);
     }
   }
 

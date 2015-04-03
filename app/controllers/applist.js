@@ -71,9 +71,14 @@ export default Ember.Controller.extend({
               var obj = hash[parseInt(app.get('id'))];
               if (obj && obj.location) {
                 var array = obj.location.split(',');
-                app.set('screen', parseInt(array[0]));
-                app.set('row', parseInt(array[1]));
-                app.set('col', parseInt(array[2]));
+                app.setProperties({
+                  'screen': parseInt(array[0]),
+                  'row': parseInt(array[1]),
+                  'col': parseInt(array[2]),
+                });
+                if (obj.link) {
+                  app.set('linked', obj.link.join(','));
+                }
               }
               model.pushObject(app);
             }.bind(this));
@@ -120,9 +125,8 @@ export default Ember.Controller.extend({
       });
 
       if (!find) {
-        var viewName = get(item, 'viewName') || 'customer';
-        var viewType = 'app.' + viewName;
-        var klass = this.container.lookupFactory('view:' + viewType);
+        var viewName = get(item, 'viewName') || 'iframe';
+        var klass = this.container.lookupFactory('view:' + viewName);
         var length = this.get('openApps').length;
         var top = 125 + 30 * length;
         var left = 250 + 30 * length;
@@ -225,7 +229,6 @@ export default Ember.Controller.extend({
         id: id,
         location: screen + ',' + row + ',' + col
       };
-      console.log(this.get('desktopStatus'));
 
       this.syncAppLayout();
     },
@@ -241,12 +244,6 @@ export default Ember.Controller.extend({
       this.syncAppLayout();
     },
 
-    moveImage: function (key) {
-      console.log('moveImage' + key);
-    },
-
-    activateWindow: function (/*content*/) {
-    }
 
   }
 });

@@ -13,7 +13,7 @@ export default Ember.Route.extend({
           id: 0,
           name: "Store",
           icon: 'http://asa.static.gausian.com/user_app/Store/icon.png',
-          viewName: 'customer',
+          viewName: 'iframe',
           path: 'http://tianjiasun.github.io/APP_store/app/',
           screen: 2,
           col: 3,
@@ -22,7 +22,7 @@ export default Ember.Route.extend({
        {
           name: "ASA",
           icon: 'http://asa.static.gausian.com/user_app/ASA/icon.png',
-          viewName: 'customer',
+          viewName: 'iframe',
           path: 'http://tianjiasun.github.io/ASA_api/app/index.html',
           screen: 2,
           col: 0,
@@ -31,7 +31,7 @@ export default Ember.Route.extend({
         {
           name: "Map",
           icon: 'http://asa.static.gausian.com/user_app/Map/icon.png',
-          viewName: 'customer',
+          viewName: 'iframe',
           path: 'https://www.google.com/maps/embed/v1/place?key=AIzaSyBrTaOSXSiXT1o7mUCjnJZSeRcSz0vnglw&q=silicon+valley',
           screen: 2,
           col: 3,
@@ -41,7 +41,7 @@ export default Ember.Route.extend({
           name: "Customers",
           app_id: "customerApp",
           icon: 'http://asa.static.gausian.com/user_app/Customers/icon.png',
-          viewName: 'customer',
+          viewName: 'iframe',
           path: 'http://gausian-developers.github.io/user-app-template5/app/',
           screen: 2,
           col: 1,
@@ -50,7 +50,7 @@ export default Ember.Route.extend({
         {
           name: "Quotes",
           icon: 'http://asa.static.gausian.com/user_app/Quotes/icon.png',
-          viewName: 'customer',
+          viewName: 'iframe',
           path: 'http://gausian-developers.github.io/user-app-template6/app/',
           screen: 2,
           col: 2,
@@ -59,7 +59,7 @@ export default Ember.Route.extend({
         {
           name: "HipChat",
           icon: 'http://asa.static.gausian.com/user_app/HipChat/icon.png',
-          viewName: 'customer',
+          viewName: 'iframe',
           path: 'https://gausian.hipchat.com/chat',
           screen: 2,
           col: 0,
@@ -68,7 +68,7 @@ export default Ember.Route.extend({
         {
           name: "Pixlr",
           icon: 'http://asa.static.gausian.com/user_app/Pixlr/icon.png',
-          viewName: 'customer',
+          viewName: 'iframe',
           path: 'http://pixlr.com/editor/?loc=zh-cn',
           screen: 2,
           col: 1,
@@ -77,7 +77,7 @@ export default Ember.Route.extend({
         {
           name: "TakaBreak",
           icon: 'http://asa.static.gausian.com/user_app/TakaBreak/icon.png',
-          viewName: 'customer',
+          viewName: 'iframe',
           path: 'http://www.earbits.com/',
           screen: 2,
           col: 2,
@@ -86,7 +86,7 @@ export default Ember.Route.extend({
         {
           name: "EasyInvoice",
           icon: 'http://asa.static.gausian.com/user_app/EasyInvoice/icon.png',
-          viewName: 'customer',
+          viewName: 'iframe',
           path: 'http://invoiceto.me/',
           screen: 2,
           col: 3,
@@ -95,7 +95,7 @@ export default Ember.Route.extend({
         {
           name: "LiveCAM",
           icon: 'http://asa.static.gausian.com/user_app/LiveCAM/icon.png',
-          viewName: 'customer',
+          viewName: 'iframe',
           path: 'http://trafficcam.santaclaraca.gov/TrafficCamera.aspx?CID=GA101',
           screen: 2,
           col: 0,
@@ -104,7 +104,7 @@ export default Ember.Route.extend({
         {
           name: "Math",
           icon: 'http://asa.static.gausian.com/user_app/Math/icon.png',
-          viewName: 'customer',
+          viewName: 'iframe',
           path: 'https://www.mathway.com/graph',
           screen: 2,
           col: 1,
@@ -113,7 +113,7 @@ export default Ember.Route.extend({
         {
           name: "Withholding",
           icon: 'http://asa.static.gausian.com/user_app/Withholding/icon.png',
-          viewName: 'customer',
+          viewName: 'iframe',
           path: 'http://apps.irs.gov/app/withholdingcalculator/',
           screen: 2,
           col: 2,
@@ -122,7 +122,7 @@ export default Ember.Route.extend({
         {
           name: "JSON Viewer",
           icon: 'http://asa.static.gausian.com/user_app/JSON/icon.png',
-          viewName: 'customer',
+          viewName: 'iframe',
           path: 'http://jsonviewer.stack.hu/',
           screen: 2,
           col: 3,
@@ -131,7 +131,7 @@ export default Ember.Route.extend({
         {
           name: "Weather",
           icon: 'http://asa.static.gausian.com/user_app/Weather/icon.png',
-          viewName: 'customer',
+          viewName: 'iframe',
           path: 'http://chrome.wunderground.com/auto/chrome/geo/wx/index.html?query=95054',
           screen: 2,
           col: 0,
@@ -140,7 +140,7 @@ export default Ember.Route.extend({
         {
           name: "FloorPlans",
           icon: 'http://asa.static.gausian.com/user_app/FloorPlans/icon.png',
-          viewName: 'customer',
+          viewName: 'iframe',
           path: 'https://planner5d.com/app-chrome/?key=3a95cf1e2b3c5c74ff7ee00871a49c8b',
           screen: 2,
           col: 1,
@@ -149,7 +149,7 @@ export default Ember.Route.extend({
         {
           name: "Draw",
           icon: 'http://asa.static.gausian.com/user_app/Draw/icon.png',
-          viewName: 'customer',
+          viewName: 'iframe',
           path: 'http://www.ratemydrawings.com/canvasdraw/',
           screen: 2,
           col: 2,
@@ -158,7 +158,7 @@ export default Ember.Route.extend({
         {
           name: "3D",
           icon: 'http://asa.static.gausian.com/user_app/3D/icon.png',
-          viewName: 'customer',
+          viewName: 'iframe',
           path: 'http://www.3dtin.com/2cwe',
           screen: 2,
           col: 3,
@@ -167,7 +167,7 @@ export default Ember.Route.extend({
         {
           name: "Calculator",
           icon: 'http://asa.static.gausian.com/user_app/Calculator/icon.png',
-          viewName: 'customer',
+          viewName: 'iframe',
           path: 'http://scientific-calculator.appspot.com/',
           screen: 2,
           col: 0,
@@ -176,7 +176,7 @@ export default Ember.Route.extend({
         {
           name: "Developer",
           icon: 'http://asa.static.gausian.com/user_app/Developer/icon.png',
-          viewName: 'customer',
+          viewName: 'iframe',
           path: 'http://tianjiasun.github.io/ASA_website/',
           screen: 2,
           col: 1,
@@ -185,7 +185,7 @@ export default Ember.Route.extend({
         {
           name: "SimpleToDo",
           icon: 'http://asa.static.gausian.com/user_app/SimpleToDo/icon.png',
-          viewName: 'customer',
+          viewName: 'iframe',
           path: 'http://scrumy.com/husks11rubbish',
           screen: 2,
           col: 2,

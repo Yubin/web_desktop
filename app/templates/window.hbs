@@ -22,81 +22,23 @@
 			<div class="back_shadow_decoration"></div>
 			<div class="back_title">Available Links on Desktop</div>
 			<div class="back_app_container">
+        {{#each view.appLinkables}}
 				<div class="back_app_unit">
-					<img class="back_app_image" src="http://asa.static.gausian.com/user_app/Map/icon.png"/>
-					<div class="back_name">Map</div>
+					<img class="back_app_image" {{bind-attr src=icon}}>
+					<div class="back_name">{{name}}</div>
+          {{#if hasLinked}}
 					<div class="back_app_linked">
 						<img class="back_app_linked_img" src="assets/img/link_orange.png"/>
 					</div>
 					<div class="back_app_overlay" onclick="flipper.classList.toggle('flipped');">
-						<div class="back_app_overlay_text">Unlink</div>
+						<a class="back_app_overlay_text" {{action 'unlink' this target=view}}>Unlink</a>
 					</div>
-				</div>
-				<div class="back_app_unit">
-					<img class="back_app_image" src="http://asa.static.gausian.com/user_app/HipChat/icon.png"/>
-					<div class="back_name">HipChat</div>
-					<div class="back_app_overlay" onclick="flipper.classList.toggle('flipped');">
-						<img class="back_app_overlay_img" src="assets/img/link_orange.png"/>
-					</div>
-				</div>
-				<div class="back_app_unit">
-					<img class="back_app_image" src="http://asa.static.gausian.com/user_app/Quotes/icon.png"/>
-					<div class="back_name">Quotes</div>
-					<div class="back_app_overlay" onclick="flipper.classList.toggle('flipped');">
-						<img class="back_app_overlay_img" src="assets/img/link_orange.png"/>
-					</div>
-				</div>
-				<div class="back_app_unit">
-					<img class="back_app_image" src="http://asa.static.gausian.com/user_app/HipChat/icon.png"/>
-					<div class="back_name">HipChat</div>
-					<div class="back_app_linked">
-						<img class="back_app_linked_img" src="assets/img/link_orange.png"/>
-					</div>
-					<div class="back_app_overlay" onclick="flipper.classList.toggle('flipped');">
-						<div class="back_app_overlay_text">Unlink</div>
-					</div>
-				</div>
-				<div class="back_app_unit">
-					<img class="back_app_image" src="http://asa.static.gausian.com/user_app/Pixlr/icon.png"/>
-					<div class="back_name">Pixlr</div>
-					<div class="back_app_overlay" onclick="flipper.classList.toggle('flipped');">
-						<img class="back_app_overlay_img" src="assets/img/link_orange.png"/>
-					</div>
-				</div>
-				<div class="back_app_unit">
-					<img class="back_app_image" src="http://asa.static.gausian.com/user_app/TakaBreak/icon.png"/>
-					<div class="back_name">TakaBreak</div>
-					<div class="back_app_overlay" onclick="flipper.classList.toggle('flipped');">
-						<img class="back_app_overlay_img" src="assets/img/link_orange.png"/>
-					</div>
-				</div>
-				<div class="back_app_unit">
-					<img class="back_app_image" src="http://asa.static.gausian.com/user_app/LiveCAM/icon.png"/>
-					<div class="back_name">LiveCAM</div>
-					<div class="back_app_overlay" onclick="flipper.classList.toggle('flipped');">
-						<img class="back_app_overlay_img" src="assets/img/link_orange.png"/>
-					</div>
-				</div>
-				<div class="back_app_unit">
-					<img class="back_app_image" src="http://asa.static.gausian.com/user_app/Math/icon.png"/>
-					<div class="back_name">Math</div>
-					<div class="back_app_overlay" onclick="flipper.classList.toggle('flipped');">
-						<img class="back_app_overlay_img" src="assets/img/link_orange.png"/>
-					</div>
-				</div>
-				<div class="back_app_unit">
-					<img class="back_app_image" src="http://asa.static.gausian.com/user_app/Withholding/icon.png"/>
-					<div class="back_name">Withholding</div>
-					<div class="back_app_overlay" onclick="flipper.classList.toggle('flipped');">
-						<img class="back_app_overlay_img" src="assets/img/link_orange.png"/>
-					</div>
-				</div>
-				<div class="back_app_unit">
-					<img class="back_app_image" src="http://asa.static.gausian.com/user_app/Draw/icon.png"/>
-					<div class="back_name">Draw</div>
-					<div class="back_app_overlay" onclick="flipper.classList.toggle('flipped');">
-						<img class="back_app_overlay_img" src="assets/img/link_orange.png"/>
-					</div>
+          {{else}}
+          <div class="back_app_overlay" onclick="flipper.classList.toggle('flipped');">
+            <a class="back_app_overlay_text" {{action 'link' this target=view}}>Link</a>
+          </div>
+          {{/if}}
+          {{/each}}
 				</div>
 			</div>
 <!-- 						<div class="back_recommend">Popular Links on Cloud</div>

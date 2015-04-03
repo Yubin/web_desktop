@@ -17,26 +17,14 @@ function receiveMessage(event) {
 
     } else if (data.op === 'addLink') {
       var originAppId = data.originAppId;
-      console.log(originAppId);
       var viewId = Ember.$('.window.' + originAppId).attr('id')
       var view = Ember.View.views[viewId];
       if (viewId) {
-        view.setProperties({
-          'fliped': true,
-          'eventSource': event.source,
+        view.set('linkAppObject', {
+          'appId': originAppId,
           'eventOrigin': origin
         });
-        // Get Ember view
-        var payload = {
-         op: 'selectLink',
-         targetApp: {
-           id: 'Quotes',
-           name: 'Quotes',
-           icon: '123123/icon.png'
-         }
-        }
       }
-      event.source.postMessage(payload, origin);
     }
   }
 
