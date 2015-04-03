@@ -62,7 +62,6 @@ export default Ember.Controller.extend({
         installApps.forEach(function (item) {
           hash[get(item, 'id')] = item;
         });
-        this.set('desktopStatus', hash);
         var ids = installApps.getEach('id');
         this.store.findQuery('app-info', {ids: ids}).then(function (res) {
           var apps = res.get('content');
@@ -75,10 +74,8 @@ export default Ember.Controller.extend({
                   'screen': parseInt(array[0]),
                   'row': parseInt(array[1]),
                   'col': parseInt(array[2]),
+                  'linked': obj.link || []
                 });
-                if (obj.link) {
-                  app.set('linked', obj.link.join(','));
-                }
               }
               model.pushObject(app);
             }.bind(this));
@@ -89,26 +86,23 @@ export default Ember.Controller.extend({
   }.observes('companyId'),
 
   syncAppLayout: function () {
-    var installed_app = this.get('desktopStatus');
     var array = [];
-    for (var key in installed_app) {
-      if (installed_app.hasOwnProperty(key)) {
-        array.pushObject(installed_app[key]);
-      }
-    }
+    this.get('model').forEach(function (item) {
+      array.pushObject({
+        id: get(item, 'id'),
+        location: get(item, 'screen') + ',' + get(item, 'row') + ',' + get(item, 'col'),
+        link: get(item, 'linked')
+      });
+    });
+
     var model = this.store.getById('user-setting', this.get('employeeId'));
     model.set('installed_app', array);
     model.save().then(function () {});
   },
 
   actions: {
-    appPosChange: function (item) {
-      var id = get(item, 'id');
-      var app =  this.get('desktopStatus.' + id);
-      if (app) {
-        app.location = get(item, 'screen') + ',' + get(item, 'row') + ',' + get(item, 'col');
-        this.syncAppLayout();
-      }
+    appPosChange: function () {
+      this.syncAppLayout();
     },
     appMoving: function () {
       this.set('controllers.application.appMoving', true);
@@ -223,24 +217,12 @@ export default Ember.Controller.extend({
         row: row
       }, content));
 
-      var desktopStatus =  this.get('desktopStatus');
-      var id = get(content, 'id');
-      desktopStatus[id] = {
-        id: id,
-        location: screen + ',' + row + ',' + col
-      };
-
       this.syncAppLayout();
     },
 
     deleteApp: function (content) {
       this._actions['closeApp'].apply(this, [content]);
-      var apps  = this.get('model');
-      var id = get(content, 'id');
-      var desktopStatus =  this.get('desktopStatus');
-
-      apps.removeObject(content);
-      delete desktopStatus[id];
+      this.get('model').removeObject(content);
       this.syncAppLayout();
     },
 

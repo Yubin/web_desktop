@@ -20,6 +20,7 @@ export default Ember.Mixin.create({
   isMinSize: false,
 
   linkAppObject: {},
+  linkOriginApp: null,
   appLinkables: [],
 
   changeZindex: function () {
@@ -170,13 +171,14 @@ export default Ember.Mixin.create({
       var allApps = this.get('parentView.model');
       var app = allApps.findBy('name', get(linkAppObject, 'appId'));
       if (app && get(app, 'input_service')) {
+        this.set('linkOriginApp', app);
         var idArray = get(app, 'input_service').split(',');
         var linked = get(app, 'linked');
         allApps.forEach(function (item) {
           var id = get(item, 'id');
           if (idArray.indexOf(id) > -1) { // in white list
             var hasLinked = false;
-            if (linked && linked.split(',').indexOf(id) > -1) { // linked
+            if (linked && linked.indexOf(id) > -1) { // linked
               hasLinked = true;
             }
             appLinkables.pushObject({
@@ -242,19 +244,23 @@ export default Ember.Mixin.create({
 
     flipApp: function () {
       this.$().removeClass('fliped');
+      var linkedApps = this.get('appLinkables').filterBy('hasLinked', true);
+      var ids = linkedApps.mapBy('id');
+      console.log(ids);
+      this.set('linkOriginApp.linked', ids);
+      var payload = {
+        op: 'selectLink',
+        targetApp: linkedApps
+      };
+      this.$('iframe')[0].contentWindow.postMessage(payload, this.get('linkAppObject.eventOrigin'));
     },
 
     link: function (content) {
-      var payload = {
-       op: 'selectLink',
-       targetApp: {
-         id: get(content, 'name'),
-         name: get(content, 'name'),
-         icon: get(content, 'icon')
-       }
-     };
-     this.$('iframe')[0].contentWindow.postMessage(payload, this.get('linkAppObject.eventOrigin'));
-     set(content, 'hasLinked', true);
+      set(content, 'hasLinked', true);
+    },
+
+    unlink: function (content) {
+      set(content, 'hasLinked', false);
     }
   }
 

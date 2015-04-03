@@ -338,7 +338,6 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
           installApps.forEach(function (item) {
             hash[get(item, 'id')] = item;
           });
-          this.set('desktopStatus', hash);
           var ids = installApps.getEach('id');
           this.store.findQuery('app-info', {ids: ids}).then(function (res) {
             var apps = res.get('content');
@@ -351,10 +350,8 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
                     'screen': parseInt(array[0]),
                     'row': parseInt(array[1]),
                     'col': parseInt(array[2]),
+                    'linked': obj.link || []
                   });
-                  if (obj.link) {
-                    app.set('linked', obj.link.join(','));
-                  }
                 }
                 model.pushObject(app);
               }.bind(this));
@@ -365,26 +362,23 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
     }.observes('companyId'),
 
     syncAppLayout: function () {
-      var installed_app = this.get('desktopStatus');
       var array = [];
-      for (var key in installed_app) {
-        if (installed_app.hasOwnProperty(key)) {
-          array.pushObject(installed_app[key]);
-        }
-      }
+      this.get('model').forEach(function (item) {
+        array.pushObject({
+          id: get(item, 'id'),
+          location: get(item, 'screen') + ',' + get(item, 'row') + ',' + get(item, 'col'),
+          link: get(item, 'linked')
+        });
+      });
+
       var model = this.store.getById('user-setting', this.get('employeeId'));
       model.set('installed_app', array);
       model.save().then(function () {});
     },
 
     actions: {
-      appPosChange: function (item) {
-        var id = get(item, 'id');
-        var app =  this.get('desktopStatus.' + id);
-        if (app) {
-          app.location = get(item, 'screen') + ',' + get(item, 'row') + ',' + get(item, 'col');
-          this.syncAppLayout();
-        }
+      appPosChange: function () {
+        this.syncAppLayout();
       },
       appMoving: function () {
         this.set('controllers.application.appMoving', true);
@@ -499,24 +493,12 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
           row: row
         }, content));
 
-        var desktopStatus =  this.get('desktopStatus');
-        var id = get(content, 'id');
-        desktopStatus[id] = {
-          id: id,
-          location: screen + ',' + row + ',' + col
-        };
-
         this.syncAppLayout();
       },
 
       deleteApp: function (content) {
         this._actions['closeApp'].apply(this, [content]);
-        var apps  = this.get('model');
-        var id = get(content, 'id');
-        var desktopStatus =  this.get('desktopStatus');
-
-        apps.removeObject(content);
-        delete desktopStatus[id];
+        this.get('model').removeObject(content);
         this.syncAppLayout();
       },
 
@@ -649,6 +631,7 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
     isMinSize: false,
 
     linkAppObject: {},
+    linkOriginApp: null,
     appLinkables: [],
 
     changeZindex: function () {
@@ -799,13 +782,14 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
         var allApps = this.get('parentView.model');
         var app = allApps.findBy('name', get(linkAppObject, 'appId'));
         if (app && get(app, 'input_service')) {
+          this.set('linkOriginApp', app);
           var idArray = get(app, 'input_service').split(',');
           var linked = get(app, 'linked');
           allApps.forEach(function (item) {
             var id = get(item, 'id');
             if (idArray.indexOf(id) > -1) { // in white list
               var hasLinked = false;
-              if (linked && linked.split(',').indexOf(id) > -1) { // linked
+              if (linked && linked.indexOf(id) > -1) { // linked
                 hasLinked = true;
               }
               appLinkables.pushObject({
@@ -871,19 +855,23 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
 
       flipApp: function () {
         this.$().removeClass('fliped');
+        var linkedApps = this.get('appLinkables').filterBy('hasLinked', true);
+        var ids = linkedApps.mapBy('id');
+        console.log(ids);
+        this.set('linkOriginApp.linked', ids);
+        var payload = {
+          op: 'selectLink',
+          targetApp: linkedApps
+        };
+        this.$('iframe')[0].contentWindow.postMessage(payload, this.get('linkAppObject.eventOrigin'));
       },
 
       link: function (content) {
-        var payload = {
-         op: 'selectLink',
-         targetApp: {
-           id: get(content, 'name'),
-           name: get(content, 'name'),
-           icon: get(content, 'icon')
-         }
-       };
-       this.$('iframe')[0].contentWindow.postMessage(payload, this.get('linkAppObject.eventOrigin'));
-       set(content, 'hasLinked', true);
+        set(content, 'hasLinked', true);
+      },
+
+      unlink: function (content) {
+        set(content, 'hasLinked', false);
       }
     }
 
