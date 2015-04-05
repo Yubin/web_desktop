@@ -3184,7 +3184,7 @@ define('web-desktop/views/iframe', ['exports', 'ember', 'web-desktop/mixins/wind
 
     changeAppLinkables: function () {
       var app = this.get('content');
-      var input_service = get(app, 'input_service');
+      var input_service = get(app, 'input_service') || '';
       var idArray = input_service && input_service.split(',');
       var linked = get(app, 'linked');
       var appLinkables = this.get('appLinkables');
