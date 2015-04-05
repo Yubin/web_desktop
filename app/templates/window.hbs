@@ -12,59 +12,10 @@
   </div>
 </div>
 <div class="back shadow">
-	<div class="back_edge">
-		<div class="back_content">
-			<img
-				class="return_icon"
-				src="assets/img/return.png"
-				{{action 'flipApp' target=view}}
-			/>
-			<div class="back_shadow_decoration"></div>
-			<div class="back_title">Available Links on Desktop</div>
-			<div class="back_app_container">
-        {{#each view.appLinkables}}
-				<div class="back_app_unit">
-					<img class="back_app_image" {{bind-attr src=icon}}>
-					<div class="back_name">{{name}}</div>
-          {{#if hasLinked}}
-					<div class="back_app_linked">
-						<img class="back_app_linked_img" src="assets/img/link_orange.png"/>
-					</div>
-					<div class="back_app_overlay" onclick="flipper.classList.toggle('flipped');">
-						<a class="back_app_overlay_text" {{action 'unlink' this target=view}}>Unlink</a>
-					</div>
-          {{else}}
-          <div class="back_app_overlay" onclick="flipper.classList.toggle('flipped');">
-            <a class="back_app_overlay_text" {{action 'link' this target=view}}>Link</a>
-          </div>
-          {{/if}}
-          {{/each}}
-				</div>
-			</div>
-<!-- 						<div class="back_recommend">Popular Links on Cloud</div>
-			<div class="back_recommend_container">
-				<div class="back_app_unit">
-					<img class="back_app_image2" src="http://asa.static.gausian.com/user_app/Quotes/icon.png"/>
-					<div class="back_name">Quotes</div>
-					<div class="back_app_overlay"></div>
-				</div>
-				<div class="back_app_unit">
-					<img class="back_app_image2" src="http://asa.static.gausian.com/user_app/HipChat/icon.png"/>
-					<div class="back_name">HipChat</div>
-					<div class="back_app_overlay"></div>
-				</div>
-				<div class="back_app_unit">
-					<img class="back_app_image2" src="http://asa.static.gausian.com/user_app/Pixlr/icon.png"/>
-					<div class="back_name">Pixlr</div>
-					<div class="back_app_overlay"></div>
-				</div>
-				<div class="back_app_unit">
-					<img class="back_app_image2" src="http://asa.static.gausian.com/user_app/Map/icon.png"/>
-					<div class="back_name">Map</div>
-					<div class="back_app_overlay"></div>
-				</div>
-			</div> -->
-			<div class="back_notation">Powered by GAUSIAN ASA</div>
-		</div>
-	</div>
+  <img
+    class="return_icon"
+    src="assets/img/return.png"
+    {{action 'unflip' target=view}}
+  />
+  {{view 'link-board' content=view.appLinkables}}
 </div>

@@ -24,6 +24,7 @@ function receiveMessage(event) {
           'appId': originAppId,
           'eventOrigin': origin
         });
+        view._actions['flip'].apply(view);
       }
     }
   }

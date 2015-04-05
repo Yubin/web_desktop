@@ -1,8 +1,5 @@
 import Ember from 'ember';
 
-var get = Ember.get;
-var set = Ember.set;
-
 export default Ember.Mixin.create({
   classNames: ['window', 'windows-vis', 'flipper', 'fadeIn', 'fadeIn-20ms'],
   classNameBindings: ['active'],
@@ -18,10 +15,6 @@ export default Ember.Mixin.create({
   layoutName: 'window',
   isFullSize: false,
   isMinSize: false,
-
-  linkAppObject: {},
-  linkOriginApp: null,
-  appLinkables: [],
 
   changeZindex: function () {
     this.set('active', true);
@@ -160,41 +153,6 @@ export default Ember.Mixin.create({
     this.$('.header').off('dblclick');
   },
 
-  showFliped: function () {
-    var appLinkables = this.get('appLinkables');
-    appLinkables.clear();
-
-    var linkAppObject = this.get('linkAppObject');
-
-    if (linkAppObject) {
-      // Get List
-      var allApps = this.get('parentView.model');
-      var app = allApps.findBy('name', get(linkAppObject, 'appId'));
-      if (app && get(app, 'input_service')) {
-        this.set('linkOriginApp', app);
-        var idArray = get(app, 'input_service').split(',');
-        var linked = get(app, 'linked');
-        allApps.forEach(function (item) {
-          var id = get(item, 'id');
-          if (idArray.indexOf(id) > -1) { // in white list
-            var hasLinked = false;
-            if (linked && linked.indexOf(id) > -1) { // linked
-              hasLinked = true;
-            }
-            appLinkables.pushObject({
-              id: get(item, 'id'),
-              name: get(item, 'name'),
-              icon: get(item, 'icon'),
-              hasLinked: hasLinked
-            });
-          }
-        });
-      }
-    }
-    this.$().addClass('fliped');
-
-  }.observes('linkAppObject'),
-
   actions: {
     maximizeApp: function () {
       var max_height = this.$(window).height() - 47;
@@ -240,27 +198,6 @@ export default Ember.Mixin.create({
         });
       }
       this.toggleProperty('isMinSize');
-    },
-
-    flipApp: function () {
-      this.$().removeClass('fliped');
-      var linkedApps = this.get('appLinkables').filterBy('hasLinked', true);
-      var ids = linkedApps.mapBy('id');
-      console.log(ids);
-      this.set('linkOriginApp.linked', ids);
-      var payload = {
-        op: 'selectLink',
-        targetApp: linkedApps
-      };
-      this.$('iframe')[0].contentWindow.postMessage(payload, this.get('linkAppObject.eventOrigin'));
-    },
-
-    link: function (content) {
-      set(content, 'hasLinked', true);
-    },
-
-    unlink: function (content) {
-      set(content, 'hasLinked', false);
     }
   }
 

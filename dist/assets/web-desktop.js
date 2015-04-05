@@ -607,12 +607,36 @@ define('web-desktop/mixins/drag-n-drop-view', ['exports', 'ember'], function (ex
   exports['default'] = Drag;
 
 });
-define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports, Ember) {
+define('web-desktop/mixins/flipwindow-view', ['exports', 'ember'], function (exports, Ember) {
 
   'use strict';
 
-  var get = Ember['default'].get;
-  var set = Ember['default'].set;
+  exports['default'] = Ember['default'].Mixin.create({
+    classNames: ['flipper'],
+
+    linkAppObject: {},
+    linkOriginApp: null,
+    appLinkables: [],
+
+    flipCallback: Ember['default'].K,
+    unflipCallback: Ember['default'].K,
+    actions: {
+      flip: function () {
+        this.$().addClass('fliped');
+        this.flipCallback();
+      },
+      unflip: function () {
+        this.$().removeClass('fliped');
+        this.unflipCallback();
+      }
+    }
+
+  });
+
+});
+define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
 
   exports['default'] = Ember['default'].Mixin.create({
     classNames: ['window', 'windows-vis', 'flipper', 'fadeIn', 'fadeIn-20ms'],
@@ -629,10 +653,6 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
     layoutName: 'window',
     isFullSize: false,
     isMinSize: false,
-
-    linkAppObject: {},
-    linkOriginApp: null,
-    appLinkables: [],
 
     changeZindex: function () {
       this.set('active', true);
@@ -771,41 +791,6 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
       this.$('.header').off('dblclick');
     },
 
-    showFliped: function () {
-      var appLinkables = this.get('appLinkables');
-      appLinkables.clear();
-
-      var linkAppObject = this.get('linkAppObject');
-
-      if (linkAppObject) {
-        // Get List
-        var allApps = this.get('parentView.model');
-        var app = allApps.findBy('name', get(linkAppObject, 'appId'));
-        if (app && get(app, 'input_service')) {
-          this.set('linkOriginApp', app);
-          var idArray = get(app, 'input_service').split(',');
-          var linked = get(app, 'linked');
-          allApps.forEach(function (item) {
-            var id = get(item, 'id');
-            if (idArray.indexOf(id) > -1) { // in white list
-              var hasLinked = false;
-              if (linked && linked.indexOf(id) > -1) { // linked
-                hasLinked = true;
-              }
-              appLinkables.pushObject({
-                id: get(item, 'id'),
-                name: get(item, 'name'),
-                icon: get(item, 'icon'),
-                hasLinked: hasLinked
-              });
-            }
-          });
-        }
-      }
-      this.$().addClass('fliped');
-
-    }.observes('linkAppObject'),
-
     actions: {
       maximizeApp: function () {
         var max_height = this.$(window).height() - 47;
@@ -851,27 +836,6 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
           });
         }
         this.toggleProperty('isMinSize');
-      },
-
-      flipApp: function () {
-        this.$().removeClass('fliped');
-        var linkedApps = this.get('appLinkables').filterBy('hasLinked', true);
-        var ids = linkedApps.mapBy('id');
-        console.log(ids);
-        this.set('linkOriginApp.linked', ids);
-        var payload = {
-          op: 'selectLink',
-          targetApp: linkedApps
-        };
-        this.$('iframe')[0].contentWindow.postMessage(payload, this.get('linkAppObject.eventOrigin'));
-      },
-
-      link: function (content) {
-        set(content, 'hasLinked', true);
-      },
-
-      unlink: function (content) {
-        set(content, 'hasLinked', false);
       }
     }
 
@@ -1685,6 +1649,63 @@ define('web-desktop/templates/iframe', ['exports', 'ember'], function (exports, 
   });
 
 });
+define('web-desktop/templates/link-board', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+  helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
+    var buffer = '', stack1, escapeExpression=this.escapeExpression, self=this;
+
+  function program1(depth0,data) {
+    
+    var buffer = '', stack1;
+    data.buffer.push("\n      <div class=\"back_app_unit\">\n        <img class=\"back_app_image\" ");
+    data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
+      'src': ("icon")
+    },hashTypes:{'src': "ID"},hashContexts:{'src': depth0},contexts:[],types:[],data:data})));
+    data.buffer.push(">\n        <div class=\"back_name\">");
+    stack1 = helpers._triageMustache.call(depth0, "name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+    data.buffer.push("</div>\n        ");
+    stack1 = helpers['if'].call(depth0, "hasLinked", {hash:{},hashTypes:{},hashContexts:{},inverse:self.program(4, program4, data),fn:self.program(2, program2, data),contexts:[depth0],types:["ID"],data:data});
+    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+    data.buffer.push("\n        ");
+    return buffer;
+    }
+  function program2(depth0,data) {
+    
+    var buffer = '';
+    data.buffer.push("\n        <div class=\"back_app_linked\">\n          <img class=\"back_app_linked_img\" src=\"assets/img/link_orange.png\"/>\n        </div>\n        <div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n          <a class=\"back_app_overlay_text\" ");
+    data.buffer.push(escapeExpression(helpers.action.call(depth0, "unlink", "", {hash:{
+      'target': ("view")
+    },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0,depth0],types:["STRING","ID"],data:data})));
+    data.buffer.push(">Unlink</a>\n        </div>\n        ");
+    return buffer;
+    }
+
+  function program4(depth0,data) {
+    
+    var buffer = '';
+    data.buffer.push("\n        <div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n          <a class=\"back_app_overlay_text\" ");
+    data.buffer.push(escapeExpression(helpers.action.call(depth0, "link", "", {hash:{
+      'target': ("view")
+    },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0,depth0],types:["STRING","ID"],data:data})));
+    data.buffer.push(">Link</a>\n        </div>\n        ");
+    return buffer;
+    }
+
+    data.buffer.push("<div class=\"back_edge\">\n  <div class=\"back_content\">\n\n    <div class=\"back_shadow_decoration\"></div>\n    <div class=\"back_title\">Available Links on Desktop</div>\n    <div class=\"back_app_container\">\n      ");
+    stack1 = helpers.each.call(depth0, "view.content", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],data:data});
+    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+    data.buffer.push("\n      </div>\n    </div>\n<!-- 						<div class=\"back_recommend\">Popular Links on Cloud</div>\n    <div class=\"back_recommend_container\">\n      <div class=\"back_app_unit\">\n        <img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/Quotes/icon.png\"/>\n        <div class=\"back_name\">Quotes</div>\n        <div class=\"back_app_overlay\"></div>\n      </div>\n      <div class=\"back_app_unit\">\n        <img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/HipChat/icon.png\"/>\n        <div class=\"back_name\">HipChat</div>\n        <div class=\"back_app_overlay\"></div>\n      </div>\n      <div class=\"back_app_unit\">\n        <img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/Pixlr/icon.png\"/>\n        <div class=\"back_name\">Pixlr</div>\n        <div class=\"back_app_overlay\"></div>\n      </div>\n      <div class=\"back_app_unit\">\n        <img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/Map/icon.png\"/>\n        <div class=\"back_name\">Map</div>\n        <div class=\"back_app_overlay\"></div>\n      </div>\n    </div> -->\n    <div class=\"back_notation\">Powered by GAUSIAN ASA</div>\n  </div>\n</div>\n");
+    return buffer;
+    
+  });
+
+});
 define('web-desktop/templates/login', ['exports', 'ember'], function (exports, Ember) {
 
   'use strict';
@@ -1927,45 +1948,8 @@ define('web-desktop/templates/window', ['exports', 'ember'], function (exports, 
   /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
-    var buffer = '', stack1, escapeExpression=this.escapeExpression, self=this;
+    var buffer = '', stack1, escapeExpression=this.escapeExpression;
 
-  function program1(depth0,data) {
-    
-    var buffer = '', stack1;
-    data.buffer.push("\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image\" ");
-    data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
-      'src': ("icon")
-    },hashTypes:{'src': "ID"},hashContexts:{'src': depth0},contexts:[],types:[],data:data})));
-    data.buffer.push(">\n					<div class=\"back_name\">");
-    stack1 = helpers._triageMustache.call(depth0, "name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
-    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("</div>\n          ");
-    stack1 = helpers['if'].call(depth0, "hasLinked", {hash:{},hashTypes:{},hashContexts:{},inverse:self.program(4, program4, data),fn:self.program(2, program2, data),contexts:[depth0],types:["ID"],data:data});
-    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\n          ");
-    return buffer;
-    }
-  function program2(depth0,data) {
-    
-    var buffer = '';
-    data.buffer.push("\n					<div class=\"back_app_linked\">\n						<img class=\"back_app_linked_img\" src=\"assets/img/link_orange.png\"/>\n					</div>\n					<div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n						<a class=\"back_app_overlay_text\" ");
-    data.buffer.push(escapeExpression(helpers.action.call(depth0, "unlink", "", {hash:{
-      'target': ("view")
-    },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0,depth0],types:["STRING","ID"],data:data})));
-    data.buffer.push(">Unlink</a>\n					</div>\n          ");
-    return buffer;
-    }
-
-  function program4(depth0,data) {
-    
-    var buffer = '';
-    data.buffer.push("\n          <div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n            <a class=\"back_app_overlay_text\" ");
-    data.buffer.push(escapeExpression(helpers.action.call(depth0, "link", "", {hash:{
-      'target': ("view")
-    },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0,depth0],types:["STRING","ID"],data:data})));
-    data.buffer.push(">Link</a>\n          </div>\n          ");
-    return buffer;
-    }
 
     data.buffer.push("<div class=\"front shadow\">\n  <div class=\"header\">\n    <span class=\"titleInside\">");
     stack1 = helpers._triageMustache.call(depth0, "view.content.name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
@@ -1985,14 +1969,15 @@ define('web-desktop/templates/window', ['exports', 'ember'], function (exports, 
     data.buffer.push(">close</a>\n  </nav>\n  <div class=\"container\">\n    ");
     stack1 = helpers._triageMustache.call(depth0, "yield", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\n  </div>\n</div>\n<div class=\"back shadow\">\n	<div class=\"back_edge\">\n		<div class=\"back_content\">\n			<img\n				class=\"return_icon\"\n				src=\"assets/img/return.png\"\n				");
-    data.buffer.push(escapeExpression(helpers.action.call(depth0, "flipApp", {hash:{
+    data.buffer.push("\n  </div>\n</div>\n<div class=\"back shadow\">\n  <img\n    class=\"return_icon\"\n    src=\"assets/img/return.png\"\n    ");
+    data.buffer.push(escapeExpression(helpers.action.call(depth0, "unflip", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push("\n			/>\n			<div class=\"back_shadow_decoration\"></div>\n			<div class=\"back_title\">Available Links on Desktop</div>\n			<div class=\"back_app_container\">\n        ");
-    stack1 = helpers.each.call(depth0, "view.appLinkables", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],data:data});
-    if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\n				</div>\n			</div>\n<!-- 						<div class=\"back_recommend\">Popular Links on Cloud</div>\n			<div class=\"back_recommend_container\">\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/Quotes/icon.png\"/>\n					<div class=\"back_name\">Quotes</div>\n					<div class=\"back_app_overlay\"></div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/HipChat/icon.png\"/>\n					<div class=\"back_name\">HipChat</div>\n					<div class=\"back_app_overlay\"></div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/Pixlr/icon.png\"/>\n					<div class=\"back_name\">Pixlr</div>\n					<div class=\"back_app_overlay\"></div>\n				</div>\n				<div class=\"back_app_unit\">\n					<img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/Map/icon.png\"/>\n					<div class=\"back_name\">Map</div>\n					<div class=\"back_app_overlay\"></div>\n				</div>\n			</div> -->\n			<div class=\"back_notation\">Powered by GAUSIAN ASA</div>\n		</div>\n	</div>\n</div>\n");
+    data.buffer.push("\n  />\n  ");
+    data.buffer.push(escapeExpression(helpers.view.call(depth0, "link-board", {hash:{
+      'content': ("view.appLinkables")
+    },hashTypes:{'content': "ID"},hashContexts:{'content': depth0},contexts:[depth0],types:["STRING"],data:data})));
+    data.buffer.push("\n</div>\n");
     return buffer;
     
   });
@@ -2206,6 +2191,16 @@ define('web-desktop/tests/mixins/drag-n-drop-view.jshint', function () {
   module('JSHint - mixins');
   test('mixins/drag-n-drop-view.js should pass jshint', function() { 
     ok(true, 'mixins/drag-n-drop-view.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/mixins/flipwindow-view.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - mixins');
+  test('mixins/flipwindow-view.js should pass jshint', function() { 
+    ok(true, 'mixins/flipwindow-view.js should pass jshint.'); 
   });
 
 });
@@ -2468,7 +2463,17 @@ define('web-desktop/tests/views/iframe.jshint', function () {
 
   module('JSHint - views');
   test('views/iframe.js should pass jshint', function() { 
-    ok(true, 'views/iframe.js should pass jshint.'); 
+    ok(false, 'views/iframe.js should pass jshint.\nviews/iframe.js: line 6, col 5, \'set\' is defined but never used.\n\n1 error'); 
+  });
+
+});
+define('web-desktop/tests/views/link-board.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - views');
+  test('views/link-board.js should pass jshint', function() { 
+    ok(true, 'views/link-board.js should pass jshint.'); 
   });
 
 });
@@ -3150,13 +3155,106 @@ define('web-desktop/views/header', ['exports', 'ember'], function (exports, Embe
   });
 
 });
-define('web-desktop/views/iframe', ['exports', 'ember', 'web-desktop/mixins/window-view'], function (exports, Ember, WindowMixin) {
+define('web-desktop/views/iframe', ['exports', 'ember', 'web-desktop/mixins/window-view', 'web-desktop/mixins/flipwindow-view'], function (exports, Ember, WindowMixin, FlipWindowMixin) {
 
   'use strict';
 
-  exports['default'] = Ember['default'].View.extend(WindowMixin['default'], {
+  var get = Ember['default'].get;
+  var set = Ember['default'].get;
+  var arraysEqual = function (a, b) {
+    if (a === b) {
+      return true;
+    } else if ( a === null || b === null || a.length !== b.length) {
+      return false;
+    } else {
+      a.forEach(function (item) {
+        if (b.indexOf(item) < 0) {
+          return false;
+        }
+      });
+      return true;
+    }
+  };
+
+  exports['default'] = Ember['default'].View.extend(WindowMixin['default'], FlipWindowMixin['default'], {
     classNameBindings: ['content.name'],
-    templateName: 'iframe'
+    templateName: 'iframe',
+
+    appLinkables: [],
+
+    changeAppLinkables: function () {
+      var app = this.get('content');
+      var input_service = get(app, 'input_service');
+      var idArray = input_service && input_service.split(',');
+      var linked = get(app, 'linked');
+      var appLinkables = this.get('appLinkables');
+      appLinkables.clear();
+      this.get('parentView.model').forEach(function (item) {
+        var id = get(item, 'id');
+        if (idArray.indexOf(id) > -1) { // in white list
+          var hasLinked = false;
+          if (linked && linked.indexOf(id) > -1) { // linked
+            hasLinked = true;
+          }
+          appLinkables.pushObject(Ember['default'].Object.create({
+            id: get(item, 'id'),
+            name: get(item, 'name'),
+            icon: get(item, 'icon'),
+            hasLinked: hasLinked
+          }));
+        }
+      });
+      this.$('iframe').load(function () {
+        this.pushToIframe();
+      }.bind(this));
+    }.observes('content.input_service').on('didInsertElement'),
+
+    pushToIframe: function () {
+      var linkedApps = this.get('appLinkables').filterBy('hasLinked', true);
+      var payload = {
+        op: 'selectLink',
+        targetApp: linkedApps
+      };
+      var url = this.$('iframe').attr('src');
+      this.$('iframe')[0].contentWindow.postMessage(payload, url);
+    },
+
+    getLinkIds: function () {
+      var linkedApps = this.get('appLinkables').filterBy('hasLinked', true);
+      return linkedApps.mapBy('id');
+    },
+
+    unflipCallback: function () {
+      var origin = this.get('content.linked');
+      var ids = this.getLinkIds();
+
+      if (!arraysEqual(origin, ids)) {
+        this.set('content.linked', ids);
+        this.get('parentView').syncAppLayout();
+        this.pushToIframe();
+      }
+    }
+
+  });
+
+});
+define('web-desktop/views/link-board', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].View.extend({
+    templateName: 'link-board',
+
+    actions: {
+      link: function (content) {
+        content.set('hasLinked', true);
+      },
+
+      unlink: function (content) {
+        content.set('hasLinked', false);
+      }
+    }
+
   });
 
 });
