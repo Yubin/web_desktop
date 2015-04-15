@@ -7,11 +7,14 @@ export default Base.extend({
     var installed_app = [];
     var obj = array[0];
     try {
-      installed_app = JSON.parse(Ember.get(obj, 'installed_app'));
+      var str = Ember.get(obj, 'installed_app');
+      if (str) {
+        installed_app = JSON.parse(str);
+        Ember.set(obj, 'installed_app', installed_app);
+      }
     } catch (e) {
       console.error(e);
     }
-    Ember.set(obj, 'installed_app', installed_app);
     return obj;
   }
 });

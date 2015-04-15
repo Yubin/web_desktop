@@ -62,6 +62,10 @@ export default Ember.View.extend({
     changeCompany: function (id) {
       this.get('controller').send('changeCompany', id);
       this.toggleProperty('showProfile');
+    },
+    SignOut: function (id) {
+      this.get('controller').send('SignOut');
+      this.toggleProperty('showProfile');
     }
   }
 

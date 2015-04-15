@@ -17,7 +17,7 @@ function receiveMessage(event) {
 
     } else if (data.op === 'addLink') {
       var originAppId = data.originAppId;
-      var viewId = Ember.$('.window.' + originAppId).attr('id')
+      var viewId = Ember.$('.window.active').attr('id')
       var view = Ember.View.views[viewId];
       if (viewId) {
         view.set('linkAppObject', {

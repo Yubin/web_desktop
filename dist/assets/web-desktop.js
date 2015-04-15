@@ -136,6 +136,24 @@ define('web-desktop/adapters/login', ['exports', 'web-desktop/adapters/base', 'w
   });
 
 });
+define('web-desktop/adapters/logout', ['exports', 'web-desktop/adapters/base', 'web-desktop/serializers/login'], function (exports, Adapter, Serializer) {
+
+  'use strict';
+
+  exports['default'] = Adapter['default'].extend({
+    serializer: Serializer['default'].create(),
+
+    createRecord: function (store, type, query) {
+      var url = this.buildURL();
+      return this.ajax(url, 'POST', {
+        data: {requestString: 'logout'},
+        serviceAppName: 'Login'
+      });
+    }
+
+  });
+
+});
 define('web-desktop/adapters/user-company', ['exports', 'web-desktop/adapters/base', 'web-desktop/serializers/user-company', 'ember'], function (exports, Adapter, Serializer, Ember) {
 
   'use strict';
@@ -328,7 +346,9 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
     loadInstallApps: function () {
       var employeeId = this.get('employeeId');
       var model = this.get('model');
-      model.clear();
+      if (model) {
+        model.clear();
+      }
       this.store.unloadAll('user-setting');
       this.store.find('user-setting', employeeId).then(function (settings) {
         var obj = get(settings, '_data');
@@ -373,7 +393,9 @@ define('web-desktop/controllers/applist', ['exports', 'ember'], function (export
 
       var model = this.store.getById('user-setting', this.get('employeeId'));
       model.set('installed_app', array);
-      model.save().then(function () {});
+      if (this.get('companyId') !== 0) {
+        model.save().then(function () {});
+      }
     },
 
     actions: {
@@ -885,7 +907,9 @@ define('web-desktop/models/employee', ['exports', 'ember-data'], function (expor
     active: DS['default'].attr('boolean'),
 
     didLoad: function(){
-      setInterval(function() {self.reload();console.log('employee reload')}, 10*1000); //every 10s
+      setInterval(function() {
+        this.reload();
+      }.bind(this), 10*1000); //every 10s
     }
   });
 
@@ -908,6 +932,15 @@ define('web-desktop/models/login', ['exports', 'ember-data'], function (exports,
     user_name: DS['default'].attr('string'),
     pwd: DS['default'].attr('string'),
     company_id: DS['default'].attr('number')
+  });
+
+});
+define('web-desktop/models/logout', ['exports', 'ember-data'], function (exports, DS) {
+
+  'use strict';
+
+  exports['default'] = DS['default'].Model.extend({
+    name: DS['default'].attr('string'),
   });
 
 });
@@ -962,190 +995,7 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
     },
     model: function (params) {
       return {
-        applist:[
-          {
-            id: 0,
-            name: "Store",
-            icon: 'http://asa.static.gausian.com/user_app/Store/icon.png',
-            viewName: 'iframe',
-            path: 'http://tianjiasun.github.io/APP_store/app/',
-            screen: 2,
-            col: 3,
-            row: 4
-         },
-         {
-            name: "ASA",
-            icon: 'http://asa.static.gausian.com/user_app/ASA/icon.png',
-            viewName: 'iframe',
-            path: 'http://tianjiasun.github.io/ASA_api/app/index.html',
-            screen: 2,
-            col: 0,
-            row: 0
-          },
-          {
-            name: "Map",
-            icon: 'http://asa.static.gausian.com/user_app/Map/icon.png',
-            viewName: 'iframe',
-            path: 'https://www.google.com/maps/embed/v1/place?key=AIzaSyBrTaOSXSiXT1o7mUCjnJZSeRcSz0vnglw&q=silicon+valley',
-            screen: 2,
-            col: 3,
-            row: 0
-          },
-          {
-            name: "Customers",
-            app_id: "customerApp",
-            icon: 'http://asa.static.gausian.com/user_app/Customers/icon.png',
-            viewName: 'iframe',
-            path: 'http://gausian-developers.github.io/user-app-template5/app/',
-            screen: 2,
-            col: 1,
-            row: 0
-          },
-          {
-            name: "Quotes",
-            icon: 'http://asa.static.gausian.com/user_app/Quotes/icon.png',
-            viewName: 'iframe',
-            path: 'http://gausian-developers.github.io/user-app-template6/app/',
-            screen: 2,
-            col: 2,
-            row: 0
-          },
-          {
-            name: "HipChat",
-            icon: 'http://asa.static.gausian.com/user_app/HipChat/icon.png',
-            viewName: 'iframe',
-            path: 'https://gausian.hipchat.com/chat',
-            screen: 2,
-            col: 0,
-            row: 1
-          },
-          {
-            name: "Pixlr",
-            icon: 'http://asa.static.gausian.com/user_app/Pixlr/icon.png',
-            viewName: 'iframe',
-            path: 'http://pixlr.com/editor/?loc=zh-cn',
-            screen: 2,
-            col: 1,
-            row: 1
-          },
-          {
-            name: "TakaBreak",
-            icon: 'http://asa.static.gausian.com/user_app/TakaBreak/icon.png',
-            viewName: 'iframe',
-            path: 'http://www.earbits.com/',
-            screen: 2,
-            col: 2,
-            row: 1
-          },
-          {
-            name: "EasyInvoice",
-            icon: 'http://asa.static.gausian.com/user_app/EasyInvoice/icon.png',
-            viewName: 'iframe',
-            path: 'http://invoiceto.me/',
-            screen: 2,
-            col: 3,
-            row: 1
-          },
-          {
-            name: "LiveCAM",
-            icon: 'http://asa.static.gausian.com/user_app/LiveCAM/icon.png',
-            viewName: 'iframe',
-            path: 'http://trafficcam.santaclaraca.gov/TrafficCamera.aspx?CID=GA101',
-            screen: 2,
-            col: 0,
-            row: 2
-          },
-          {
-            name: "Math",
-            icon: 'http://asa.static.gausian.com/user_app/Math/icon.png',
-            viewName: 'iframe',
-            path: 'https://www.mathway.com/graph',
-            screen: 2,
-            col: 1,
-            row: 2
-          },
-          {
-            name: "Withholding",
-            icon: 'http://asa.static.gausian.com/user_app/Withholding/icon.png',
-            viewName: 'iframe',
-            path: 'http://apps.irs.gov/app/withholdingcalculator/',
-            screen: 2,
-            col: 2,
-            row: 2
-          },
-          {
-            name: "JSON Viewer",
-            icon: 'http://asa.static.gausian.com/user_app/JSON/icon.png',
-            viewName: 'iframe',
-            path: 'http://jsonviewer.stack.hu/',
-            screen: 2,
-            col: 3,
-            row: 2
-          },
-          {
-            name: "Weather",
-            icon: 'http://asa.static.gausian.com/user_app/Weather/icon.png',
-            viewName: 'iframe',
-            path: 'http://chrome.wunderground.com/auto/chrome/geo/wx/index.html?query=95054',
-            screen: 2,
-            col: 0,
-            row: 3
-          },
-          {
-            name: "FloorPlans",
-            icon: 'http://asa.static.gausian.com/user_app/FloorPlans/icon.png',
-            viewName: 'iframe',
-            path: 'https://planner5d.com/app-chrome/?key=3a95cf1e2b3c5c74ff7ee00871a49c8b',
-            screen: 2,
-            col: 1,
-            row: 3
-          },
-          {
-            name: "Draw",
-            icon: 'http://asa.static.gausian.com/user_app/Draw/icon.png',
-            viewName: 'iframe',
-            path: 'http://www.ratemydrawings.com/canvasdraw/',
-            screen: 2,
-            col: 2,
-            row: 3
-          },
-          {
-            name: "3D",
-            icon: 'http://asa.static.gausian.com/user_app/3D/icon.png',
-            viewName: 'iframe',
-            path: 'http://www.3dtin.com/2cwe',
-            screen: 2,
-            col: 3,
-            row: 3
-          },
-          {
-            name: "Calculator",
-            icon: 'http://asa.static.gausian.com/user_app/Calculator/icon.png',
-            viewName: 'iframe',
-            path: 'http://scientific-calculator.appspot.com/',
-            screen: 2,
-            col: 0,
-            row: 4
-          },
-          {
-            name: "Developer",
-            icon: 'http://asa.static.gausian.com/user_app/Developer/icon.png',
-            viewName: 'iframe',
-            path: 'http://tianjiasun.github.io/ASA_website/',
-            screen: 2,
-            col: 1,
-            row: 4
-          },
-          {
-            name: "SimpleToDo",
-            icon: 'http://asa.static.gausian.com/user_app/SimpleToDo/icon.png',
-            viewName: 'iframe',
-            path: 'http://scrumy.com/husks11rubbish',
-            screen: 2,
-            col: 2,
-            row: 4
-          }
-        ]
+        applist:[]
       };
     },
 
@@ -1156,16 +1006,20 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
       ctl.set('appinstall', this.get('appinstall'));
 
       var user = {};
-      try {
-        user = JSON.parse(localStorage.getItem('gausian-user'));
-      } catch (e) {
-        console.error(e);
-      }
-      console.log(user);
+      // try {
+      //   user = JSON.parse(localStorage.getItem('gausian-user'));
+      // } catch (e) {
+      //   console.error(e);
+      // }
+      // console.log(user);
       // if (user && get(user, 'id')) {
       //   this.store.find('employee', get(user, 'id'));
       // }
-      this.get('controller').set('user', user);
+      controller.setProperties({
+        'user': user,
+        'employee': {id: 1},
+        'current_login_company': 0
+      });
     },
 
     renderTemplate: function() {
@@ -1246,12 +1100,20 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
       },
 
       SignOut: function () {
-        this.get('controller').setProperties({
-          isLogin: false,
-          loginType: 0,
-          'current_login_company': 0
-        });
-        this.refresh();
+
+        this.store.createRecord('logout').save().then(function (res) {
+          var responseBody = res._data.response;
+          var responseCode = res._data.response_code;
+          console.log(responseBody);
+          this.get('controller').setProperties({
+            isLogin: false,
+            loginType: 0,
+            user: {},
+            'employee': {id: 1},
+            'current_login_company': 0
+          });
+          // this.refresh();
+        }.bind(this));
         // localStorage.setItem('gausian-user', null);
       }
     }
@@ -1339,11 +1201,14 @@ define('web-desktop/serializers/user-setting', ['exports', 'web-desktop/serializ
       var installed_app = [];
       var obj = array[0];
       try {
-        installed_app = JSON.parse(Ember['default'].get(obj, 'installed_app'));
+        var str = Ember['default'].get(obj, 'installed_app');
+        if (str) {
+          installed_app = JSON.parse(str);
+          Ember['default'].set(obj, 'installed_app', installed_app);
+        }
       } catch (e) {
         console.error(e);
       }
-      Ember['default'].set(obj, 'installed_app', installed_app);
       return obj;
     }
   });
@@ -1580,7 +1445,9 @@ define('web-desktop/templates/header', ['exports', 'ember'], function (exports, 
     stack1 = helpers.each.call(depth0, "companies", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(8, program8, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
     data.buffer.push("\n    <li>\n      <a ");
-    data.buffer.push(escapeExpression(helpers.action.call(depth0, "SignOut", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
+    data.buffer.push(escapeExpression(helpers.action.call(depth0, "SignOut", {hash:{
+      'target': ("view")
+    },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
     data.buffer.push(">Sign Out</a>\n    </li>\n  </ul>\n  ");
     return buffer;
     }
@@ -2023,6 +1890,16 @@ define('web-desktop/tests/adapters/login.jshint', function () {
   });
 
 });
+define('web-desktop/tests/adapters/logout.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - adapters');
+  test('adapters/logout.js should pass jshint', function() { 
+    ok(false, 'adapters/logout.js should pass jshint.\nadapters/logout.js: line 7, col 40, \'query\' is defined but never used.\nadapters/logout.js: line 7, col 34, \'type\' is defined but never used.\nadapters/logout.js: line 7, col 27, \'store\' is defined but never used.\n\n3 errors'); 
+  });
+
+});
 define('web-desktop/tests/adapters/user-company.jshint', function () {
 
   'use strict';
@@ -2230,7 +2107,7 @@ define('web-desktop/tests/models/employee.jshint', function () {
 
   module('JSHint - models');
   test('models/employee.js should pass jshint', function() { 
-    ok(false, 'models/employee.js should pass jshint.\nmodels/employee.js: line 16, col 73, Missing semicolon.\nmodels/employee.js: line 16, col 29, \'self\' is not defined.\n\n2 errors'); 
+    ok(true, 'models/employee.js should pass jshint.'); 
   });
 
 });
@@ -2251,6 +2128,16 @@ define('web-desktop/tests/models/login.jshint', function () {
   module('JSHint - models');
   test('models/login.js should pass jshint', function() { 
     ok(true, 'models/login.js should pass jshint.'); 
+  });
+
+});
+define('web-desktop/tests/models/logout.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - models');
+  test('models/logout.js should pass jshint', function() { 
+    ok(true, 'models/logout.js should pass jshint.'); 
   });
 
 });
@@ -2290,7 +2177,7 @@ define('web-desktop/tests/routes/application.jshint', function () {
 
   module('JSHint - routes');
   test('routes/application.js should pass jshint', function() { 
-    ok(false, 'routes/application.js should pass jshint.\nroutes/application.js: line 9, col 20, \'params\' is defined but never used.\nroutes/application.js: line 227, col 27, \'content\' is defined but never used.\nroutes/application.js: line 232, col 24, \'content\' is defined but never used.\nroutes/application.js: line 237, col 26, \'content\' is defined but never used.\nroutes/application.js: line 250, col 13, \'responseCode\' is defined but never used.\n\n5 errors'); 
+    ok(false, 'routes/application.js should pass jshint.\nroutes/application.js: line 9, col 20, \'params\' is defined but never used.\nroutes/application.js: line 48, col 27, \'content\' is defined but never used.\nroutes/application.js: line 53, col 24, \'content\' is defined but never used.\nroutes/application.js: line 58, col 26, \'content\' is defined but never used.\nroutes/application.js: line 71, col 13, \'responseCode\' is defined but never used.\nroutes/application.js: line 119, col 13, \'responseCode\' is defined but never used.\n\n6 errors'); 
   });
 
 });
@@ -2453,7 +2340,7 @@ define('web-desktop/tests/views/header.jshint', function () {
 
   module('JSHint - views');
   test('views/header.js should pass jshint', function() { 
-    ok(true, 'views/header.js should pass jshint.'); 
+    ok(false, 'views/header.js should pass jshint.\nviews/header.js: line 66, col 24, \'id\' is defined but never used.\n\n1 error'); 
   });
 
 });
@@ -3149,6 +3036,10 @@ define('web-desktop/views/header', ['exports', 'ember'], function (exports, Embe
       changeCompany: function (id) {
         this.get('controller').send('changeCompany', id);
         this.toggleProperty('showProfile');
+      },
+      SignOut: function (id) {
+        this.get('controller').send('SignOut');
+        this.toggleProperty('showProfile');
       }
     }
 
@@ -3184,14 +3075,15 @@ define('web-desktop/views/iframe', ['exports', 'ember', 'web-desktop/mixins/wind
 
     changeAppLinkables: function () {
       var app = this.get('content');
-      var input_service = get(app, 'input_service') || '';
-      var idArray = input_service && input_service.split(',');
+      var output_service = get(app, 'output_service') || '';
+      var idArray = output_service && output_service.split(',');
       var linked = get(app, 'linked');
       var appLinkables = this.get('appLinkables');
       appLinkables.clear();
       this.get('parentView.model').forEach(function (item) {
+        var input_service = get(item, 'input_service');
         var id = get(item, 'id');
-        if (idArray.indexOf(id) > -1) { // in white list
+        if (id !== get(app, 'id') && idArray.indexOf(input_service) > -1) { // in white list
           var hasLinked = false;
           if (linked && linked.indexOf(id) > -1) { // linked
             hasLinked = true;

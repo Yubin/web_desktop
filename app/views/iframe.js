@@ -27,14 +27,15 @@ export default Ember.View.extend(WindowMixin, FlipWindowMixin, {
 
   changeAppLinkables: function () {
     var app = this.get('content');
-    var input_service = get(app, 'input_service') || '';
-    var idArray = input_service && input_service.split(',');
+    var output_service = get(app, 'output_service') || '';
+    var idArray = output_service && output_service.split(',');
     var linked = get(app, 'linked');
     var appLinkables = this.get('appLinkables');
     appLinkables.clear();
     this.get('parentView.model').forEach(function (item) {
+      var input_service = get(item, 'input_service');
       var id = get(item, 'id');
-      if (idArray.indexOf(id) > -1) { // in white list
+      if (id !== get(app, 'id') && idArray.indexOf(input_service) > -1) { // in white list
         var hasLinked = false;
         if (linked && linked.indexOf(id) > -1) { // linked
           hasLinked = true;

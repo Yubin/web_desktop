@@ -52,7 +52,9 @@ export default Ember.Controller.extend({
   loadInstallApps: function () {
     var employeeId = this.get('employeeId');
     var model = this.get('model');
-    model.clear();
+    if (model) {
+      model.clear();
+    }
     this.store.unloadAll('user-setting');
     this.store.find('user-setting', employeeId).then(function (settings) {
       var obj = get(settings, '_data');
@@ -97,7 +99,9 @@ export default Ember.Controller.extend({
 
     var model = this.store.getById('user-setting', this.get('employeeId'));
     model.set('installed_app', array);
-    model.save().then(function () {});
+    if (this.get('companyId') !== 0) {
+      model.save().then(function () {});
+    }
   },
 
   actions: {

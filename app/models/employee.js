@@ -13,6 +13,8 @@ export default DS.Model.extend({
   active: DS.attr('boolean'),
 
   didLoad: function(){
-    setInterval(function() {self.reload();console.log('employee reload')}, 10*1000); //every 10s
+    setInterval(function() {
+      this.reload();
+    }.bind(this), 10*1000); //every 10s
   }
 });

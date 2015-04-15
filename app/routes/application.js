@@ -8,190 +8,7 @@ export default Ember.Route.extend({
   },
   model: function (params) {
     return {
-      applist:[
-        {
-          id: 0,
-          name: "Store",
-          icon: 'http://asa.static.gausian.com/user_app/Store/icon.png',
-          viewName: 'iframe',
-          path: 'http://tianjiasun.github.io/APP_store/app/',
-          screen: 2,
-          col: 3,
-          row: 4
-       },
-       {
-          name: "ASA",
-          icon: 'http://asa.static.gausian.com/user_app/ASA/icon.png',
-          viewName: 'iframe',
-          path: 'http://tianjiasun.github.io/ASA_api/app/index.html',
-          screen: 2,
-          col: 0,
-          row: 0
-        },
-        {
-          name: "Map",
-          icon: 'http://asa.static.gausian.com/user_app/Map/icon.png',
-          viewName: 'iframe',
-          path: 'https://www.google.com/maps/embed/v1/place?key=AIzaSyBrTaOSXSiXT1o7mUCjnJZSeRcSz0vnglw&q=silicon+valley',
-          screen: 2,
-          col: 3,
-          row: 0
-        },
-        {
-          name: "Customers",
-          app_id: "customerApp",
-          icon: 'http://asa.static.gausian.com/user_app/Customers/icon.png',
-          viewName: 'iframe',
-          path: 'http://gausian-developers.github.io/user-app-template5/app/',
-          screen: 2,
-          col: 1,
-          row: 0
-        },
-        {
-          name: "Quotes",
-          icon: 'http://asa.static.gausian.com/user_app/Quotes/icon.png',
-          viewName: 'iframe',
-          path: 'http://gausian-developers.github.io/user-app-template6/app/',
-          screen: 2,
-          col: 2,
-          row: 0
-        },
-        {
-          name: "HipChat",
-          icon: 'http://asa.static.gausian.com/user_app/HipChat/icon.png',
-          viewName: 'iframe',
-          path: 'https://gausian.hipchat.com/chat',
-          screen: 2,
-          col: 0,
-          row: 1
-        },
-        {
-          name: "Pixlr",
-          icon: 'http://asa.static.gausian.com/user_app/Pixlr/icon.png',
-          viewName: 'iframe',
-          path: 'http://pixlr.com/editor/?loc=zh-cn',
-          screen: 2,
-          col: 1,
-          row: 1
-        },
-        {
-          name: "TakaBreak",
-          icon: 'http://asa.static.gausian.com/user_app/TakaBreak/icon.png',
-          viewName: 'iframe',
-          path: 'http://www.earbits.com/',
-          screen: 2,
-          col: 2,
-          row: 1
-        },
-        {
-          name: "EasyInvoice",
-          icon: 'http://asa.static.gausian.com/user_app/EasyInvoice/icon.png',
-          viewName: 'iframe',
-          path: 'http://invoiceto.me/',
-          screen: 2,
-          col: 3,
-          row: 1
-        },
-        {
-          name: "LiveCAM",
-          icon: 'http://asa.static.gausian.com/user_app/LiveCAM/icon.png',
-          viewName: 'iframe',
-          path: 'http://trafficcam.santaclaraca.gov/TrafficCamera.aspx?CID=GA101',
-          screen: 2,
-          col: 0,
-          row: 2
-        },
-        {
-          name: "Math",
-          icon: 'http://asa.static.gausian.com/user_app/Math/icon.png',
-          viewName: 'iframe',
-          path: 'https://www.mathway.com/graph',
-          screen: 2,
-          col: 1,
-          row: 2
-        },
-        {
-          name: "Withholding",
-          icon: 'http://asa.static.gausian.com/user_app/Withholding/icon.png',
-          viewName: 'iframe',
-          path: 'http://apps.irs.gov/app/withholdingcalculator/',
-          screen: 2,
-          col: 2,
-          row: 2
-        },
-        {
-          name: "JSON Viewer",
-          icon: 'http://asa.static.gausian.com/user_app/JSON/icon.png',
-          viewName: 'iframe',
-          path: 'http://jsonviewer.stack.hu/',
-          screen: 2,
-          col: 3,
-          row: 2
-        },
-        {
-          name: "Weather",
-          icon: 'http://asa.static.gausian.com/user_app/Weather/icon.png',
-          viewName: 'iframe',
-          path: 'http://chrome.wunderground.com/auto/chrome/geo/wx/index.html?query=95054',
-          screen: 2,
-          col: 0,
-          row: 3
-        },
-        {
-          name: "FloorPlans",
-          icon: 'http://asa.static.gausian.com/user_app/FloorPlans/icon.png',
-          viewName: 'iframe',
-          path: 'https://planner5d.com/app-chrome/?key=3a95cf1e2b3c5c74ff7ee00871a49c8b',
-          screen: 2,
-          col: 1,
-          row: 3
-        },
-        {
-          name: "Draw",
-          icon: 'http://asa.static.gausian.com/user_app/Draw/icon.png',
-          viewName: 'iframe',
-          path: 'http://www.ratemydrawings.com/canvasdraw/',
-          screen: 2,
-          col: 2,
-          row: 3
-        },
-        {
-          name: "3D",
-          icon: 'http://asa.static.gausian.com/user_app/3D/icon.png',
-          viewName: 'iframe',
-          path: 'http://www.3dtin.com/2cwe',
-          screen: 2,
-          col: 3,
-          row: 3
-        },
-        {
-          name: "Calculator",
-          icon: 'http://asa.static.gausian.com/user_app/Calculator/icon.png',
-          viewName: 'iframe',
-          path: 'http://scientific-calculator.appspot.com/',
-          screen: 2,
-          col: 0,
-          row: 4
-        },
-        {
-          name: "Developer",
-          icon: 'http://asa.static.gausian.com/user_app/Developer/icon.png',
-          viewName: 'iframe',
-          path: 'http://tianjiasun.github.io/ASA_website/',
-          screen: 2,
-          col: 1,
-          row: 4
-        },
-        {
-          name: "SimpleToDo",
-          icon: 'http://asa.static.gausian.com/user_app/SimpleToDo/icon.png',
-          viewName: 'iframe',
-          path: 'http://scrumy.com/husks11rubbish',
-          screen: 2,
-          col: 2,
-          row: 4
-        }
-      ]
+      applist:[]
     };
   },
 
@@ -202,16 +19,20 @@ export default Ember.Route.extend({
     ctl.set('appinstall', this.get('appinstall'));
 
     var user = {};
-    try {
-      user = JSON.parse(localStorage.getItem('gausian-user'));
-    } catch (e) {
-      console.error(e);
-    }
-    console.log(user);
+    // try {
+    //   user = JSON.parse(localStorage.getItem('gausian-user'));
+    // } catch (e) {
+    //   console.error(e);
+    // }
+    // console.log(user);
     // if (user && get(user, 'id')) {
     //   this.store.find('employee', get(user, 'id'));
     // }
-    this.get('controller').set('user', user);
+    controller.setProperties({
+      'user': user,
+      'employee': {id: 1},
+      'current_login_company': 0
+    });
   },
 
   renderTemplate: function() {
@@ -292,12 +113,20 @@ export default Ember.Route.extend({
     },
 
     SignOut: function () {
-      this.get('controller').setProperties({
-        isLogin: false,
-        loginType: 0,
-        'current_login_company': 0
-      });
-      this.refresh();
+
+      this.store.createRecord('logout').save().then(function (res) {
+        var responseBody = res._data.response;
+        var responseCode = res._data.response_code;
+        console.log(responseBody);
+        this.get('controller').setProperties({
+          isLogin: false,
+          loginType: 0,
+          user: {},
+          'employee': {id: 1},
+          'current_login_company': 0
+        });
+        // this.refresh();
+      }.bind(this));
       // localStorage.setItem('gausian-user', null);
     }
   }
