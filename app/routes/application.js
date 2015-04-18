@@ -1,11 +1,43 @@
 import Ember from 'ember';
 
 var get = Ember.get;
+var isEmpty = Ember.isEmpty;
+
 export default Ember.Route.extend({
+
+  _setupUserInfo: function (user, employee_info, companies, current_login_company ) {
+    var ctr = this.get('controller');
+    if (isEmpty(user) && isEmpty(employee_info)) {
+      ctr.setProperties({
+        'isLogin': false
+      });
+    } else {
+      ctr.setProperties({
+        'isLogin': true
+      });
+    }
+    ctr.setProperties({
+      'user': user || {},
+      'employee': employee_info || {id: 1},
+      'current_login_company': current_login_company || 0,
+      'companies': companies || []
+    });
+  },
 
   beforeModel: function (params) {
     this.set('appinstall', get(params, 'queryParams.appinstall'));
+    this.store.createRecord('user', {}).save().then(function (res) {
+      var obj = res._data;
+      if (obj) {
+        this._setupUserInfo(obj.user, obj.employee_info, obj.companies, obj.current_login_company);
+      } else {
+        this._setupUserInfo();
+      }
+    }.bind(this), function (err) {
+      this._actions['SignOut'].apply(this);
+    }.bind(this));
   },
+
   model: function (params) {
     return {
       applist:[]
@@ -17,8 +49,6 @@ export default Ember.Route.extend({
     ctl.reset();
     ctl.set('model', get(model , 'applist'));
     ctl.set('appinstall', this.get('appinstall'));
-
-    var user = {};
     // try {
     //   user = JSON.parse(localStorage.getItem('gausian-user'));
     // } catch (e) {
@@ -28,11 +58,6 @@ export default Ember.Route.extend({
     // if (user && get(user, 'id')) {
     //   this.store.find('employee', get(user, 'id'));
     // }
-    controller.setProperties({
-      'user': user,
-      'employee': {id: 1},
-      'current_login_company': 0
-    });
   },
 
   renderTemplate: function() {
@@ -67,20 +92,13 @@ export default Ember.Route.extend({
         pwd: get(content, 'password'),
         company_id: 1
       }).save().then(function (res) {
-        var responseBody = res._data.response;
+        var obj = res._data.response;
         var responseCode = res._data.response_code;
-        console.log(responseBody);
+        console.log(obj);
         if (res._data.response_code !== 1) {
           this.get('controller').set('loginFail', true);
         } else {
-          this.get('controller').setProperties({
-            isLogin: true,
-            'companies': get(responseBody, 'companies'),
-            'user': get(responseBody, 'user'),
-            'employee': get(responseBody, 'employee_info'),
-            'current_login_company': get(responseBody, 'current_login_company')
-          });
-          // localStorage.setItem('gausian-user', JSON.stringify(user));
+          this._setupUserInfo(obj.user, obj.employee_info, obj.companies, obj.current_login_company);
           this.set('controller.loginShow', false);
         }
       }.bind(this));
@@ -95,36 +113,25 @@ export default Ember.Route.extend({
         loginType: 2,
         token: 'asdfasdfasdf'
       };
-      this.get('controller').setProperties({
-        isLogin: true,
-        'user': user
-      });
+      this._setupUserInfo(user);
+
       // localStorage.setItem('gausian-user', JSON.stringify(user));
       this.set('controller.loginShow', false);
     },
 
     changeCompany: function (id) {
       this.store.createRecord('user-company', {'company_id': id}).save().then(function (res) {
-        this.get('controller').setProperties({
-          'current_login_company': id,
-          'employee': get(res, '_data.employee_info')
-        });
+      this._setupUserInfo(this.get('controller.user'), get(res, '_data.employee_info'), this.get('controller.companies'), id);
+
       }.bind(this));
     },
 
     SignOut: function () {
-
       this.store.createRecord('logout').save().then(function (res) {
         var responseBody = res._data.response;
         var responseCode = res._data.response_code;
         console.log(responseBody);
-        this.get('controller').setProperties({
-          isLogin: false,
-          loginType: 0,
-          user: {},
-          'employee': {id: 1},
-          'current_login_company': 0
-        });
+        this._setupUserInfo();
         // this.refresh();
       }.bind(this));
       // localStorage.setItem('gausian-user', null);

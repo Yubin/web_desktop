@@ -207,6 +207,29 @@ define('web-desktop/adapters/user-setting', ['exports', 'web-desktop/adapters/ba
   });
 
 });
+define('web-desktop/adapters/user', ['exports', 'web-desktop/adapters/base', 'web-desktop/serializers/base', 'ember'], function (exports, Adapter, Serializer, Ember) {
+
+  'use strict';
+
+  var get = Ember['default'].get;
+
+  exports['default'] = Adapter['default'].extend({
+    serializer: Serializer['default'].create(),
+
+    createRecord: function (store, type, record) {
+      var url = this.buildURL();
+      var requestStr = 'GetUser';
+      var serviceAppName = 'Login';
+
+      return this.ajax(url, 'POST', {
+        data: {requestString: requestStr},
+        serviceAppName: serviceAppName
+      });
+    }
+
+  });
+
+});
 define('web-desktop/app', ['exports', 'ember', 'ember/resolver', 'ember/load-initializers', 'web-desktop/config/environment'], function (exports, Ember, Resolver, loadInitializers, config) {
 
   'use strict';
@@ -988,6 +1011,14 @@ define('web-desktop/models/user-setting', ['exports', 'ember-data'], function (e
   });
 
 });
+define('web-desktop/models/user', ['exports', 'ember-data'], function (exports, DS) {
+
+	'use strict';
+
+	exports['default'] = DS['default'].Model.extend({
+	});
+
+});
 define('web-desktop/router', ['exports', 'ember', 'web-desktop/config/environment'], function (exports, Ember, config) {
 
   'use strict';
@@ -1012,11 +1043,43 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
   'use strict';
 
   var get = Ember['default'].get;
+  var isEmpty = Ember['default'].isEmpty;
+
   exports['default'] = Ember['default'].Route.extend({
+
+    _setupUserInfo: function (user, employee_info, companies, current_login_company ) {
+      var ctr = this.get('controller');
+      if (isEmpty(user) && isEmpty(employee_info)) {
+        ctr.setProperties({
+          'isLogin': false
+        });
+      } else {
+        ctr.setProperties({
+          'isLogin': true
+        });
+      }
+      ctr.setProperties({
+        'user': user || {},
+        'employee': employee_info || {id: 1},
+        'current_login_company': current_login_company || 0,
+        'companies': companies || []
+      });
+    },
 
     beforeModel: function (params) {
       this.set('appinstall', get(params, 'queryParams.appinstall'));
+      this.store.createRecord('user', {}).save().then(function (res) {
+        var obj = res._data;
+        if (obj) {
+          this._setupUserInfo(obj.user, obj.employee_info, obj.companies, obj.current_login_company);
+        } else {
+          this._setupUserInfo();
+        }
+      }.bind(this), function (err) {
+        this._actions['SignOut'].apply(this);
+      }.bind(this));
     },
+
     model: function (params) {
       return {
         applist:[]
@@ -1028,8 +1091,6 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
       ctl.reset();
       ctl.set('model', get(model , 'applist'));
       ctl.set('appinstall', this.get('appinstall'));
-
-      var user = {};
       // try {
       //   user = JSON.parse(localStorage.getItem('gausian-user'));
       // } catch (e) {
@@ -1039,11 +1100,6 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
       // if (user && get(user, 'id')) {
       //   this.store.find('employee', get(user, 'id'));
       // }
-      controller.setProperties({
-        'user': user,
-        'employee': {id: 1},
-        'current_login_company': 0
-      });
     },
 
     renderTemplate: function() {
@@ -1078,20 +1134,13 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
           pwd: get(content, 'password'),
           company_id: 1
         }).save().then(function (res) {
-          var responseBody = res._data.response;
+          var obj = res._data.response;
           var responseCode = res._data.response_code;
-          console.log(responseBody);
+          console.log(obj);
           if (res._data.response_code !== 1) {
             this.get('controller').set('loginFail', true);
           } else {
-            this.get('controller').setProperties({
-              isLogin: true,
-              'companies': get(responseBody, 'companies'),
-              'user': get(responseBody, 'user'),
-              'employee': get(responseBody, 'employee_info'),
-              'current_login_company': get(responseBody, 'current_login_company')
-            });
-            // localStorage.setItem('gausian-user', JSON.stringify(user));
+            this._setupUserInfo(obj.user, obj.employee_info, obj.companies, obj.current_login_company);
             this.set('controller.loginShow', false);
           }
         }.bind(this));
@@ -1106,36 +1155,25 @@ define('web-desktop/routes/application', ['exports', 'ember'], function (exports
           loginType: 2,
           token: 'asdfasdfasdf'
         };
-        this.get('controller').setProperties({
-          isLogin: true,
-          'user': user
-        });
+        this._setupUserInfo(user);
+
         // localStorage.setItem('gausian-user', JSON.stringify(user));
         this.set('controller.loginShow', false);
       },
 
       changeCompany: function (id) {
         this.store.createRecord('user-company', {'company_id': id}).save().then(function (res) {
-          this.get('controller').setProperties({
-            'current_login_company': id,
-            'employee': get(res, '_data.employee_info')
-          });
+        this._setupUserInfo(this.get('controller.user'), get(res, '_data.employee_info'), this.get('controller.companies'), id);
+
         }.bind(this));
       },
 
       SignOut: function () {
-
         this.store.createRecord('logout').save().then(function (res) {
           var responseBody = res._data.response;
           var responseCode = res._data.response_code;
           console.log(responseBody);
-          this.get('controller').setProperties({
-            isLogin: false,
-            loginType: 0,
-            user: {},
-            'employee': {id: 1},
-            'current_login_company': 0
-          });
+          this._setupUserInfo();
           // this.refresh();
         }.bind(this));
         // localStorage.setItem('gausian-user', null);
@@ -1944,6 +1982,16 @@ define('web-desktop/tests/adapters/user-setting.jshint', function () {
   });
 
 });
+define('web-desktop/tests/adapters/user.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - adapters');
+  test('adapters/user.js should pass jshint', function() { 
+    ok(false, 'adapters/user.js should pass jshint.\nadapters/user.js: line 5, col 5, \'get\' is defined but never used.\nadapters/user.js: line 10, col 40, \'record\' is defined but never used.\nadapters/user.js: line 10, col 34, \'type\' is defined but never used.\nadapters/user.js: line 10, col 27, \'store\' is defined but never used.\n\n4 errors'); 
+  });
+
+});
 define('web-desktop/tests/app.jshint', function () {
 
   'use strict';
@@ -2185,6 +2233,16 @@ define('web-desktop/tests/models/user-setting.jshint', function () {
   });
 
 });
+define('web-desktop/tests/models/user.jshint', function () {
+
+  'use strict';
+
+  module('JSHint - models');
+  test('models/user.js should pass jshint', function() { 
+    ok(true, 'models/user.js should pass jshint.'); 
+  });
+
+});
 define('web-desktop/tests/router.jshint', function () {
 
   'use strict';
@@ -2201,7 +2259,7 @@ define('web-desktop/tests/routes/application.jshint', function () {
 
   module('JSHint - routes');
   test('routes/application.js should pass jshint', function() { 
-    ok(false, 'routes/application.js should pass jshint.\nroutes/application.js: line 9, col 20, \'params\' is defined but never used.\nroutes/application.js: line 48, col 27, \'content\' is defined but never used.\nroutes/application.js: line 53, col 24, \'content\' is defined but never used.\nroutes/application.js: line 58, col 26, \'content\' is defined but never used.\nroutes/application.js: line 71, col 13, \'responseCode\' is defined but never used.\nroutes/application.js: line 119, col 13, \'responseCode\' is defined but never used.\n\n6 errors'); 
+    ok(false, 'routes/application.js should pass jshint.\nroutes/application.js: line 36, col 29, \'err\' is defined but never used.\nroutes/application.js: line 41, col 20, \'params\' is defined but never used.\nroutes/application.js: line 73, col 27, \'content\' is defined but never used.\nroutes/application.js: line 78, col 24, \'content\' is defined but never used.\nroutes/application.js: line 83, col 26, \'content\' is defined but never used.\nroutes/application.js: line 96, col 13, \'responseCode\' is defined but never used.\nroutes/application.js: line 132, col 13, \'responseCode\' is defined but never used.\n\n7 errors'); 
   });
 
 });
