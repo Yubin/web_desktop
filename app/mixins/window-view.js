@@ -4,10 +4,16 @@ export default Ember.Mixin.create({
   classNames: ['window', 'windows-vis', 'flipper', 'fadeIn', 'fadeIn-20ms'],
   classNameBindings: ['active'],
   active: true,
-  width: 950,
-  height: 600,
+  width: function () {
+    return this.get('content.width') || 950;
+  }.property('content.width'),
+
+  height: function () {
+    return this.get('content.height') || 600;
+  }.property('content.height'),
+
   left: 0,
-  top: 0,
+  top: 45,
 
   minWidth: 600,
   minHeight: 450,
@@ -88,31 +94,42 @@ export default Ember.Mixin.create({
 
   didInsertElement: function () {
     this.changeZindex();
-    this.$().css({
-      width: this.get('width'),
-      height: this.get('height'),
-      left: this.get('left'),
-      top: this.get('top')
-    });
-    this.$().resizable({
-      minHeight: this.get('minHeight'),
-      minWidth: this.get('minWidth'),
-      start: function () {
-        this.$('.iframeDragResizeMask').css({
-          display: 'block'
-        });
-      }.bind(this),
-      stop: function( event, ui ) {
-        var size = ui.size;
-        this.setProperties({
-          width: size.width,
-          height: size.height
-        });
-        this.$('.iframeDragResizeMask').css({
-          display: 'none'
-        });
-      }.bind(this)
-    });
+
+    if (this.get('content.maximized') === 'true') {
+      this._actions['maximizeApp'].apply(this);
+    } else {
+      this.$().css({
+        width: this.get('width'),
+        height: this.get('height'),
+        left: this.get('left'),
+        top: this.get('top')
+      });
+    }
+    if (this.get('content.realizable')) {
+      this.$().resizable({
+        minHeight: this.get('minHeight'),
+        minWidth: this.get('minWidth'),
+        start: function () {
+          this.$('.iframeDragResizeMask').css({
+            display: 'block'
+          });
+        }.bind(this),
+        stop: function( event, ui ) {
+          var size = ui.size;
+          this.setProperties({
+            width: size.width,
+            height: size.height
+          });
+          this.$('.iframeDragResizeMask').css({
+            display: 'none'
+          });
+        }.bind(this)
+      });
+      this.$('.header').on('dblclick', function () {
+        this._actions['maximizeApp'].apply(this);
+      }.bind(this));
+    }
+
     this.$().draggable({
       start: function () {
         this.$('.iframeDragResizeMask').css({
@@ -130,10 +147,6 @@ export default Ember.Mixin.create({
         });
       }.bind(this)
     });
-
-    this.$('.header').on('dblclick', function () {
-      this._actions['maximizeApp'].apply(this);
-    }.bind(this));
 
     this.$(window).resize(function() {
       Ember.run.debounce(function () {
@@ -165,6 +178,12 @@ export default Ember.Mixin.create({
           'height': this.get('height')
         });
       } else {
+        if (this.$().css('top') === 'auto') {
+          this.$().css('top', 47);
+        }
+        if (this.$().css('left') === 'auto') {
+          this.$().css('left', 0);
+        }
         this.$().animate({ // image follow
           'top': 47,
           'left': 0,

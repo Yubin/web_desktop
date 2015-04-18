@@ -664,10 +664,16 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
     classNames: ['window', 'windows-vis', 'flipper', 'fadeIn', 'fadeIn-20ms'],
     classNameBindings: ['active'],
     active: true,
-    width: 950,
-    height: 600,
+    width: function () {
+      return this.get('content.width') || 950;
+    }.property('content.width'),
+
+    height: function () {
+      return this.get('content.height') || 600;
+    }.property('content.height'),
+
     left: 0,
-    top: 0,
+    top: 45,
 
     minWidth: 600,
     minHeight: 450,
@@ -748,31 +754,42 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
 
     didInsertElement: function () {
       this.changeZindex();
-      this.$().css({
-        width: this.get('width'),
-        height: this.get('height'),
-        left: this.get('left'),
-        top: this.get('top')
-      });
-      this.$().resizable({
-        minHeight: this.get('minHeight'),
-        minWidth: this.get('minWidth'),
-        start: function () {
-          this.$('.iframeDragResizeMask').css({
-            display: 'block'
-          });
-        }.bind(this),
-        stop: function( event, ui ) {
-          var size = ui.size;
-          this.setProperties({
-            width: size.width,
-            height: size.height
-          });
-          this.$('.iframeDragResizeMask').css({
-            display: 'none'
-          });
-        }.bind(this)
-      });
+
+      if (this.get('content.maximized') === 'true') {
+        this._actions['maximizeApp'].apply(this);
+      } else {
+        this.$().css({
+          width: this.get('width'),
+          height: this.get('height'),
+          left: this.get('left'),
+          top: this.get('top')
+        });
+      }
+      if (this.get('content.realizable')) {
+        this.$().resizable({
+          minHeight: this.get('minHeight'),
+          minWidth: this.get('minWidth'),
+          start: function () {
+            this.$('.iframeDragResizeMask').css({
+              display: 'block'
+            });
+          }.bind(this),
+          stop: function( event, ui ) {
+            var size = ui.size;
+            this.setProperties({
+              width: size.width,
+              height: size.height
+            });
+            this.$('.iframeDragResizeMask').css({
+              display: 'none'
+            });
+          }.bind(this)
+        });
+        this.$('.header').on('dblclick', function () {
+          this._actions['maximizeApp'].apply(this);
+        }.bind(this));
+      }
+
       this.$().draggable({
         start: function () {
           this.$('.iframeDragResizeMask').css({
@@ -790,10 +807,6 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
           });
         }.bind(this)
       });
-
-      this.$('.header').on('dblclick', function () {
-        this._actions['maximizeApp'].apply(this);
-      }.bind(this));
 
       this.$(window).resize(function() {
         Ember['default'].run.debounce(function () {
@@ -825,6 +838,12 @@ define('web-desktop/mixins/window-view', ['exports', 'ember'], function (exports
             'height': this.get('height')
           });
         } else {
+          if (this.$().css('top') === 'auto') {
+            this.$().css('top', 47);
+          }
+          if (this.$().css('left') === 'auto') {
+            this.$().css('left', 0);
+          }
           this.$().animate({ // image follow
             'top': 47,
             'left': 0,
@@ -884,6 +903,11 @@ define('web-desktop/models/app-info', ['exports', 'ember-data'], function (expor
     censorship_date: DS['default'].attr('string'),
     path: DS['default'].attr('string'),
     icon: DS['default'].attr('string'),
+    maximized: DS['default'].attr('boolean'),
+    has_header: DS['default'].attr('boolean'),
+    realizable: DS['default'].attr('boolean'),
+    width: DS['default'].attr('number'),
+    height: DS['default'].attr('number'),
     screen: DS['default'].attr('number', {defaultValue: 0}),
     row: DS['default'].attr('number', {defaultValue: 0}),
     col: DS['default'].attr('number', {defaultValue: 0})
@@ -1218,15 +1242,16 @@ define('web-desktop/templates/appicon', ['exports', 'ember'], function (exports,
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     var buffer = '', escapeExpression=this.escapeExpression;
 
 
-    data.buffer.push("<div class=\"effect\"></div>\r\n<div class=\"app-edge\"></div>\r\n<div class=\"app-img\"></div>\r\n<div class=\"app-text\">");
+    data.buffer.push("<div class=\"effect\"></div>\n<div class=\"app-edge\"></div>\n<div class=\"app-img\"></div>\n<div class=\"app-text\">");
     data.buffer.push(escapeExpression(helpers.unbound.call(depth0, "view.content.name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data})));
-    data.buffer.push("</div>\r\n");
+    data.buffer.push("</div>\n");
     return buffer;
     
   });
@@ -1236,28 +1261,29 @@ define('web-desktop/templates/application', ['exports', 'ember'], function (expo
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     var buffer = '', helper, options, helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
 
 
-    data.buffer.push("<!-- DESKTOP -->\r\n");
+    data.buffer.push("<!-- DESKTOP -->\n");
     data.buffer.push(escapeExpression((helper = helpers.render || (depth0 && depth0.render),options={hash:{
       'isVisible': ("controller.headerShowing")
     },hashTypes:{'isVisible': "ID"},hashContexts:{'isVisible': depth0},contexts:[depth0],types:["STRING"],data:data},helper ? helper.call(depth0, "header", options) : helperMissing.call(depth0, "render", "header", options))));
-    data.buffer.push("\r\n\r\n");
+    data.buffer.push("\n\n");
     data.buffer.push(escapeExpression((helper = helpers['trash-can'] || (depth0 && depth0['trash-can']),options={hash:{
       'action': ("deleteApp"),
       'show': ("controller.appMoving")
     },hashTypes:{'action': "STRING",'show': "ID"},hashContexts:{'action': depth0,'show': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "trash-can", options))));
-    data.buffer.push("\r\n\r\n");
+    data.buffer.push("\n\n");
     data.buffer.push(escapeExpression((helper = helpers.render || (depth0 && depth0.render),options={hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data},helper ? helper.call(depth0, "searchBar", options) : helperMissing.call(depth0, "render", "searchBar", options))));
-    data.buffer.push("\r\n\r\n");
+    data.buffer.push("\n\n");
     data.buffer.push(escapeExpression((helper = helpers.outlet || (depth0 && depth0.outlet),options={hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data},helper ? helper.call(depth0, "applist", options) : helperMissing.call(depth0, "outlet", "applist", options))));
-    data.buffer.push("\r\n\r\n");
+    data.buffer.push("\n\n");
     data.buffer.push(escapeExpression(helpers.view.call(depth0, "login", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push("\r\n\r\n<div id=\"ui_maskLayer_0\" class=\"ui_maskLayer\">\r\n  <div id=\"ui_maskLayerBody_0\" class=\"ui_maskLayerBody\"></div>\r\n</div>\r\n");
+    data.buffer.push("\n\n<div id=\"ui_maskLayer_0\" class=\"ui_maskLayer\">\n  <div id=\"ui_maskLayerBody_0\" class=\"ui_maskLayerBody\"></div>\n</div>\n");
     return buffer;
     
   });
@@ -1267,7 +1293,8 @@ define('web-desktop/templates/applist', ['exports', 'ember'], function (exports,
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     var buffer = '', stack1, escapeExpression=this.escapeExpression, self=this;
@@ -1275,42 +1302,42 @@ define('web-desktop/templates/applist', ['exports', 'ember'], function (exports,
   function program1(depth0,data) {
     
     var buffer = '', stack1;
-    data.buffer.push("\r\n  ");
+    data.buffer.push("\n  ");
     stack1 = helpers['if'].call(depth0, "hasApp", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(2, program2, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\r\n  ");
+    data.buffer.push("\n  ");
     return buffer;
     }
   function program2(depth0,data) {
     
     var buffer = '';
-    data.buffer.push("\r\n  ");
+    data.buffer.push("\n  ");
     data.buffer.push(escapeExpression(helpers.view.call(depth0, "appscreen", {hash:{
       'index': ("id"),
       'hasApp': ("hasApp")
     },hashTypes:{'index': "ID",'hasApp': "ID"},hashContexts:{'index': depth0,'hasApp': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push("\r\n  ");
+    data.buffer.push("\n  ");
     return buffer;
     }
 
   function program4(depth0,data) {
     
     var buffer = '';
-    data.buffer.push("\r\n    ");
+    data.buffer.push("\n    ");
     data.buffer.push(escapeExpression(helpers.view.call(depth0, "appicon", {hash:{
       'content': ("app")
     },hashTypes:{'content': "ID"},hashContexts:{'content': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push("\r\n    ");
+    data.buffer.push("\n    ");
     return buffer;
     }
 
-    data.buffer.push("\r\n\r\n\r\n  ");
+    data.buffer.push("\n\n\n  ");
     stack1 = helpers.each.call(depth0, "view.controller.screens", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\r\n\r\n  \r\n    ");
+    data.buffer.push("\n\n  \n    ");
     stack1 = helpers.each.call(depth0, "app", "in", "view.controller.model", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(4, program4, data),contexts:[depth0,depth0,depth0],types:["ID","ID","ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\r\n  \r\n  <div class='hint'></div>\r\n");
+    data.buffer.push("\n  \n  <div class='hint'></div>\n");
     return buffer;
     
   });
@@ -1320,13 +1347,14 @@ define('web-desktop/templates/appscreen', ['exports', 'ember'], function (export
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     
 
 
-    data.buffer.push("\r\n");
+    data.buffer.push("\n");
     
   });
 
@@ -1335,7 +1363,8 @@ define('web-desktop/templates/components/star-rating', ['exports', 'ember'], fun
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     var buffer = '', stack1, self=this;
@@ -1343,12 +1372,12 @@ define('web-desktop/templates/components/star-rating', ['exports', 'ember'], fun
   function program1(depth0,data) {
     
     
-    data.buffer.push("\r\n  <i class=\"fa fa-star\"></i>\r\n");
+    data.buffer.push("\n  <i class=\"fa fa-star\"></i>\n");
     }
 
     stack1 = helpers.each.call(depth0, "stars", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\r\n");
+    data.buffer.push("\n");
     return buffer;
     
   });
@@ -1358,13 +1387,14 @@ define('web-desktop/templates/components/trash-can', ['exports', 'ember'], funct
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     
 
 
-    data.buffer.push("\r\n<div class=\"trash fadeIn fadeIn-50ms fadeIn-Delay-20ms fadeOut fadeOut-50ms\">DELETE</div>\r\n");
+    data.buffer.push("\n<div class=\"trash fadeIn fadeIn-50ms fadeIn-Delay-20ms fadeOut fadeOut-50ms\">DELETE</div>\n");
     
   });
 
@@ -1373,7 +1403,8 @@ define('web-desktop/templates/header-dock-item', ['exports', 'ember'], function 
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     var buffer = '', escapeExpression=this.escapeExpression;
@@ -1381,9 +1412,9 @@ define('web-desktop/templates/header-dock-item', ['exports', 'ember'], function 
 
     data.buffer.push("<div class=\"app-img fadeIn fadeIn-50ms\" style=\"background-image: url(");
     data.buffer.push(escapeExpression(helpers.unbound.call(depth0, "view.content.icon", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data})));
-    data.buffer.push(");\"></div>\r\n<em><span>");
+    data.buffer.push(");\"></div>\n<em><span>");
     data.buffer.push(escapeExpression(helpers.unbound.call(depth0, "view.content.name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data})));
-    data.buffer.push("</span></em>\r\n");
+    data.buffer.push("</span></em>\n");
     return buffer;
     
   });
@@ -1393,7 +1424,8 @@ define('web-desktop/templates/header', ['exports', 'ember'], function (exports, 
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     var buffer = '', stack1, escapeExpression=this.escapeExpression, self=this;
@@ -1401,13 +1433,13 @@ define('web-desktop/templates/header', ['exports', 'ember'], function (exports, 
   function program1(depth0,data) {
     
     
-    data.buffer.push("\r\n  <ul class=\"dropdown-menu-left\">\r\n    <li>\r\n      <a>Company Info</a>\r\n    </li>\r\n    <li>\r\n      <a>Create New Accounts</a>\r\n    </li>\r\n  </ul>\r\n  ");
+    data.buffer.push("\n  <ul class=\"dropdown-menu-left\">\n    <li>\n      <a>Company Info</a>\n    </li>\n    <li>\n      <a>Create New Accounts</a>\n    </li>\n  </ul>\n  ");
     }
 
   function program3(depth0,data) {
     
     var buffer = '', stack1;
-    data.buffer.push("\r\n      <span>\r\n        <a ");
+    data.buffer.push("\n      <span>\n        <a ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "showProfile", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
@@ -1417,67 +1449,67 @@ define('web-desktop/templates/header', ['exports', 'ember'], function (exports, 
     data.buffer.push(" ");
     stack1 = helpers._triageMustache.call(depth0, "user.last", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("</a>\r\n      </span>\r\n\r\n      ");
+    data.buffer.push("</a>\n      </span>\n\n      ");
     return buffer;
     }
 
   function program5(depth0,data) {
     
     var buffer = '';
-    data.buffer.push("\r\n      <span>\r\n        <a ");
+    data.buffer.push("\n      <span>\n        <a ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "loginShow", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push(">Sign up / Log in</a>\r\n        <img src=\"assets/img/GAUSIAN_logo.png\" >\r\n      </span>\r\n      ");
+    data.buffer.push(">Sign up / Log in</a>\n        <img src=\"assets/img/GAUSIAN_logo.png\" >\n      </span>\n      ");
     return buffer;
     }
 
   function program7(depth0,data) {
     
     var buffer = '', stack1;
-    data.buffer.push("\r\n  <ul class=\"dropdown-menu pull-right\">\r\n    <li>\r\n      <a>My Account</a>\r\n    </li>\r\n    ");
+    data.buffer.push("\n  <ul class=\"dropdown-menu pull-right\">\n    <li>\n      <a>My Account</a>\n    </li>\n    ");
     stack1 = helpers.each.call(depth0, "companies", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(8, program8, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\r\n    <li>\r\n      <a ");
+    data.buffer.push("\n    <li>\n      <a ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "SignOut", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push(">Sign Out</a>\r\n    </li>\r\n  </ul>\r\n  ");
+    data.buffer.push(">Sign Out</a>\n    </li>\n  </ul>\n  ");
     return buffer;
     }
   function program8(depth0,data) {
     
     var buffer = '', stack1;
-    data.buffer.push("\r\n    <li>\r\n      <a ");
+    data.buffer.push("\n    <li>\n      <a ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "changeCompany", "id", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0,depth0],types:["STRING","ID"],data:data})));
     data.buffer.push(">");
     stack1 = helpers._triageMustache.call(depth0, "name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("</a>\r\n    </li>\r\n    ");
+    data.buffer.push("</a>\n    </li>\n    ");
     return buffer;
     }
 
-    data.buffer.push("<ul class=\"nav fadeIn fadeIn-50ms animated fadeIn\">\r\n  <li class=\"logo fadeIn fadeIn-50ms\">\r\n    <span>\r\n      <a ");
+    data.buffer.push("<ul class=\"nav fadeIn fadeIn-50ms animated fadeIn\">\n  <li class=\"logo fadeIn fadeIn-50ms\">\n    <span>\n      <a ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "showProfile_comp", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
     data.buffer.push("> ");
     stack1 = helpers._triageMustache.call(depth0, "view.companyName", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push(" </a>\r\n    </span>\r\n  </li>\r\n  ");
+    data.buffer.push(" </a>\n    </span>\n  </li>\n  ");
     stack1 = helpers['if'].call(depth0, "view.showProfile_comp", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\r\n\r\n  ");
+    data.buffer.push("\n\n  ");
     data.buffer.push(escapeExpression(helpers.view.call(depth0, "header-dock", {hash:{
       'content': ("dock")
     },hashTypes:{'content': "ID"},hashContexts:{'content': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push("\r\n\r\n  <li class=\"login fadeIn fadeIn-50ms\">\r\n      ");
+    data.buffer.push("\n\n  <li class=\"login fadeIn fadeIn-50ms\">\n      ");
     stack1 = helpers['if'].call(depth0, "isLogin", {hash:{},hashTypes:{},hashContexts:{},inverse:self.program(5, program5, data),fn:self.program(3, program3, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\r\n  </li>\r\n  ");
+    data.buffer.push("\n  </li>\n  ");
     stack1 = helpers['if'].call(depth0, "view.showProfile", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(7, program7, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\r\n</ul>\r\n");
+    data.buffer.push("\n</ul>\n");
     return buffer;
     
   });
@@ -1487,7 +1519,8 @@ define('web-desktop/templates/iframe', ['exports', 'ember'], function (exports, 
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     var buffer = '', escapeExpression=this.escapeExpression;
@@ -1501,7 +1534,7 @@ define('web-desktop/templates/iframe', ['exports', 'ember'], function (exports, 
     data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
       'id': ("view.content.name")
     },hashTypes:{'id': "ID"},hashContexts:{'id': depth0},contexts:[],types:[],data:data})));
-    data.buffer.push(" width=\"100%\" height=\"100%\" frameBorder=\"0\"></iframe>\r\n<div id=\"iframeApp_dragResizeMask_3\" class=\"iframeDragResizeMask\"></div>\r\n");
+    data.buffer.push(" width=\"100%\" height=\"100%\" frameBorder=\"0\"></iframe>\n<div id=\"iframeApp_dragResizeMask_3\" class=\"iframeDragResizeMask\"></div>\n");
     return buffer;
     
   });
@@ -1511,7 +1544,8 @@ define('web-desktop/templates/link-board', ['exports', 'ember'], function (expor
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     var buffer = '', stack1, escapeExpression=this.escapeExpression, self=this;
@@ -1519,45 +1553,45 @@ define('web-desktop/templates/link-board', ['exports', 'ember'], function (expor
   function program1(depth0,data) {
     
     var buffer = '', stack1;
-    data.buffer.push("\r\n      <div class=\"back_app_unit\">\r\n        <img class=\"back_app_image\" ");
+    data.buffer.push("\n      <div class=\"back_app_unit\">\n        <img class=\"back_app_image\" ");
     data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
       'src': ("icon")
     },hashTypes:{'src': "ID"},hashContexts:{'src': depth0},contexts:[],types:[],data:data})));
-    data.buffer.push(">\r\n        <div class=\"back_name\">");
+    data.buffer.push(">\n        <div class=\"back_name\">");
     stack1 = helpers._triageMustache.call(depth0, "name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("</div>\r\n        ");
+    data.buffer.push("</div>\n        ");
     stack1 = helpers['if'].call(depth0, "hasLinked", {hash:{},hashTypes:{},hashContexts:{},inverse:self.program(4, program4, data),fn:self.program(2, program2, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\r\n        ");
+    data.buffer.push("\n        ");
     return buffer;
     }
   function program2(depth0,data) {
     
     var buffer = '';
-    data.buffer.push("\r\n        <div class=\"back_app_linked\">\r\n          <img class=\"back_app_linked_img\" src=\"assets/img/link_orange.png\"/>\r\n        </div>\r\n        <div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\r\n          <a class=\"back_app_overlay_text\" ");
+    data.buffer.push("\n        <div class=\"back_app_linked\">\n          <img class=\"back_app_linked_img\" src=\"assets/img/link_orange.png\"/>\n        </div>\n        <div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n          <a class=\"back_app_overlay_text\" ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "unlink", "", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0,depth0],types:["STRING","ID"],data:data})));
-    data.buffer.push(">Unlink</a>\r\n        </div>\r\n        ");
+    data.buffer.push(">Unlink</a>\n        </div>\n        ");
     return buffer;
     }
 
   function program4(depth0,data) {
     
     var buffer = '';
-    data.buffer.push("\r\n        <div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\r\n          <a class=\"back_app_overlay_text\" ");
+    data.buffer.push("\n        <div class=\"back_app_overlay\" onclick=\"flipper.classList.toggle('flipped');\">\n          <a class=\"back_app_overlay_text\" ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "link", "", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0,depth0],types:["STRING","ID"],data:data})));
-    data.buffer.push(">Link</a>\r\n        </div>\r\n        ");
+    data.buffer.push(">Link</a>\n        </div>\n        ");
     return buffer;
     }
 
-    data.buffer.push("<div class=\"back_edge\">\r\n  <div class=\"back_content\">\r\n\r\n    <div class=\"back_shadow_decoration\"></div>\r\n    <div class=\"back_title\">Available Links on Desktop</div>\r\n    <div class=\"back_app_container\">\r\n      ");
+    data.buffer.push("<div class=\"back_edge\">\n  <div class=\"back_content\">\n\n    <div class=\"back_shadow_decoration\"></div>\n    <div class=\"back_title\">Available Links on Desktop</div>\n    <div class=\"back_app_container\">\n      ");
     stack1 = helpers.each.call(depth0, "view.content", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\r\n      </div>\r\n    </div>\r\n<!-- 						<div class=\"back_recommend\">Popular Links on Cloud</div>\r\n    <div class=\"back_recommend_container\">\r\n      <div class=\"back_app_unit\">\r\n        <img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/Quotes/icon.png\"/>\r\n        <div class=\"back_name\">Quotes</div>\r\n        <div class=\"back_app_overlay\"></div>\r\n      </div>\r\n      <div class=\"back_app_unit\">\r\n        <img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/HipChat/icon.png\"/>\r\n        <div class=\"back_name\">HipChat</div>\r\n        <div class=\"back_app_overlay\"></div>\r\n      </div>\r\n      <div class=\"back_app_unit\">\r\n        <img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/Pixlr/icon.png\"/>\r\n        <div class=\"back_name\">Pixlr</div>\r\n        <div class=\"back_app_overlay\"></div>\r\n      </div>\r\n      <div class=\"back_app_unit\">\r\n        <img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/Map/icon.png\"/>\r\n        <div class=\"back_name\">Map</div>\r\n        <div class=\"back_app_overlay\"></div>\r\n      </div>\r\n    </div> -->\r\n    <div class=\"back_notation\">Powered by GAUSIAN ASA</div>\r\n  </div>\r\n</div>\r\n");
+    data.buffer.push("\n      </div>\n    </div>\n<!-- 						<div class=\"back_recommend\">Popular Links on Cloud</div>\n    <div class=\"back_recommend_container\">\n      <div class=\"back_app_unit\">\n        <img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/Quotes/icon.png\"/>\n        <div class=\"back_name\">Quotes</div>\n        <div class=\"back_app_overlay\"></div>\n      </div>\n      <div class=\"back_app_unit\">\n        <img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/HipChat/icon.png\"/>\n        <div class=\"back_name\">HipChat</div>\n        <div class=\"back_app_overlay\"></div>\n      </div>\n      <div class=\"back_app_unit\">\n        <img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/Pixlr/icon.png\"/>\n        <div class=\"back_name\">Pixlr</div>\n        <div class=\"back_app_overlay\"></div>\n      </div>\n      <div class=\"back_app_unit\">\n        <img class=\"back_app_image2\" src=\"http://asa.static.gausian.com/user_app/Map/icon.png\"/>\n        <div class=\"back_name\">Map</div>\n        <div class=\"back_app_overlay\"></div>\n      </div>\n    </div> -->\n    <div class=\"back_notation\">Powered by GAUSIAN ASA</div>\n  </div>\n</div>\n");
     return buffer;
     
   });
@@ -1567,7 +1601,8 @@ define('web-desktop/templates/login', ['exports', 'ember'], function (exports, E
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     var buffer = '', helper, options, escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing;
@@ -1575,69 +1610,69 @@ define('web-desktop/templates/login', ['exports', 'ember'], function (exports, E
 
     data.buffer.push("<i class=\"icon-remove modal-close\" ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "loginClose", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push("></i>\r\n<div ");
+    data.buffer.push("></i>\n<div ");
     data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
       'class': (":blur-image :animated loginShow:fadeIn")
     },hashTypes:{'class': "STRING"},hashContexts:{'class': depth0},contexts:[],types:[],data:data})));
-    data.buffer.push("></div>\r\n<div ");
+    data.buffer.push("></div>\n<div ");
     data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
       'class': (":flip-container :animated loginShow:bounceInDown:bounceOutUp")
     },hashTypes:{'class': "STRING"},hashContexts:{'class': depth0},contexts:[],types:[],data:data})));
-    data.buffer.push(">\r\n  <div id=\"flipper\" class=\"\">\r\n    <div class=\"front\">\r\n      <div class=\"badge_band_right\"></div>\r\n      <div class=\"badge_band_left\"></div>\r\n      <div class=\"badge_band_left_shadow\"></div>\r\n      <div class=\"badge_band_end\"></div>\r\n      <a href=\"http://www.gausian.com\">\r\n        <div class=\"badge_buckle\">\r\n          <img class=\"logo_img\" src=\"assets/img/GAUSIAN_logo.png\">\r\n        </div>\r\n      </a>\r\n      <div class=\"badge_buckle_shadow\"></div>\r\n      <div ");
+    data.buffer.push(">\n  <div id=\"flipper\" class=\"\">\n    <div class=\"front\">\n      <div class=\"badge_band_right\"></div>\n      <div class=\"badge_band_left\"></div>\n      <div class=\"badge_band_left_shadow\"></div>\n      <div class=\"badge_band_end\"></div>\n      <a href=\"http://www.gausian.com\">\n        <div class=\"badge_buckle\">\n          <img class=\"logo_img\" src=\"assets/img/GAUSIAN_logo.png\">\n        </div>\n      </a>\n      <div class=\"badge_buckle_shadow\"></div>\n      <div ");
     data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
       'class': (":badge_container loginFail:has-error loginFail")
     },hashTypes:{'class': "STRING"},hashContexts:{'class': depth0},contexts:[],types:[],data:data})));
-    data.buffer.push(">\r\n        <div class=\"up_container\">\r\n          <img class=\"up_img\" src=\"assets/img/einstein.png\" onclick=\"\r\n            flipper.classList.toggle('flipped');\r\n            document.getElementById('visitor_container').style.opacity=0;\r\n            document.getElementById('sign_container').style.opacity=0;\r\n            document.getElementById('portrait_container').style.opacity=1;\r\n            \">\r\n          <div id=\"up_hole\"></div>\r\n        </div>\r\n        <div class=\"down_container\">\r\n          <div class=\"company_name\"> Your Company Name </div>\r\n          ");
+    data.buffer.push(">\n        <div class=\"up_container\">\n          <img class=\"up_img\" src=\"assets/img/einstein.png\" onclick=\"\n            flipper.classList.toggle('flipped');\n            document.getElementById('visitor_container').style.opacity=0;\n            document.getElementById('sign_container').style.opacity=0;\n            document.getElementById('portrait_container').style.opacity=1;\n            \">\n          <div id=\"up_hole\"></div>\n        </div>\n        <div class=\"down_container\">\n          <div class=\"company_name\"> Your Company Name </div>\n          ");
     data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
       'type': ("text"),
       'value': ("view.emailAddr"),
       'class': ("email_input visitor_input"),
       'placeholder': ("Email")
     },hashTypes:{'type': "STRING",'value': "ID",'class': "STRING",'placeholder': "STRING"},hashContexts:{'type': depth0,'value': depth0,'class': depth0,'placeholder': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
-    data.buffer.push("\r\n          ");
+    data.buffer.push("\n          ");
     data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
       'type': ("password"),
       'value': ("view.password"),
       'class': ("pw_input"),
       'placeholder': ("Password")
     },hashTypes:{'type': "STRING",'value': "ID",'class': "STRING",'placeholder': "STRING"},hashContexts:{'type': depth0,'value': depth0,'class': depth0,'placeholder': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
-    data.buffer.push("\r\n          <button ");
+    data.buffer.push("\n          <button ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "login", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push(" class=\"login_bn\">Login</button>\r\n\r\n          <div class=\"sign_bn fadeIn fadeIn-100ms fadeIn-Delay-50ms\" onclick=\"\r\n            flipper.classList.toggle('flipped');\r\n            document.getElementById('visitor_container').style.opacity=0;\r\n            document.getElementById('sign_container').style.opacity=1;\r\n            document.getElementById('portrait_container').style.opacity=0;\r\n            \">\r\n            Sign up\r\n          </div>\r\n          <div class=\"visitor_bn fadeIn fadeIn-100ms fadeIn-Delay-50ms\" onclick=\"\r\n            flipper.classList.toggle('flipped');\r\n            document.getElementById('visitor_container').style.opacity=1;\r\n            document.getElementById('sign_container').style.opacity=0;\r\n            document.getElementById('portrait_container').style.opacity=0;\r\n            \">\r\n            I'm a Visitor\r\n          </div>\r\n        </div>\r\n      </div>\r\n    </div>\r\n    <div class=\"back\">\r\n      <div class=\"badge_band_right\"></div>\r\n      <div class=\"badge_band_left\"></div>\r\n      <div class=\"badge_band_left_shadow\"></div>\r\n      <div class=\"badge_band_end\"></div>\r\n      <div class=\"badge_buckle\"></div>\r\n      <div class=\"badge_buckle_back\"></div>\r\n      <div class=\"badge_buckle_shadow\"></div>\r\n      <div class=\"badge_container\">\r\n        <div class=\"up_container\">\r\n          <img class=\"up_img\" src=\"assets/img/empty.png\">\r\n          <div id=\"up_hole\"></div>\r\n        </div>\r\n        <img class=\"return_icon\" src=\"assets/img/return.png\" onclick=\"flipper.classList.toggle('flipped');\">\r\n        <div class=\"down_container\"></div>\r\n        <div id=\"sign_container\" style=\"opacity: 0;\">\r\n          <div class=\"back_container_header\">Sign up</div>\r\n          <input class=\"back_container_input_first\" type=\"text\" placeholder=\"First\">\r\n          <input class=\"back_container_input_last\" type=\"text\" placeholder=\"Last\">\r\n          <input class=\"back_container_input_email\" type=\"text\" placeholder=\"Email\">\r\n          <input class=\"back_container_input_company\" type=\"text\" placeholder=\"Full Company Name\">\r\n          <input class=\"back_container_input_pw\" type=\"password\" placeholder=\"Password\">\r\n          <a href=\"http://yubin.github.io/web_desktop\">\r\n            <div class=\"back_container_sign\">Sign</div>\r\n          </a>\r\n          <div class=\"back_container_invite\">Invite</div>\r\n        </div>\r\n        <div id=\"visitor_container\" style=\"opacity: 0;\">\r\n          <div class=\"back_container_header\">Visitor to</div>\r\n          <div class=\"visitor_input_company_name\">You Company Name</div>\r\n\r\n          ");
+    data.buffer.push(" class=\"login_bn\">Login</button>\n\n          <div class=\"sign_bn fadeIn fadeIn-100ms fadeIn-Delay-50ms\" onclick=\"\n            flipper.classList.toggle('flipped');\n            document.getElementById('visitor_container').style.opacity=0;\n            document.getElementById('sign_container').style.opacity=1;\n            document.getElementById('portrait_container').style.opacity=0;\n            \">\n            Sign up\n          </div>\n          <div class=\"visitor_bn fadeIn fadeIn-100ms fadeIn-Delay-50ms\" onclick=\"\n            flipper.classList.toggle('flipped');\n            document.getElementById('visitor_container').style.opacity=1;\n            document.getElementById('sign_container').style.opacity=0;\n            document.getElementById('portrait_container').style.opacity=0;\n            \">\n            I'm a Visitor\n          </div>\n        </div>\n      </div>\n    </div>\n    <div class=\"back\">\n      <div class=\"badge_band_right\"></div>\n      <div class=\"badge_band_left\"></div>\n      <div class=\"badge_band_left_shadow\"></div>\n      <div class=\"badge_band_end\"></div>\n      <div class=\"badge_buckle\"></div>\n      <div class=\"badge_buckle_back\"></div>\n      <div class=\"badge_buckle_shadow\"></div>\n      <div class=\"badge_container\">\n        <div class=\"up_container\">\n          <img class=\"up_img\" src=\"assets/img/empty.png\">\n          <div id=\"up_hole\"></div>\n        </div>\n        <img class=\"return_icon\" src=\"assets/img/return.png\" onclick=\"flipper.classList.toggle('flipped');\">\n        <div class=\"down_container\"></div>\n        <div id=\"sign_container\" style=\"opacity: 0;\">\n          <div class=\"back_container_header\">Sign up</div>\n          <input class=\"back_container_input_first\" type=\"text\" placeholder=\"First\">\n          <input class=\"back_container_input_last\" type=\"text\" placeholder=\"Last\">\n          <input class=\"back_container_input_email\" type=\"text\" placeholder=\"Email\">\n          <input class=\"back_container_input_company\" type=\"text\" placeholder=\"Full Company Name\">\n          <input class=\"back_container_input_pw\" type=\"password\" placeholder=\"Password\">\n          <a href=\"http://yubin.github.io/web_desktop\">\n            <div class=\"back_container_sign\">Sign</div>\n          </a>\n          <div class=\"back_container_invite\">Invite</div>\n        </div>\n        <div id=\"visitor_container\" style=\"opacity: 0;\">\n          <div class=\"back_container_header\">Visitor to</div>\n          <div class=\"visitor_input_company_name\">You Company Name</div>\n\n          ");
     data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
       'type': ("text"),
       'value': ("view.firstName"),
       'class': ("visitor_input_first visitor_input"),
       'placeholder': ("First")
     },hashTypes:{'type': "STRING",'value': "ID",'class': "STRING",'placeholder': "STRING"},hashContexts:{'type': depth0,'value': depth0,'class': depth0,'placeholder': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
-    data.buffer.push("\r\n          ");
+    data.buffer.push("\n          ");
     data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
       'type': ("text"),
       'value': ("view.lastName"),
       'class': ("visitor_input_last visitor_input"),
       'placeholder': ("Last")
     },hashTypes:{'type': "STRING",'value': "ID",'class': "STRING",'placeholder': "STRING"},hashContexts:{'type': depth0,'value': depth0,'class': depth0,'placeholder': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
-    data.buffer.push("\r\n          ");
+    data.buffer.push("\n          ");
     data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
       'type': ("text"),
       'value': ("view.emailAddr"),
       'class': ("visitor_input_email visitor_input"),
       'placeholder': ("Email")
     },hashTypes:{'type': "STRING",'value': "ID",'class': "STRING",'placeholder': "STRING"},hashContexts:{'type': depth0,'value': depth0,'class': depth0,'placeholder': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
-    data.buffer.push("\r\n          ");
+    data.buffer.push("\n          ");
     data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
       'type': ("text"),
       'value': ("view.invCode"),
       'class': ("visitor_input_security visitor_input"),
       'placeholder': ("Invitation Code")
     },hashTypes:{'type': "STRING",'value': "ID",'class': "STRING",'placeholder': "STRING"},hashContexts:{'type': depth0,'value': depth0,'class': depth0,'placeholder': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
-    data.buffer.push("\r\n          <button ");
+    data.buffer.push("\n          <button ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "visitor", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push(" class=\"back_container_enter\">Enter</button>\r\n        </div>\r\n        <div id=\"portrait_container\" style=\"opacity: 1;\">\r\n          <div class=\"back_container_header\">Change Portrait</div>\r\n          <div class=\"portrait_container\">\r\n            <img class=\"portrait_img\" src=\"assets/img/einstein_5.png\">\r\n          </div>\r\n          <input class=\"portrait_email\" type=\"text\" placeholder=\"Email\">\r\n          <input class=\"portrait_pw\" type=\"password\" placeholder=\"Password\">\r\n          <div class=\"portrait_apply\">Apply New Portrait</div>\r\n        </div>\r\n      </div>\r\n    </div>\r\n  </div>\r\n</div>\r\n");
+    data.buffer.push(" class=\"back_container_enter\">Enter</button>\n        </div>\n        <div id=\"portrait_container\" style=\"opacity: 1;\">\n          <div class=\"back_container_header\">Change Portrait</div>\n          <div class=\"portrait_container\">\n            <img class=\"portrait_img\" src=\"assets/img/einstein_5.png\">\n          </div>\n          <input class=\"portrait_email\" type=\"text\" placeholder=\"Email\">\n          <input class=\"portrait_pw\" type=\"password\" placeholder=\"Password\">\n          <div class=\"portrait_apply\">Apply New Portrait</div>\n        </div>\n      </div>\n    </div>\n  </div>\n</div>\n");
     return buffer;
     
   });
@@ -1647,7 +1682,8 @@ define('web-desktop/templates/scroll-bar-handler', ['exports', 'ember'], functio
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     var buffer = '', escapeExpression=this.escapeExpression;
@@ -1657,7 +1693,7 @@ define('web-desktop/templates/scroll-bar-handler', ['exports', 'ember'], functio
     data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
       'style': ("view.style")
     },hashTypes:{'style': "STRING"},hashContexts:{'style': depth0},contexts:[],types:[],data:data})));
-    data.buffer.push(">\r\n  <div class=\"jspDragTop\"></div>\r\n  <div class=\"jspDragBottom\"></div>\r\n</div>\r\n");
+    data.buffer.push(">\n  <div class=\"jspDragTop\"></div>\n  <div class=\"jspDragBottom\"></div>\n</div>\n");
     return buffer;
     
   });
@@ -1667,22 +1703,23 @@ define('web-desktop/templates/scroll-bar', ['exports', 'ember'], function (expor
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     var buffer = '', escapeExpression=this.escapeExpression;
 
 
-    data.buffer.push("<div class=\"jspCap jspCapTop\"></div>\r\n<div class=\"jspTrack\" ");
+    data.buffer.push("<div class=\"jspCap jspCapTop\"></div>\n<div class=\"jspTrack\" ");
     data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
       'style': ("view.trackStyle")
     },hashTypes:{'style': "STRING"},hashContexts:{'style': depth0},contexts:[],types:[],data:data})));
-    data.buffer.push(">\r\n  ");
+    data.buffer.push(">\n  ");
     data.buffer.push(escapeExpression(helpers.view.call(depth0, "scroll-bar-handler", {hash:{
       'len': ("view.handlerLen"),
       'top': ("view.handlerTop")
     },hashTypes:{'len': "ID",'top': "ID"},hashContexts:{'len': depth0,'top': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push("\r\n</div>\r\n<div class=\"jspCap jspCapBottom\"></div>\r\n");
+    data.buffer.push("\n</div>\n<div class=\"jspCap jspCapBottom\"></div>\n");
     return buffer;
     
   });
@@ -1692,38 +1729,39 @@ define('web-desktop/templates/search-bar', ['exports', 'ember'], function (expor
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     var buffer = '', helper, options, helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
 
 
-    data.buffer.push("<div class=\"search fadeIn fadeIn-50ms fadeIn-Delay-20ms\">\r\n  <div class=\"search-icon\"></div>\r\n  ");
+    data.buffer.push("<div class=\"search fadeIn fadeIn-50ms fadeIn-Delay-20ms\">\n  <div class=\"search-icon\"></div>\n  ");
     data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
       'type': ("text"),
       'placeholder': ("Search APP or Content"),
       'disabled': (true)
     },hashTypes:{'type': "STRING",'placeholder': "STRING",'disabled': "BOOLEAN"},hashContexts:{'type': depth0,'placeholder': depth0,'disabled': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
-    data.buffer.push("\r\n</div>\r\n\r\n<div class=\"overlay\">\r\n  <div class=\"modal fadeIn fadeIn-50ms\">\r\n    ");
+    data.buffer.push("\n</div>\n\n<div class=\"overlay\">\n  <div class=\"modal fadeIn fadeIn-50ms\">\n    ");
     data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
       'type': ("text"),
       'value': ("view.query")
     },hashTypes:{'type': "STRING",'value': "ID"},hashContexts:{'type': depth0,'value': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
-    data.buffer.push("\r\n    <a class=\"cancel_search\" ");
+    data.buffer.push("\n    <a class=\"cancel_search\" ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "cancel", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push(">Cancel</a>\r\n    <div class=\"container\">\r\n    ");
+    data.buffer.push(">Cancel</a>\n    <div class=\"container\">\n    ");
     data.buffer.push(escapeExpression(helpers.view.call(depth0, "search-results", {hash:{
       'content': ("view.controller.searchContent")
     },hashTypes:{'content': "ID"},hashContexts:{'content': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push("\r\n\r\n    ");
+    data.buffer.push("\n\n    ");
     data.buffer.push(escapeExpression(helpers.view.call(depth0, "scroll-bar", {hash:{
       'trackLen': ("view.trackLen"),
       'handlerLen': ("view.handlerLen"),
       'handlerTop': ("view.handlerTop")
     },hashTypes:{'trackLen': "ID",'handlerLen': "ID",'handlerTop': "ID"},hashContexts:{'trackLen': depth0,'handlerLen': depth0,'handlerTop': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push("\r\n    </div>\r\n  </div>\r\n</div>\r\n");
+    data.buffer.push("\n    </div>\n  </div>\n</div>\n");
     return buffer;
     
   });
@@ -1733,7 +1771,8 @@ define('web-desktop/templates/search-results-item', ['exports', 'ember'], functi
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     var buffer = '', stack1, helper, options, escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing, self=this;
@@ -1741,52 +1780,52 @@ define('web-desktop/templates/search-results-item', ['exports', 'ember'], functi
   function program1(depth0,data) {
     
     var buffer = '', stack1;
-    data.buffer.push("\r\n<a class=\"action open\" ");
+    data.buffer.push("\n<a class=\"action open\" ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "openApp", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push(">\r\n  ");
+    data.buffer.push(">\n  ");
     stack1 = helpers._triageMustache.call(depth0, "view.label", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\r\n</a>\r\n");
+    data.buffer.push("\n</a>\n");
     return buffer;
     }
 
   function program3(depth0,data) {
     
     var buffer = '', stack1;
-    data.buffer.push("\r\n<a class=\"action get\" ");
+    data.buffer.push("\n<a class=\"action get\" ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "installApp", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push(">\r\n  ");
+    data.buffer.push(">\n  ");
     stack1 = helpers._triageMustache.call(depth0, "view.label", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\r\n</a>\r\n");
+    data.buffer.push("\n</a>\n");
     return buffer;
     }
 
-    data.buffer.push("<div class=\"icon\">\r\n  <img ");
+    data.buffer.push("<div class=\"icon\">\n  <img ");
     data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
       'src': ("view.content.icon")
     },hashTypes:{'src': "ID"},hashContexts:{'src': depth0},contexts:[],types:[],data:data})));
-    data.buffer.push(" />\r\n</div>\r\n<div class=\"detail\">\r\n  <a class=\"name\">");
+    data.buffer.push(" />\n</div>\n<div class=\"detail\">\n  <a class=\"name\">");
     stack1 = helpers._triageMustache.call(depth0, "view.content.name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("</a>\r\n  <a class=\"star-rating\"> ");
+    data.buffer.push("</a>\n  <a class=\"star-rating\"> ");
     data.buffer.push(escapeExpression((helper = helpers['star-rating'] || (depth0 && depth0['star-rating']),options={hash:{
       'content': ("view.content.rating")
     },hashTypes:{'content': "ID"},hashContexts:{'content': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "star-rating", options))));
-    data.buffer.push(" </a>\r\n  <a class=\"category\">");
+    data.buffer.push(" </a>\n  <a class=\"category\">");
     stack1 = helpers._triageMustache.call(depth0, "view.content.brief", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("</a>\r\n  <a class=\"price\">");
+    data.buffer.push("</a>\n  <a class=\"price\">");
     stack1 = helpers._triageMustache.call(depth0, "view.content.catalog", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("</a>\r\n</div>\r\n");
+    data.buffer.push("</a>\n</div>\n");
     stack1 = helpers['if'].call(depth0, "view.content.installed", {hash:{},hashTypes:{},hashContexts:{},inverse:self.program(3, program3, data),fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\r\n");
+    data.buffer.push("\n");
     return buffer;
     
   });
@@ -1796,39 +1835,40 @@ define('web-desktop/templates/window', ['exports', 'ember'], function (exports, 
 
   'use strict';
 
-  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+  exports['default'] = Ember['default'].Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data
+  /**/) {
   this.compilerInfo = [4,'>= 1.0.0'];
   helpers = this.merge(helpers, Ember['default'].Handlebars.helpers); data = data || {};
     var buffer = '', stack1, escapeExpression=this.escapeExpression;
 
 
-    data.buffer.push("<div class=\"front shadow\">\r\n  <div class=\"header\">\r\n    <span class=\"titleInside\">");
+    data.buffer.push("<div class=\"front shadow\">\n  <div class=\"header\">\n    <span class=\"titleInside\">");
     stack1 = helpers._triageMustache.call(depth0, "view.content.name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("</span>\r\n  </div>\r\n  <nav class=\"control-window\">\r\n    <a href=\"#\" class=\"minimize\" ");
+    data.buffer.push("</span>\n  </div>\n  <nav class=\"control-window\">\n    <a href=\"#\" class=\"minimize\" ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "minimizeApp", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push(">minimize</a>\r\n    <a href=\"#\" class=\"maximize\" ");
+    data.buffer.push(">minimize</a>\n    <a href=\"#\" class=\"maximize\" ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "maximizeApp", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push(">maximize</a>\r\n    <a href=\"#\" class=\"close\" ");
+    data.buffer.push(">maximize</a>\n    <a href=\"#\" class=\"close\" ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "closeApp", "view.content", {hash:{
       'target': ("view.parentView")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0,depth0],types:["STRING","ID"],data:data})));
-    data.buffer.push(">close</a>\r\n  </nav>\r\n  <div class=\"container\">\r\n    ");
+    data.buffer.push(">close</a>\n  </nav>\n  <div class=\"container\">\n    ");
     stack1 = helpers._triageMustache.call(depth0, "yield", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
     if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-    data.buffer.push("\r\n  </div>\r\n</div>\r\n<div class=\"back shadow\">\r\n  <img\r\n    class=\"return_icon\"\r\n    src=\"assets/img/return.png\"\r\n    ");
+    data.buffer.push("\n  </div>\n</div>\n<div class=\"back shadow\">\n  <img\n    class=\"return_icon\"\n    src=\"assets/img/return.png\"\n    ");
     data.buffer.push(escapeExpression(helpers.action.call(depth0, "unflip", {hash:{
       'target': ("view")
     },hashTypes:{'target': "ID"},hashContexts:{'target': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push("\r\n  />\r\n  ");
+    data.buffer.push("\n  />\n  ");
     data.buffer.push(escapeExpression(helpers.view.call(depth0, "link-board", {hash:{
       'content': ("view.appLinkables")
     },hashTypes:{'content': "ID"},hashContexts:{'content': depth0},contexts:[depth0],types:["STRING"],data:data})));
-    data.buffer.push("\r\n</div>\r\n");
+    data.buffer.push("\n</div>\n");
     return buffer;
     
   });

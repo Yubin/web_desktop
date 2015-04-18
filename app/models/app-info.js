@@ -16,6 +16,11 @@ export default DS.Model.extend({
   censorship_date: DS.attr('string'),
   path: DS.attr('string'),
   icon: DS.attr('string'),
+  maximized: DS.attr('boolean'),
+  has_header: DS.attr('boolean'),
+  realizable: DS.attr('boolean'),
+  width: DS.attr('number'),
+  height: DS.attr('number'),
   screen: DS.attr('number', {defaultValue: 0}),
   row: DS.attr('number', {defaultValue: 0}),
   col: DS.attr('number', {defaultValue: 0})
