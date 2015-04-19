@@ -51,63 +51,49 @@ define('ember-qunit/qunit-module', ['exports', 'qunit'], function (exports, quni
 
   exports.createModule = createModule;
 
-  function beforeEachCallback(callbacks) {
+  function normalizeCallbacks(callbacks) {
     if (typeof callbacks !== 'object') { return; }
     if (!callbacks) { return; }
 
-    var beforeEach;
-    
-    if (callbacks.setup) {
-      beforeEach = callbacks.setup;
-      delete callbacks.setup;
-    }
-
     if (callbacks.beforeEach) {
-      beforeEach = callbacks.beforeEach;
+      callbacks.setup = callbacks.beforeEach;
       delete callbacks.beforeEach;
     }
 
-    return beforeEach;
-  }
-
-  function afterEachCallback(callbacks) {
-    if (typeof callbacks !== 'object') { return; }
-    if (!callbacks) { return; }
-
-    var afterEach;
-
-    if (callbacks.teardown) {
-      afterEach = callbacks.teardown;
-      delete callbacks.teardown;
-    }
-
     if (callbacks.afterEach) {
-      afterEach = callbacks.afterEach;
+      callbacks.teardown = callbacks.afterEach;
       delete callbacks.afterEach;
     }
+  }
 
-    return afterEach;
+  function addAssertArgumentToContextualizedSteps(steps, assert) {
+    var step;
+
+    for (var i = 0, l = steps.length; i < l; i++) {
+      step = steps[i];
+      steps[i] = generateStepWrapper(step, assert);
+    }
+  }
+
+  function generateStepWrapper(step, assert) {
+    return function contextualizedStepWrapper () {
+      step.call(this, assert);
+    };
   }
 
   function createModule(Constructor, name, description, callbacks) {
-    var beforeEach = beforeEachCallback(callbacks || description);
-    var afterEach  = afterEachCallback(callbacks || description);
+    normalizeCallbacks(callbacks || description);
 
     var module = new Constructor(name, description, callbacks);
 
     qunit.module(module.name, {
       setup: function(assert) {
+        addAssertArgumentToContextualizedSteps(module.contextualizedSetupSteps, assert);
+
         module.setup();
-
-        if (beforeEach) {
-          beforeEach.call(module.context, assert);
-        }
       },
-
       teardown: function(assert) {
-        if (afterEach) {
-          afterEach.call(module.context, assert);
-        }
+        addAssertArgumentToContextualizedSteps(module.contextualizedTeardownSteps, assert);
 
         module.teardown();
       }

@@ -126,8 +126,8 @@ export default Ember.Controller.extend({
         var viewName = get(item, 'viewName') || 'iframe';
         var klass = this.container.lookupFactory('view:' + viewName);
         var length = this.get('openApps').length;
-        var top = 125 + 30 * length;
-        var left = 250 + 30 * length;
+        var top = 60 + 30 * length;
+        var left = 135 + 30 * length;
         if (klass) {
           var instant = klass.create({
             top: top,
