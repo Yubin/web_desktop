@@ -1895,7 +1895,7 @@ nav.control-window a.deactivate {
 }
 .back_notation {
   position: absolute;
-  bottom: 26px;
+  bottom: 36px;
   left: 50%;
   transform: translateX(-50%);
   font-family: arial;
