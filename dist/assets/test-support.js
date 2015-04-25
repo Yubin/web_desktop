@@ -51,49 +51,63 @@ define('ember-qunit/qunit-module', ['exports', 'qunit'], function (exports, quni
 
   exports.createModule = createModule;
 
-  function normalizeCallbacks(callbacks) {
+  function beforeEachCallback(callbacks) {
     if (typeof callbacks !== 'object') { return; }
     if (!callbacks) { return; }
 
+    var beforeEach;
+    
+    if (callbacks.setup) {
+      beforeEach = callbacks.setup;
+      delete callbacks.setup;
+    }
+
     if (callbacks.beforeEach) {
-      callbacks.setup = callbacks.beforeEach;
+      beforeEach = callbacks.beforeEach;
       delete callbacks.beforeEach;
     }
 
+    return beforeEach;
+  }
+
+  function afterEachCallback(callbacks) {
+    if (typeof callbacks !== 'object') { return; }
+    if (!callbacks) { return; }
+
+    var afterEach;
+
+    if (callbacks.teardown) {
+      afterEach = callbacks.teardown;
+      delete callbacks.teardown;
+    }
+
     if (callbacks.afterEach) {
-      callbacks.teardown = callbacks.afterEach;
+      afterEach = callbacks.afterEach;
       delete callbacks.afterEach;
     }
-  }
 
-  function addAssertArgumentToContextualizedSteps(steps, assert) {
-    var step;
-
-    for (var i = 0, l = steps.length; i < l; i++) {
-      step = steps[i];
-      steps[i] = generateStepWrapper(step, assert);
-    }
-  }
-
-  function generateStepWrapper(step, assert) {
-    return function contextualizedStepWrapper () {
-      step.call(this, assert);
-    };
+    return afterEach;
   }
 
   function createModule(Constructor, name, description, callbacks) {
-    normalizeCallbacks(callbacks || description);
+    var beforeEach = beforeEachCallback(callbacks || description);
+    var afterEach  = afterEachCallback(callbacks || description);
 
     var module = new Constructor(name, description, callbacks);
 
     qunit.module(module.name, {
       setup: function(assert) {
-        addAssertArgumentToContextualizedSteps(module.contextualizedSetupSteps, assert);
-
         module.setup();
+
+        if (beforeEach) {
+          beforeEach.call(module.context, assert);
+        }
       },
+
       teardown: function(assert) {
-        addAssertArgumentToContextualizedSteps(module.contextualizedTeardownSteps, assert);
+        if (afterEach) {
+          afterEach.call(module.context, assert);
+        }
 
         module.teardown();
       }
@@ -3461,9 +3475,9 @@ QUnit.notifications = function(options) {
 
 /* globals jQuery,QUnit */
 
-QUnit.config.autostart = false;
-QUnit.config.urlConfig.push({ id: 'nocontainer', label: 'Hide container' });
+QUnit.config.urlConfig.push({ id: 'nocontainer', label: 'Hide container'});
 QUnit.config.urlConfig.push({ id: 'nojshint', label: 'Disable JSHint'});
+QUnit.config.urlConfig.push({ id: 'doccontainer', label: 'Doc test pane'});
 
 if (QUnit.notifications) {
   QUnit.notifications({
@@ -3476,7 +3490,9 @@ if (QUnit.notifications) {
 
 jQuery(document).ready(function() {
   var containerVisibility = QUnit.urlParams.nocontainer ? 'hidden' : 'visible';
+  var containerPosition = QUnit.urlParams.doccontainer ? 'absolute' : 'relative';
   document.getElementById('ember-testing-container').style.visibility = containerVisibility;
+  document.getElementById('ember-testing-container').style.position = containerPosition;
 });
 
 /* globals jQuery,QUnit */
@@ -3494,9 +3510,15 @@ jQuery(document).ready(function() {
     });
   };
 
+  var autostart = QUnit.config.autostart !== false;
+  QUnit.config.autostart = false;
+
   setTimeout(function() {
     TestLoader.load();
-    QUnit.start();
+
+    if (autostart) {
+      QUnit.start();
+    }
   }, 250);
 });
 

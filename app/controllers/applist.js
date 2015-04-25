@@ -121,7 +121,9 @@ export default Ember.Controller.extend({
       var find = this.get('openApps').any(function (it) {
         return get(it, 'name') === name;
       });
-
+	if (name === 'Customers') {
+		set(item, 'path', 'http://localhost:8300/');
+	}
       if (!find) {
         var viewName = get(item, 'viewName') || 'iframe';
         var klass = this.container.lookupFactory('view:' + viewName);
